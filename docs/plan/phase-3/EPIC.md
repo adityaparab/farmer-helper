@@ -13,8 +13,8 @@ This Epic maps to Phase 3 in `docs/plan/PHASES.md` and tracks local sub-issue st
 ## Sub-issues
 | ID | Title | Status | Last updated | Notes |
 |---|---|---|---|---|
-| P3-T01 | Create embedding provider abstraction | In progress | 2026-05-26 | Next active task |
-| P3-T02 | Add batch embedding logic | Not started | - | Pending |
+| P3-T01 | Create embedding provider abstraction | Completed | 2026-05-27 | Added typed contracts, provider interface, and unit tests |
+| P3-T02 | Add batch embedding logic | In progress | 2026-05-27 | Next active task |
 | P3-T03 | Extend schema for vector persistence/upsert | Not started | - | Pending |
 | P3-T04 | Add retry and error handling for embedding jobs | Not started | - | Pending |
 | P3-T05 | Add async-safe job orchestration | Not started | - | Pending |

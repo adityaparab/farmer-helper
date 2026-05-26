@@ -1,5 +1,7 @@
 import logging
+from logging import LogRecord
 
+from pytest import LogCaptureFixture
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -14,7 +16,25 @@ def _session() -> Session:
     return Session(bind=engine)
 
 
-def test_status_service_emits_lifecycle_trace_events(caplog) -> None:
+def _find_record(records: list[LogRecord], message: str) -> LogRecord:
+    return next(record for record in records if record.getMessage() == message)
+
+
+def _record_int(record: LogRecord, key: str) -> int:
+    value = record.__dict__.get(key)
+    if not isinstance(value, int):
+        raise AssertionError(f"Expected int '{key}' in log record")
+    return value
+
+
+def _record_str(record: LogRecord, key: str) -> str:
+    value = record.__dict__.get(key)
+    if not isinstance(value, str):
+        raise AssertionError(f"Expected str '{key}' in log record")
+    return value
+
+
+def test_status_service_emits_lifecycle_trace_events(caplog: LogCaptureFixture) -> None:
     session = _session()
     repository = IngestionJobRepository(session)
     service = IngestionStatusService(repository)
@@ -30,15 +50,15 @@ def test_status_service_emits_lifecycle_trace_events(caplog) -> None:
     assert "ingestion.job.processing" in messages
     assert "ingestion.job.succeeded" in messages
 
-    started_record = next(
-        record for record in caplog.records if record.getMessage() == "ingestion.job.started"
-    )
-    assert started_record.job_id == job_id
-    assert started_record.document_id == 10
-    assert started_record.ingestion_status == "pending"
+    started_record = _find_record(caplog.records, "ingestion.job.started")
+    assert _record_int(started_record, "job_id") == job_id
+    assert _record_int(started_record, "document_id") == 10
+    assert _record_str(started_record, "ingestion_status") == "pending"
 
 
-def test_status_service_emits_failed_trace_event_with_error_fields(caplog) -> None:
+def test_status_service_emits_failed_trace_event_with_error_fields(
+    caplog: LogCaptureFixture,
+) -> None:
     session = _session()
     repository = IngestionJobRepository(session)
     service = IngestionStatusService(repository)
@@ -53,11 +73,9 @@ def test_status_service_emits_failed_trace_event_with_error_fields(caplog) -> No
         error_message="decode failure",
     )
 
-    failed_record = next(
-        record for record in caplog.records if record.getMessage() == "ingestion.job.failed"
-    )
-    assert failed_record.job_id == job_id
-    assert failed_record.document_id == 20
-    assert failed_record.ingestion_status == "failed"
-    assert failed_record.error_code == "INGESTION_PDF_READ_ERROR"
-    assert failed_record.error_message == "decode failure"
+    failed_record = _find_record(caplog.records, "ingestion.job.failed")
+    assert _record_int(failed_record, "job_id") == job_id
+    assert _record_int(failed_record, "document_id") == 20
+    assert _record_str(failed_record, "ingestion_status") == "failed"
+    assert _record_str(failed_record, "error_code") == "INGESTION_PDF_READ_ERROR"
+    assert _record_str(failed_record, "error_message") == "decode failure"

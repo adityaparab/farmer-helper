@@ -5,14 +5,14 @@
 Define an embedding provider interface and baseline implementation boundary for pluggable embedding backends.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-26
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Define provider input/output contracts and error semantics.
-2. Add provider abstraction module with clear extension points.
-3. Add unit tests for contract behavior and edge cases.
+## What was done
+1. Added typed embedding contracts in `src/farmer_helper/schemas/embedding.py`.
+2. Added provider abstraction and provider error semantics in `src/farmer_helper/services/embedding/provider.py`.
+3. Added contract and edge-case tests in `tests/unit/test_embedding_provider_abstraction.py`.
 
 ## Decisions made
 - Keep provider abstraction backend-agnostic to support future provider switching.
