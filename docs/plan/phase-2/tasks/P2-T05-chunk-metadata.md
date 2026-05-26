@@ -5,11 +5,15 @@
 Attach deterministic metadata to each chunk, including provenance, heading context, versioning, and content hash identifiers.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-26
-- Completed: -
+- Completed: 2026-05-26
 
-## Next work
-1. Define chunk metadata schema.
-2. Attach page range and content hash metadata in chunking output path.
-3. Add tests for metadata correctness and determinism.
+## What was done
+1. Added metadata schemas in `src/farmer_helper/schemas/ingestion.py`.
+2. Added `src/farmer_helper/services/ingestion/chunk_metadata_enricher.py`.
+3. Added tests in `tests/unit/test_chunk_metadata_enricher.py`.
+
+## Decisions made
+- Use SHA-256 hash of chunk text as deterministic content hash.
+- Include version and heading context in metadata for downstream traceability.

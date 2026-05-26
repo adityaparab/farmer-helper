@@ -35,3 +35,18 @@ class IngestionChunk(BaseModel):
     page_end: int
     text: str
     char_count: int
+
+
+class ChunkMetadata(BaseModel):
+    page_start: int
+    page_end: int
+    heading: str | None
+    version: str
+    content_hash: str
+
+
+class EnrichedIngestionChunk(BaseModel):
+    chunk_index: int
+    text: str
+    char_count: int
+    metadata: ChunkMetadata
