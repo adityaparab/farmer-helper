@@ -2,6 +2,21 @@
 
 Backend-first AI system for grounded, citation-rich agricultural question answering based on a curated document set.
 
+## Quickstart
+Run locally (native):
+1. `python -m venv .venv`
+2. `.\.venv\Scripts\Activate.ps1`
+3. `pip install -e .[dev]`
+4. `alembic upgrade head`
+5. `uvicorn farmer_helper.main:app --reload --host 127.0.0.1 --port 8000`
+
+Run locally (Docker):
+1. `docker compose up --build`
+
+Health checks:
+1. `http://127.0.0.1:8000/health/live`
+2. `http://127.0.0.1:8000/health/ready`
+
 ## Planning
 The engineering roadmap is documented in `docs/plan/PHASES.md`.
 
@@ -11,6 +26,10 @@ Use the roadmap phase-by-phase. Each phase is broken into measurable, testable s
 Active implementation tracking for Phase 0 lives in:
 - `docs/plan/phase-0/EPIC.md`
 - `docs/plan/phase-0/tasks/`
+
+Active implementation tracking for Phase 1 lives in:
+- `docs/plan/phase-1/EPIC.md`
+- `docs/plan/phase-1/tasks/`
 
 GitHub issue status comment standard:
 - `docs/plan/ISSUE_COMMENT_TEMPLATE.md`
@@ -48,3 +67,23 @@ Evaluation question set from Phase 0 Task 9:
 
 Phase sign-off checklist from Phase 0 Task 10:
 - `docs/plan/phase-0/PHASE_SIGN_OFF_CHECKLIST.md`
+
+## Phase 1 backend foundation
+Core backend implementation:
+- `src/farmer_helper/main.py`
+- `src/farmer_helper/core/config.py`
+- `src/farmer_helper/api/routes/health.py`
+
+Database and migrations:
+- `src/farmer_helper/db/models/foundation.py`
+- `alembic/`
+
+Quality and automation:
+- `.github/workflows/ci.yml`
+- `.pre-commit-config.yaml`
+- `pyproject.toml`
+
+Developer and deployment docs:
+- `docs/development/SETUP.md`
+- `docs/development/ARCHITECTURE_OVERVIEW.md`
+- `docs/deployment/RAILWAY_DEPLOYMENT.md`

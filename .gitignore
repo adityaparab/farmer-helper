@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+dist/
+build/
+*.pyc
+*.pyo
+*.pyd
+alembic/versions/__pycache__/
+farmer_helper.db

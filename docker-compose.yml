@@ -1,0 +1,32 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: farmer_helper
+      POSTGRES_USER: farmer
+      POSTGRES_PASSWORD: farmer
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U farmer -d farmer_helper"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      APP_ENV: development
+      APP_LOG_LEVEL: INFO
+      DATABASE_URL: postgresql+psycopg://farmer:farmer@db:5432/farmer_helper
+      API_HOST: 0.0.0.0
+      API_PORT: 8000
+    ports:
+      - "8000:8000"
