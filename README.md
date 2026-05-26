@@ -35,6 +35,10 @@ Active implementation tracking for Phase 2 lives in:
 - `docs/plan/phase-2/EPIC.md`
 - `docs/plan/phase-2/tasks/`
 
+Active implementation tracking for Phase 3 lives in:
+- `docs/plan/phase-3/EPIC.md`
+- `docs/plan/phase-3/tasks/`
+
 GitHub issue status comment standard:
 - `docs/plan/ISSUE_COMMENT_TEMPLATE.md`
 - `scripts/post-issue-status-comment.ps1`
