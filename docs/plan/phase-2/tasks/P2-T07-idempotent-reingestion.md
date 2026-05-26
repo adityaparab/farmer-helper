@@ -5,11 +5,15 @@
 Ensure repeated ingestion of the same document content does not duplicate downstream artifacts.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-26
-- Completed: -
+- Completed: 2026-05-26
 
-## Next work
-1. Implement idempotency strategy keyed by content hash/version.
-2. Add persistence guards for duplicate ingest operations.
-3. Add tests for repeated ingestion behavior.
+## What was done
+1. Added `src/farmer_helper/repositories/document_repository.py`.
+2. Added `src/farmer_helper/services/ingestion/idempotency_service.py`.
+3. Added tests in `tests/unit/test_idempotency_service.py`.
+
+## Decisions made
+- Idempotency key is `content_hash + version`.
+- Re-ingestion with same key reuses existing document record and avoids duplication.
