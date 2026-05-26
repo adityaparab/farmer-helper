@@ -5,14 +5,14 @@
 Implement batch embedding orchestration over provider contracts with deterministic request/response handling.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add batch embedding service that chunks input texts into provider requests.
-2. Preserve stable index mapping between source chunks and returned embeddings.
-3. Add unit tests for batching boundaries and ordering guarantees.
+## What was done
+1. Added batch orchestration in `src/farmer_helper/services/embedding/batch_service.py`.
+2. Added provider-response validation for model match, item counts, index validity, and dimensions consistency.
+3. Added unit tests in `tests/unit/test_embedding_batch_service.py` for boundaries and ordering guarantees.
 
 ## Decisions made
 - Keep batching logic separate from provider implementation details.
