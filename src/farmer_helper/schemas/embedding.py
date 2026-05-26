@@ -31,3 +31,18 @@ class EmbeddingResponse(BaseModel):
             if len(item.vector) != expected:
                 raise ValueError("all embedding vectors must match 'dimensions' value")
         return self
+
+
+class EmbeddingSourceChunk(BaseModel):
+    chunk_index: int = Field(ge=0)
+    text: str = Field(min_length=1)
+    content_hash: str = Field(min_length=1)
+
+
+class EmbeddingOrchestrationResult(BaseModel):
+    document_id: int = Field(ge=1)
+    model: str = Field(min_length=1)
+    provider: str = Field(min_length=1)
+    version: str = Field(min_length=1)
+    dimensions: int = Field(ge=1)
+    persisted_count: int = Field(ge=1)

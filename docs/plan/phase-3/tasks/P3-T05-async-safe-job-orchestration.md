@@ -5,14 +5,14 @@
 Provide async-safe embedding orchestration that supports predictable execution boundaries and robust error propagation.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add async embedding orchestration service over batching and retry provider layers.
-2. Preserve deterministic mapping between input chunks and persisted embeddings.
-3. Add async unit tests for success and failure path behavior.
+## What was done
+1. Added async-safe orchestration service in `src/farmer_helper/services/embedding/orchestration_service.py`.
+2. Added orchestration models in `src/farmer_helper/schemas/embedding.py`.
+3. Added unit tests in `tests/unit/test_embedding_orchestration_service.py`.
 
 ## Decisions made
 - Keep orchestration logic separate from API trigger entrypoints.
