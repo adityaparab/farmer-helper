@@ -5,14 +5,15 @@
 Expose embedding pipeline execution through API and CLI entrypoints for controlled operational triggering.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add API route handler for embedding trigger requests.
-2. Add service wiring from trigger endpoint to embedding orchestration.
-3. Add CLI script for local/manual execution of embedding trigger.
+## What was done
+1. Added embedding trigger route in `src/farmer_helper/api/routes/embeddings.py`.
+2. Wired route into app startup in `src/farmer_helper/main.py`.
+3. Added CLI trigger script `scripts/trigger-embeddings.py`.
+4. Added route tests in `tests/unit/test_embedding_trigger_route.py`.
 
 ## Decisions made
 - Keep trigger surface minimal and typed.

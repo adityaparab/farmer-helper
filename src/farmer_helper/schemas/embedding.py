@@ -46,3 +46,13 @@ class EmbeddingOrchestrationResult(BaseModel):
     version: str = Field(min_length=1)
     dimensions: int = Field(ge=1)
     persisted_count: int = Field(ge=1)
+
+
+class EmbeddingTriggerRequest(BaseModel):
+    document_id: int = Field(ge=1)
+    model: str = Field(min_length=1)
+    provider: str = Field(min_length=1, default="mock-provider")
+    version: str = Field(min_length=1, default="v1")
+    batch_size: int = Field(ge=1, le=256, default=32)
+    dimensions: int = Field(ge=1, le=4096, default=8)
+    chunks: list[EmbeddingSourceChunk] = Field(min_length=1)
