@@ -13,8 +13,8 @@ This Epic maps to Phase 4 in `docs/plan/PHASES.md` and tracks local sub-issue st
 ## Sub-issues
 | ID | Title | Status | Last updated | Notes |
 |---|---|---|---|---|
-| P4-T01 | Implement vector retrieval | In progress | 2026-05-27 | Next active task |
-| P4-T02 | Implement keyword retrieval | Not started | - | Pending |
+| P4-T01 | Implement vector retrieval | Completed | 2026-05-27 | Added vector retrieval schemas, service scoring, and unit tests |
+| P4-T02 | Implement keyword retrieval | In progress | 2026-05-27 | Next active task |
 | P4-T03 | Merge and deduplicate results with explicit fusion logic | Not started | - | Pending |
 | P4-T04 | Add pluggable reranker interface | Not started | - | Pending |
 | P4-T05 | Add retrieval API endpoint with score and citation metadata | Not started | - | Pending |

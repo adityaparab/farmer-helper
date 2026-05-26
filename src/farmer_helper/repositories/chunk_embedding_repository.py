@@ -16,6 +16,23 @@ class ChunkEmbeddingRepository:
         )
         return list(self._session.scalars(stmt))
 
+    def list_for_retrieval(
+        self,
+        provider: str,
+        model: str,
+        version: str,
+    ) -> list[ChunkEmbedding]:
+        stmt = (
+            select(ChunkEmbedding)
+            .where(
+                ChunkEmbedding.provider == provider,
+                ChunkEmbedding.model == model,
+                ChunkEmbedding.version == version,
+            )
+            .order_by(ChunkEmbedding.document_id.asc(), ChunkEmbedding.chunk_index.asc())
+        )
+        return list(self._session.scalars(stmt))
+
     def upsert(
         self,
         document_id: int,

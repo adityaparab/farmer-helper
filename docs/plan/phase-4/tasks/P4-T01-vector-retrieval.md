@@ -5,14 +5,15 @@
 Implement baseline vector retrieval over persisted embedding records with top-k scoring and deterministic ordering.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add retrieval request/response schemas for vector search.
-2. Add repository-level vector retrieval query path.
-3. Add service-level ranking and top-k selection behavior.
+## What was done
+1. Added retrieval schemas in `src/farmer_helper/schemas/retrieval.py`.
+2. Added repository retrieval candidate query in `src/farmer_helper/repositories/chunk_embedding_repository.py`.
+3. Added vector retrieval scoring service in `src/farmer_helper/services/retrieval/vector_retrieval_service.py`.
+4. Added unit tests in `tests/unit/test_vector_retrieval_service.py`.
 
 ## Decisions made
 - Start with deterministic distance scoring over stored vectors.
