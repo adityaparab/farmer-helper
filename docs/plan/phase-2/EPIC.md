@@ -14,8 +14,8 @@ This Epic maps to Phase 2 in `docs/plan/PHASES.md` and tracks local sub-issue st
 | ID | Title | Status | Last updated | Notes |
 |---|---|---|---|---|
 | P2-T01 | Validate input files before ingestion | Completed | 2026-05-26 | File validator implemented with deterministic error codes and tests |
-| P2-T02 | Extract text from PDFs with deterministic error handling | In progress | 2026-05-26 | Next active task |
-| P2-T03 | Normalize and clean extracted text | Not started | - | Pending |
+| P2-T02 | Extract text from PDFs with deterministic error handling | Completed | 2026-05-26 | PDF extractor implemented with deterministic error codes and tests |
+| P2-T03 | Normalize and clean extracted text | In progress | 2026-05-26 | Next active task |
 | P2-T04 | Chunk text with page-aware, configurable chunking | Not started | - | Pending |
 | P2-T05 | Attach metadata including page ranges and content hash | Not started | - | Pending |
 | P2-T06 | Persist ingestion status and error state | Not started | - | Pending |
