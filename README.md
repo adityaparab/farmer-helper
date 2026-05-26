@@ -97,3 +97,28 @@ Input file validation:
 - `src/farmer_helper/services/ingestion/file_validator.py`
 - `src/farmer_helper/schemas/ingestion.py`
 - `tests/unit/test_file_validator.py`
+
+PDF extraction and normalization:
+- `src/farmer_helper/services/ingestion/pdf_extractor.py`
+- `src/farmer_helper/services/ingestion/text_normalizer.py`
+- `tests/unit/test_pdf_extractor.py`
+- `tests/unit/test_text_normalizer.py`
+
+Chunking and metadata:
+- `src/farmer_helper/services/ingestion/text_chunker.py`
+- `src/farmer_helper/services/ingestion/chunk_metadata_enricher.py`
+- `tests/unit/test_text_chunker.py`
+- `tests/unit/test_chunk_metadata_enricher.py`
+
+Status, idempotency, and observability:
+- `src/farmer_helper/repositories/document_repository.py`
+- `src/farmer_helper/services/ingestion/idempotency_service.py`
+- `src/farmer_helper/services/ingestion/status_service.py`
+- `src/farmer_helper/services/ingestion/trace_logger.py`
+- `tests/unit/test_idempotency_service.py`
+- `tests/unit/test_ingestion_status_service.py`
+- `tests/unit/test_ingestion_trace_logging.py`
+- `tests/integration/test_ingestion_pipeline_paths.py`
+
+Operational documentation:
+- `docs/development/INGESTION_PIPELINE.md`

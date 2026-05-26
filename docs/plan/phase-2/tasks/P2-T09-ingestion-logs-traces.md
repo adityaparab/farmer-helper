@@ -5,15 +5,15 @@
 Add structured ingestion logs and trace events so document processing can be observed and debugged reliably.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-26
-- Completed: -
+- Completed: 2026-05-26
 
-## Next work
-1. Define ingestion lifecycle log events and required fields.
-2. Emit structured logs for stage start/end and failure states.
-3. Validate log consistency and include request/job correlation identifiers.
+## What was done
+1. Added `src/farmer_helper/services/ingestion/trace_logger.py` for structured ingestion lifecycle events.
+2. Updated `src/farmer_helper/services/ingestion/status_service.py` to emit started/processing/succeeded/failed trace events.
+3. Added `tests/unit/test_ingestion_trace_logging.py` to validate event names and correlation/error fields.
 
 ## Decisions made
-- Reuse existing structured logging infrastructure and request context propagation.
-- Keep event names deterministic for downstream filtering and alerting.
+- Reused existing structured logging infrastructure and request context propagation.
+- Standardized deterministic event names for downstream filtering and alerting.
