@@ -19,5 +19,5 @@ This Epic maps to Phase 3 in `docs/plan/PHASES.md` and tracks local sub-issue st
 | P3-T04 | Add retry and error handling for embedding jobs | Completed | 2026-05-27 | Added retry policy/provider wrapper with retryable/non-retryable tests |
 | P3-T05 | Add async-safe job orchestration | Completed | 2026-05-27 | Added async-safe orchestration service with success/failure tests |
 | P3-T06 | Add API/CLI trigger for embeddings | Completed | 2026-05-27 | Added trigger API route, CLI script, and route tests |
-| P3-T07 | Add integration and smoke tests with coverage target | In progress | 2026-05-27 | Next active task |
-| P3-T08 | Document provider versioning and extension path | Not started | - | Pending |
+| P3-T07 | Add integration and smoke tests with coverage target | Completed | 2026-05-27 | Added integration and smoke tests for trigger and persistence behavior |
+| P3-T08 | Document provider versioning and extension path | In progress | 2026-05-27 | Next active task |

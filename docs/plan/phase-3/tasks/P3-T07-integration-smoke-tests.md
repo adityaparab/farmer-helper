@@ -5,14 +5,14 @@
 Expand embedding pipeline verification with integration and smoke-level tests covering end-to-end trigger behavior.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add integration tests for trigger-to-persistence flow.
-2. Add smoke tests for embedding trigger endpoint behavior.
-3. Verify coverage for key embedding orchestration paths.
+## What was done
+1. Added integration test `tests/integration/test_embedding_trigger_integration.py`.
+2. Added smoke tests `tests/smoke/test_embedding_trigger.py`.
+3. Verified trigger-to-persistence flow and validation behavior.
 
 ## Decisions made
 - Reuse deterministic mock provider paths for stable test outcomes.
