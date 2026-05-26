@@ -22,3 +22,16 @@ class TextNormalizationConfig(BaseModel):
     collapse_blank_lines: bool = True
     trim_edges: bool = True
     keep_newlines: bool = True
+
+
+class ChunkingConfig(BaseModel):
+    chunk_size_chars: int = 800
+    overlap_chars: int = 120
+
+
+class IngestionChunk(BaseModel):
+    chunk_index: int
+    page_start: int
+    page_end: int
+    text: str
+    char_count: int

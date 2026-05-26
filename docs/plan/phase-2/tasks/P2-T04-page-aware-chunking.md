@@ -5,11 +5,15 @@
 Chunk normalized extracted text into deterministic, page-aware segments with configurable sizing and overlap.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-26
-- Completed: -
+- Completed: 2026-05-26
 
-## Next work
-1. Implement chunking strategy with configurable chunk size and overlap.
-2. Preserve page provenance for each chunk.
-3. Add unit tests for boundary and overlap behavior.
+## What was done
+1. Added `src/farmer_helper/services/ingestion/text_chunker.py`.
+2. Added chunking schemas/config in `src/farmer_helper/schemas/ingestion.py`.
+3. Added tests in `tests/unit/test_text_chunker.py`.
+
+## Decisions made
+- Keep chunking deterministic by character windows with configurable overlap.
+- Preserve page provenance at chunk level for downstream citation mapping.
