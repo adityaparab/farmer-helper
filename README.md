@@ -31,6 +31,10 @@ Active implementation tracking for Phase 1 lives in:
 - `docs/plan/phase-1/EPIC.md`
 - `docs/plan/phase-1/tasks/`
 
+Active implementation tracking for Phase 2 lives in:
+- `docs/plan/phase-2/EPIC.md`
+- `docs/plan/phase-2/tasks/`
+
 GitHub issue status comment standard:
 - `docs/plan/ISSUE_COMMENT_TEMPLATE.md`
 - `scripts/post-issue-status-comment.ps1`
@@ -87,3 +91,9 @@ Developer and deployment docs:
 - `docs/development/SETUP.md`
 - `docs/development/ARCHITECTURE_OVERVIEW.md`
 - `docs/deployment/RAILWAY_DEPLOYMENT.md`
+
+## Phase 2 ingestion progress
+Input file validation:
+- `src/farmer_helper/services/ingestion/file_validator.py`
+- `src/farmer_helper/schemas/ingestion.py`
+- `tests/unit/test_file_validator.py`
