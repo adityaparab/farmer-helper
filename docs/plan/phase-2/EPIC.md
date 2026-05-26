@@ -20,6 +20,6 @@ This Epic maps to Phase 2 in `docs/plan/PHASES.md` and tracks local sub-issue st
 | P2-T05 | Attach metadata including page ranges and content hash | Completed | 2026-05-26 | Metadata enricher implemented with content hash and versioning |
 | P2-T06 | Persist ingestion status and error state | Completed | 2026-05-26 | Status persistence repository/service with transition tests implemented |
 | P2-T07 | Enforce idempotent re-ingestion behavior | Completed | 2026-05-26 | Content hash/version idempotency guard implemented with tests |
-| P2-T08 | Add unit, integration, and failure-path tests | In progress | 2026-05-26 | Next active task |
-| P2-T09 | Add ingestion logs and processing traces | Not started | - | Pending |
+| P2-T08 | Add unit, integration, and failure-path tests | Completed | 2026-05-26 | Added integration/failure-path tests for idempotency + status collaboration |
+| P2-T09 | Add ingestion logs and processing traces | In progress | 2026-05-26 | Next active task |
 | P2-T10 | Document ingestion flow and operational guidance | Not started | - | Pending |

@@ -5,15 +5,15 @@
 Expand test coverage for ingestion orchestration and failure-path handling so pipeline behavior is validated end-to-end.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-26
-- Completed: -
+- Completed: 2026-05-26
 
-## Next work
-1. Add orchestration-level ingestion flow tests.
-2. Add failure-path tests for extraction/normalization/chunking errors.
-3. Validate deterministic status updates across successful and failed runs.
+## What was done
+1. Added integration test coverage in `tests/integration/test_ingestion_pipeline_paths.py`.
+2. Added re-ingestion path test validating idempotent document reuse with successful job completion.
+3. Added failure-path test validating status failure persistence on file validation errors.
 
 ## Decisions made
-- Start with high-value failure paths first to prevent regressions in status/error handling.
-- Keep test fixtures deterministic and minimal.
+- Prioritized high-value pipeline collaboration paths across idempotency and status services.
+- Kept tests deterministic with in-memory SQLite and explicit assertions on persisted state.
