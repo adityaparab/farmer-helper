@@ -5,11 +5,15 @@
 Persist ingestion pipeline execution status and error state transitions with deterministic status semantics.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-26
-- Completed: -
+- Completed: 2026-05-26
 
-## Next work
-1. Add ingestion status persistence service/repository behavior.
-2. Persist failure state with stable error codes.
-3. Add tests for status transitions and error persistence.
+## What was done
+1. Added `src/farmer_helper/repositories/ingestion_job_repository.py`.
+2. Added `src/farmer_helper/services/ingestion/status_service.py`.
+3. Added transition tests in `tests/unit/test_ingestion_status_service.py`.
+
+## Decisions made
+- Use explicit state transitions: `pending -> processing -> succeeded` and `{pending|processing} -> failed`.
+- Persist error code and message on failed terminal state.

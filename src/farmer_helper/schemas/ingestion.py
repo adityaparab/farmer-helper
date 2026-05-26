@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel
 
 
@@ -50,3 +52,6 @@ class EnrichedIngestionChunk(BaseModel):
     text: str
     char_count: int
     metadata: ChunkMetadata
+
+
+IngestionJobStatus = Literal["pending", "processing", "succeeded", "failed"]
