@@ -5,14 +5,14 @@
 Add deterministic retry handling and explicit error semantics for embedding provider failures.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add retry policy abstraction for embedding calls.
-2. Implement retry-aware embedding execution service.
-3. Add tests for retryable vs non-retryable provider errors and exhaustion behavior.
+## What was done
+1. Added retry policy and wrapper provider in `src/farmer_helper/services/embedding/retrying_provider.py`.
+2. Implemented bounded deterministic retry execution for provider calls.
+3. Added tests in `tests/unit/test_retrying_embedding_provider.py` for retry success, fail-fast, and exhaustion behavior.
 
 ## Decisions made
 - Retry behavior must be deterministic and bounded.
