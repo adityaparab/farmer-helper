@@ -5,11 +5,15 @@
 Normalize raw extracted text into consistent clean text suitable for chunking and metadata enrichment.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-26
-- Completed: -
+- Completed: 2026-05-26
 
-## Next work
-1. Implement text normalization pipeline with deterministic transforms.
-2. Add configurable cleaning options and edge-case handling.
-3. Add tests for whitespace, control chars, and OCR-noise-like input.
+## What was done
+1. Added `src/farmer_helper/services/ingestion/text_normalizer.py`.
+2. Added normalization config schema in `src/farmer_helper/schemas/ingestion.py`.
+3. Added tests in `tests/unit/test_text_normalizer.py`.
+
+## Decisions made
+- Keep normalization deterministic and config-driven.
+- Preserve page boundaries and page numbering while normalizing text payloads.

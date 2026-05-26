@@ -15,3 +15,10 @@ class ExtractedPage(BaseModel):
 class ExtractedDocument(BaseModel):
     file_path: str
     pages: list[ExtractedPage]
+
+
+class TextNormalizationConfig(BaseModel):
+    collapse_whitespace: bool = True
+    collapse_blank_lines: bool = True
+    trim_edges: bool = True
+    keep_newlines: bool = True
