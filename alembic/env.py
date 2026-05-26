@@ -1,14 +1,19 @@
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy import engine_from_config, pool
 
+from alembic import context
 from farmer_helper.core.config import get_settings
 from farmer_helper.db.models.base import Base
-from farmer_helper.db.models.foundation import ApiRequestLog, Document, IngestionJob
+from farmer_helper.db.models.foundation import (
+    ApiRequestLog,
+    ChunkEmbedding,
+    Document,
+    IngestionJob,
+)
 
 # Keep imports for metadata registration.
-_ = (Document, IngestionJob, ApiRequestLog)
+_ = (Document, IngestionJob, ApiRequestLog, ChunkEmbedding)
 
 config = context.config
 

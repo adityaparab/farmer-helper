@@ -5,14 +5,15 @@
 Extend persistence models and migration path for storing embedding vectors with idempotent upsert semantics.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add embedding vector persistence model and relation to documents/chunks.
-2. Add migration changes for vector storage and upsert keys.
-3. Add repository operations for insert/upsert retrieval paths.
+## What was done
+1. Added embedding persistence model `ChunkEmbedding` in `src/farmer_helper/db/models/foundation.py`.
+2. Added migration `alembic/versions/20260527_0002_embedding_vector_schema.py`.
+3. Added upsert/list repository operations in `src/farmer_helper/repositories/chunk_embedding_repository.py`.
+4. Added unit tests in `tests/unit/test_chunk_embedding_repository.py`.
 
 ## Decisions made
 - Keep persistence schema compatible with pgvector target integration.

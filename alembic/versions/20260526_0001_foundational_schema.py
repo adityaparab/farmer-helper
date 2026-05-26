@@ -5,8 +5,9 @@ Revises:
 Create Date: 2026-05-26 00:00:01
 """
 
-from alembic import op
 import sqlalchemy as sa
+
+from alembic import op
 
 # revision identifiers, used by Alembic.
 revision = "20260526_0001"
@@ -22,7 +23,9 @@ def upgrade() -> None:
         sa.Column("source_path", sa.String(length=512), nullable=False),
         sa.Column("content_hash", sa.String(length=128), nullable=False),
         sa.Column("version", sa.String(length=64), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.PrimaryKeyConstraint("id"),
         sa.UniqueConstraint("source_path"),
     )
@@ -37,11 +40,15 @@ def upgrade() -> None:
         sa.Column("error_code", sa.String(length=64), nullable=True),
         sa.Column("error_message", sa.Text(), nullable=True),
         sa.Column("metadata_json", sa.JSON(), nullable=True),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index("ix_ingestion_jobs_id", "ingestion_jobs", ["id"], unique=False)
-    op.create_index("ix_ingestion_jobs_document_id", "ingestion_jobs", ["document_id"], unique=False)
+    op.create_index(
+        "ix_ingestion_jobs_document_id", "ingestion_jobs", ["document_id"], unique=False
+    )
     op.create_index("ix_ingestion_jobs_status", "ingestion_jobs", ["status"], unique=False)
 
     op.create_table(
@@ -52,11 +59,15 @@ def upgrade() -> None:
         sa.Column("method", sa.String(length=16), nullable=False),
         sa.Column("status_code", sa.Integer(), nullable=False),
         sa.Column("latency_ms", sa.Integer(), nullable=False),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
+        sa.Column(
+            "created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False
+        ),
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index("ix_api_request_logs_id", "api_request_logs", ["id"], unique=False)
-    op.create_index("ix_api_request_logs_request_id", "api_request_logs", ["request_id"], unique=False)
+    op.create_index(
+        "ix_api_request_logs_request_id", "api_request_logs", ["request_id"], unique=False
+    )
 
 
 def downgrade() -> None:
