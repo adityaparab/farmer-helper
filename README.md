@@ -126,3 +126,30 @@ Status, idempotency, and observability:
 
 Operational documentation:
 - `docs/development/INGESTION_PIPELINE.md`
+
+## Phase 3 embedding progress
+Provider contracts, batching, and retries:
+- `src/farmer_helper/schemas/embedding.py`
+- `src/farmer_helper/services/embedding/provider.py`
+- `src/farmer_helper/services/embedding/batch_service.py`
+- `src/farmer_helper/services/embedding/retrying_provider.py`
+- `tests/unit/test_embedding_provider_abstraction.py`
+- `tests/unit/test_embedding_batch_service.py`
+- `tests/unit/test_retrying_embedding_provider.py`
+
+Persistence and orchestration:
+- `src/farmer_helper/db/models/foundation.py`
+- `src/farmer_helper/repositories/chunk_embedding_repository.py`
+- `src/farmer_helper/services/embedding/orchestration_service.py`
+- `tests/unit/test_chunk_embedding_repository.py`
+- `tests/unit/test_embedding_orchestration_service.py`
+
+Trigger surfaces and end-to-end tests:
+- `src/farmer_helper/api/routes/embeddings.py`
+- `scripts/trigger-embeddings.py`
+- `tests/unit/test_embedding_trigger_route.py`
+- `tests/integration/test_embedding_trigger_integration.py`
+- `tests/smoke/test_embedding_trigger.py`
+
+Provider versioning and extension documentation:
+- `docs/development/EMBEDDING_PROVIDERS.md`

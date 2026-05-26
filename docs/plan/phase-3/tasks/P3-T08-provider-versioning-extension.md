@@ -5,14 +5,14 @@
 Document embedding provider versioning strategy and extension workflow for introducing new providers safely.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Document provider/version fields and compatibility expectations.
-2. Document extension path for adding real provider integrations.
-3. Link operational guidance from README and development docs.
+## What was done
+1. Added provider versioning and extension guide `docs/development/EMBEDDING_PROVIDERS.md`.
+2. Updated `README.md` with Phase 3 implementation references.
+3. Updated `docs/development/ARCHITECTURE_OVERVIEW.md` with embedding pipeline capability and docs links.
 
 ## Decisions made
 - Keep provider versioning explicit in persisted records and trigger interfaces.
