@@ -48,3 +48,13 @@ class FusedRetrievalItem(VectorRetrievalItem):
 
 class FusedRetrievalResponse(BaseModel):
     items: list[FusedRetrievalItem]
+
+
+class RerankRequest(BaseModel):
+    query_text: str = Field(min_length=1)
+    items: list[FusedRetrievalItem]
+    top_k: int = Field(ge=1, le=100, default=5)
+
+
+class RerankResponse(BaseModel):
+    items: list[FusedRetrievalItem]

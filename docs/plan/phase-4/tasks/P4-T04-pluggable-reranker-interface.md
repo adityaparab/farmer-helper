@@ -5,14 +5,14 @@
 Add a provider-agnostic reranker contract and default no-op implementation that can be composed after retrieval fusion.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Define reranker request/response schema contracts.
-2. Add pluggable reranker interface and baseline implementation.
-3. Add unit tests for reranker contract behavior.
+## What was done
+1. Added reranker schema contracts in `src/farmer_helper/schemas/retrieval.py`.
+2. Added pluggable reranker interface and baseline implementations in `src/farmer_helper/services/retrieval/reranker.py`.
+3. Added unit tests in `tests/unit/test_reranker.py`.
 
 ## Decisions made
 - Reranker must be optional and configuration-driven.
