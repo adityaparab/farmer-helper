@@ -4,6 +4,7 @@ from farmer_helper.schemas.retrieval import (
     RerankRequest,
     RetrievalCitation,
     RetrievalItem,
+    RetrievalMetrics,
     RetrievalRequest,
     RetrievalResponse,
     VectorRetrievalRequest,
@@ -83,5 +84,11 @@ class RetrievalQueryService:
                     ),
                 )
                 for item in ranked_items
-            ]
+            ],
+            metrics=RetrievalMetrics(
+                vector_count=len(vector_response.items),
+                keyword_count=len(keyword_response.items),
+                fused_count=len(fused.items),
+                returned_count=len(ranked_items),
+            ),
         )

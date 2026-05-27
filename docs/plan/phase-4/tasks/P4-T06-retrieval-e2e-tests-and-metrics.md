@@ -5,14 +5,15 @@
 Add integration/smoke coverage for retrieval endpoint behavior and basic measurable retrieval metrics outputs.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add end-to-end retrieval integration test that verifies deterministic merged ordering.
-2. Add retrieval smoke test for API contract and citation metadata fields.
-3. Add basic retrieval metrics schema/values in endpoint response metadata.
+## What was done
+1. Added retrieval metrics schema and response fields in `src/farmer_helper/schemas/retrieval.py`.
+2. Added metrics population in `src/farmer_helper/services/retrieval/query_service.py`.
+3. Added end-to-end retrieval integration test in `tests/integration/test_retrieval_query_integration.py`.
+4. Added retrieval smoke test in `tests/smoke/test_retrieval_query.py`.
 
 ## Decisions made
 - Metrics for this step should be lightweight and deterministic, suitable for CI assertions.

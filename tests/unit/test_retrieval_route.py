@@ -1,7 +1,12 @@
 from fastapi.testclient import TestClient
 
 from farmer_helper.main import app
-from farmer_helper.schemas.retrieval import RetrievalCitation, RetrievalItem, RetrievalResponse
+from farmer_helper.schemas.retrieval import (
+    RetrievalCitation,
+    RetrievalItem,
+    RetrievalMetrics,
+    RetrievalResponse,
+)
 
 
 class FakeRetrievalService:
@@ -22,7 +27,13 @@ class FakeRetrievalService:
                         content_hash="h42",
                     ),
                 )
-            ]
+            ],
+            metrics=RetrievalMetrics(
+                vector_count=2,
+                keyword_count=1,
+                fused_count=1,
+                returned_count=1,
+            ),
         )
 
 
@@ -54,6 +65,7 @@ def test_retrieval_query_route_success(monkeypatch) -> None:
     assert len(payload["items"]) == 1
     assert payload["items"][0]["citation"]["document_id"] == 42
     assert payload["items"][0]["fused_score"] == payload["items"][0]["score"]
+    assert payload["metrics"]["returned_count"] == 1
 
 
 def test_retrieval_query_route_rejects_unsupported_reranker() -> None:

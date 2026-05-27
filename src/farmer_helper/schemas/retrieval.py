@@ -89,5 +89,13 @@ class RetrievalItem(BaseModel):
     citation: RetrievalCitation
 
 
+class RetrievalMetrics(BaseModel):
+    vector_count: int = Field(ge=0)
+    keyword_count: int = Field(ge=0)
+    fused_count: int = Field(ge=0)
+    returned_count: int = Field(ge=0)
+
+
 class RetrievalResponse(BaseModel):
     items: list[RetrievalItem]
+    metrics: RetrievalMetrics

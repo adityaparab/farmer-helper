@@ -99,6 +99,10 @@ def test_retrieval_query_service_returns_citation_metadata() -> None:
     assert item.citation.document_id == item.document_id
     assert item.citation.chunk_index == item.chunk_index
     assert item.citation.content_hash == item.content_hash
+    assert response.metrics.vector_count == 1
+    assert response.metrics.keyword_count == 1
+    assert response.metrics.fused_count == 2
+    assert response.metrics.returned_count == 2
 
 
 def test_retrieval_query_service_invokes_optional_reranker() -> None:

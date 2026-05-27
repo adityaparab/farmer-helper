@@ -175,3 +175,5 @@ Retrieval API and tests:
 - `tests/unit/test_reranker.py`
 - `tests/unit/test_retrieval_query_service.py`
 - `tests/unit/test_retrieval_route.py`
+- `tests/integration/test_retrieval_query_integration.py`
+- `tests/smoke/test_retrieval_query.py`
