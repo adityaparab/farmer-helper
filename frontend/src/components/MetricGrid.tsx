@@ -1,7 +1,7 @@
-import type { Metric } from '../types'
+import type { AdminDashboardMetricCard } from '../api/client'
 
 type MetricGridProps = {
-  metrics: Metric[]
+  metrics: AdminDashboardMetricCard[]
 }
 
 export function MetricGrid({ metrics }: MetricGridProps) {
@@ -10,7 +10,9 @@ export function MetricGrid({ metrics }: MetricGridProps) {
       {metrics.map((metric) => (
         <article key={metric.label} className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm">
           <p className="text-sm text-neutral-500">{metric.label}</p>
-          <p className="mt-1 text-2xl font-semibold text-neutral-900">{metric.value}</p>
+          <p className="mt-1 text-2xl font-semibold text-neutral-900">
+            {Intl.NumberFormat().format(metric.value)}
+          </p>
         </article>
       ))}
     </div>

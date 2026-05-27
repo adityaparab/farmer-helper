@@ -1,5 +1,6 @@
 import type { FormEvent } from 'react'
-import type { ChatItem, Metric, Role } from '../types'
+import type { ApiClient } from '../api/client'
+import type { ChatItem, Role } from '../types'
 import { AdminDashboard } from './AdminDashboard'
 import { GuestExperience } from './GuestExperience'
 import { UserWorkspace } from './UserWorkspace'
@@ -10,10 +11,10 @@ type RoleViewProps = {
   password: string
   authIsSubmitting: boolean
   authErrorMessage: string | null
+  apiClient: ApiClient
   question: string
   canSubmitQuestion: boolean
   chatHistory: ChatItem[]
-  dashboardMetrics: Metric[]
   onUsernameChange: (value: string) => void
   onPasswordChange: (value: string) => void
   onQuestionChange: (value: string) => void
@@ -27,10 +28,10 @@ export function RoleView({
   password,
   authIsSubmitting,
   authErrorMessage,
+  apiClient,
   question,
   canSubmitQuestion,
   chatHistory,
-  dashboardMetrics,
   onUsernameChange,
   onPasswordChange,
   onQuestionChange,
@@ -52,7 +53,7 @@ export function RoleView({
   }
 
   if (role === 'admin') {
-    return <AdminDashboard metrics={dashboardMetrics} />
+    return <AdminDashboard apiClient={apiClient} />
   }
 
   return (

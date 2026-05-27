@@ -11,8 +11,25 @@ function jsonResponse(payload: unknown, init: ResponseInit = {}) {
   })
 }
 
+function metricsPayload() {
+  return {
+    cards: [
+      { label: 'Documents', value: 9 },
+      { label: 'Embedded chunks', value: 52910 },
+      { label: 'Chat messages', value: 4 },
+      { label: 'QA review items', value: 2 },
+      { label: 'Audit events', value: 12 },
+    ],
+    ingestion_jobs_by_status: { pending: 1 },
+    chat_sessions_by_status: {},
+    gold_answers_by_status: {},
+    qa_review_items_by_status: { pending: 2 },
+    embedding_jobs_by_status: {},
+  }
+}
+
 function mockAuthSuccess(role: 'admin' | 'user') {
-  return vi
+  const fetchSpy = vi
     .spyOn(globalThis, 'fetch')
     .mockResolvedValueOnce(
       jsonResponse({
@@ -26,6 +43,12 @@ function mockAuthSuccess(role: 'admin' | 'user') {
     .mockResolvedValueOnce(
       jsonResponse({ id: role === 'admin' ? 1 : 2, username: role, role }),
     )
+
+  if (role === 'admin') {
+    fetchSpy.mockResolvedValueOnce(jsonResponse(metricsPayload()))
+  }
+
+  return fetchSpy
 }
 
 describe('App', () => {
@@ -52,10 +75,45 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Continue' }))
 
     expect(await screen.findByRole('region', { name: 'Admin dashboard' })).toBeInTheDocument()
-    expect(screen.getByText('Documents')).toBeInTheDocument()
+    expect(await screen.findByText('Documents')).toBeInTheDocument()
+    expect(screen.getByText('52,910')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Select PDF' })).toBeInTheDocument()
     expect(fetchSpy).toHaveBeenCalledWith('/auth/login', expect.any(Object))
     expect(fetchSpy).toHaveBeenCalledWith('/auth/me', expect.any(Object))
+    expect(fetchSpy).toHaveBeenCalledWith('/admin/dashboard/metrics', expect.any(Object))
+  })
+
+  it('uploads an admin PDF through the backend upload endpoint', async () => {
+    const fetchSpy = mockAuthSuccess('admin')
+    fetchSpy
+      .mockResolvedValueOnce(
+        jsonResponse({
+          job_id: 42,
+          document_id: 7,
+          status: 'pending',
+          source_path: '/uploads/soil.pdf',
+          content_hash: 'hash',
+          size_bytes: 12,
+          document_created: true,
+        }),
+      )
+      .mockResolvedValueOnce(jsonResponse(metricsPayload()))
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.type(screen.getByLabelText('Username'), 'admin')
+    await user.type(screen.getByLabelText('Password'), 'P@ssw0rd')
+    await user.click(screen.getByRole('button', { name: 'Continue' }))
+    await screen.findByRole('region', { name: 'Admin dashboard' })
+
+    const file = new File(['%PDF-1.4'], 'soil.pdf', { type: 'application/pdf' })
+    await user.upload(screen.getByLabelText('PDF file'), file)
+    await user.clear(screen.getByLabelText('Content version'))
+    await user.type(screen.getByLabelText('Content version'), 'content-v2')
+    await user.click(screen.getByRole('button', { name: 'Upload PDF' }))
+
+    expect(await screen.findByText('Upload accepted. Ingestion job 42 is pending.')).toBeInTheDocument()
+    expect(fetchSpy).toHaveBeenCalledWith('/admin/documents/upload', expect.any(Object))
   })
 
   it('routes backend user-role users to chat and history in the same view', async () => {

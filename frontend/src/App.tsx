@@ -4,7 +4,7 @@ import { ApiError, createApiClient } from './api/client'
 import type { ApiClient, AuthUserResponse } from './api/client'
 import { AppHeader } from './components/AppHeader'
 import { RoleView } from './components/RoleView'
-import { dashboardMetrics, draftAnswer, initialChatHistory } from './data/dashboard'
+import { draftAnswer, initialChatHistory } from './data/dashboard'
 import type { ChatItem, Role } from './types'
 
 type AppProps = {
@@ -116,10 +116,10 @@ function App({ apiClient: injectedApiClient }: AppProps) {
         password={password}
         authIsSubmitting={authIsSubmitting}
         authErrorMessage={authError}
+        apiClient={apiClient}
         question={question}
         canSubmitQuestion={canSubmitQuestion}
         chatHistory={chatHistory}
-        dashboardMetrics={dashboardMetrics}
         onUsernameChange={setUsername}
         onPasswordChange={setPassword}
         onQuestionChange={setQuestion}
