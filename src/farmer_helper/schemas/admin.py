@@ -107,3 +107,17 @@ class AccessAuditLogResponse(BaseModel):
     request_id: str | None
     details: dict[str, str] | None
     created_at: datetime
+
+
+class AdminDashboardMetricCard(BaseModel):
+    label: str
+    value: int
+
+
+class AdminDashboardMetricsResponse(BaseModel):
+    cards: list[AdminDashboardMetricCard]
+    ingestion_jobs_by_status: dict[str, int]
+    chat_sessions_by_status: dict[str, int]
+    gold_answers_by_status: dict[str, int]
+    qa_review_items_by_status: dict[str, int]
+    embedding_jobs_by_status: dict[str, int]

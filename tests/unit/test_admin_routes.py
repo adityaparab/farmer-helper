@@ -62,6 +62,69 @@ def test_admin_ingestion_reindex_and_status_workflow() -> None:
     assert reindex.json()["status"] == "pending"
 
 
+def test_admin_dashboard_metrics_contract() -> None:
+    _reset_db()
+    client = TestClient(app)
+    headers = _admin_headers(client, "metrics-admin")
+
+    create = client.post(
+        "/admin/ingestion/jobs",
+        headers=headers,
+        json={
+            "source_path": "docs/source/metrics.pdf",
+            "content_hash": "hash-metrics",
+            "content_version": "v1",
+        },
+    )
+    assert create.status_code == 201
+    job_id = create.json()["job_id"]
+
+    processing = client.post(
+        f"/admin/jobs/{job_id}/status",
+        headers=headers,
+        json={"status": "processing"},
+    )
+    assert processing.status_code == 200
+
+    update = client.post(
+        f"/admin/jobs/{job_id}/status",
+        headers=headers,
+        json={"status": "succeeded"},
+    )
+    assert update.status_code == 200
+
+    gold = client.post(
+        "/admin/gold-answers",
+        headers=headers,
+        json={"question": "What is compost?", "answer": "Compost is decomposed organic matter."},
+    )
+    assert gold.status_code == 201
+
+    review = client.post(
+        "/admin/review-queue",
+        headers=headers,
+        json={"issue_type": "source_gap", "details": "Need stronger citation coverage"},
+    )
+    assert review.status_code == 201
+
+    metrics = client.get("/admin/dashboard/metrics", headers=headers)
+    assert metrics.status_code == 200
+
+    payload = metrics.json()
+    assert {item["label"] for item in payload["cards"]} == {
+        "Documents",
+        "Embedded chunks",
+        "Chat messages",
+        "QA review items",
+        "Audit events",
+    }
+    assert payload["ingestion_jobs_by_status"] == {"succeeded": 1}
+    assert payload["gold_answers_by_status"] == {"draft": 1}
+    assert payload["qa_review_items_by_status"] == {"pending": 1}
+    assert payload["chat_sessions_by_status"] == {}
+    assert payload["embedding_jobs_by_status"] == {}
+
+
 def test_admin_version_gold_answer_review_queue_and_audit() -> None:
     _reset_db()
     client = TestClient(app)

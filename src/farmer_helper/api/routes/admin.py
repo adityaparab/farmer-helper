@@ -1,9 +1,21 @@
 from typing import cast
 
 from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from farmer_helper.db.base import get_db_session
+from farmer_helper.db.models.foundation import (
+    AccessAuditLog,
+    ChatMessage,
+    ChatSession,
+    ChunkEmbedding,
+    Document,
+    EmbeddingAsyncJobRecord,
+    GoldAnswerRecord,
+    IngestionJob,
+    QaReviewQueueItem,
+)
 from farmer_helper.repositories.admin_repository import (
     AccessAuditLogRepository,
     AdminJobRepository,
@@ -15,6 +27,8 @@ from farmer_helper.repositories.document_repository import DocumentRepository
 from farmer_helper.repositories.ingestion_job_repository import IngestionJobRepository
 from farmer_helper.schemas.admin import (
     AccessAuditLogResponse,
+    AdminDashboardMetricCard,
+    AdminDashboardMetricsResponse,
     AdminIngestionJobCreateRequest,
     AdminJobResponse,
     AdminJobStatus,
@@ -71,6 +85,54 @@ def _audit(
         target_id=target_id,
         request_id=request.headers.get("x-request-id"),
         details=details,
+    )
+
+
+def _count_rows(db: Session, model: type[object]) -> int:
+    return int(db.scalar(select(func.count()).select_from(model)) or 0)
+
+
+def _count_by_field(db: Session, field: object, model: type[object]) -> dict[str, int]:
+    rows = db.execute(select(field, func.count()).select_from(model).group_by(field)).all()
+    return {str(key): int(value) for key, value in rows}
+
+
+@router.get("/dashboard/metrics", response_model=AdminDashboardMetricsResponse)
+def get_dashboard_metrics(
+    db: Session = Depends(get_db_session),
+) -> AdminDashboardMetricsResponse:  # noqa: B008
+    """Return aggregate metrics for the admin dashboard.
+
+    The endpoint keeps dashboard queries explicit and bounded to aggregate counts over
+    existing operational tables. Frontend clients can render the card list directly while
+    using status distributions for compact charts and health indicators.
+
+    Returns:
+        AdminDashboardMetricsResponse with card metrics and status distributions.
+    """
+    total_documents = _count_rows(db, Document)
+    total_chunks = _count_rows(db, ChunkEmbedding)
+    total_messages = _count_rows(db, ChatMessage)
+    total_audit_logs = _count_rows(db, AccessAuditLog)
+    total_qa_items = _count_rows(db, QaReviewQueueItem)
+
+    return AdminDashboardMetricsResponse(
+        cards=[
+            AdminDashboardMetricCard(label="Documents", value=total_documents),
+            AdminDashboardMetricCard(label="Embedded chunks", value=total_chunks),
+            AdminDashboardMetricCard(label="Chat messages", value=total_messages),
+            AdminDashboardMetricCard(label="QA review items", value=total_qa_items),
+            AdminDashboardMetricCard(label="Audit events", value=total_audit_logs),
+        ],
+        ingestion_jobs_by_status=_count_by_field(db, IngestionJob.status, IngestionJob),
+        chat_sessions_by_status=_count_by_field(db, ChatSession.status, ChatSession),
+        gold_answers_by_status=_count_by_field(db, GoldAnswerRecord.status, GoldAnswerRecord),
+        qa_review_items_by_status=_count_by_field(db, QaReviewQueueItem.status, QaReviewQueueItem),
+        embedding_jobs_by_status=_count_by_field(
+            db,
+            EmbeddingAsyncJobRecord.status,
+            EmbeddingAsyncJobRecord,
+        ),
     )
 
 
