@@ -1,6 +1,6 @@
 import type { FormEvent } from 'react'
 import type { ApiClient } from '../api/client'
-import type { ChatItem, Role } from '../types'
+import type { Role } from '../types'
 import { AdminDashboard } from './AdminDashboard'
 import { GuestExperience } from './GuestExperience'
 import { UserWorkspace } from './UserWorkspace'
@@ -12,16 +12,12 @@ type RoleViewProps = {
   authIsSubmitting: boolean
   authErrorMessage: string | null
   apiClient: ApiClient
-  question: string
-  canSubmitQuestion: boolean
-  chatIsSubmitting: boolean
-  chatErrorMessage: string | null
-  chatHistory: ChatItem[]
+  answerBaseUrl?: string
+  accessToken: string | null
+  sessionKey?: string
   onUsernameChange: (value: string) => void
   onPasswordChange: (value: string) => void
-  onQuestionChange: (value: string) => void
   onLogin: (event: FormEvent<HTMLFormElement>) => void
-  onAsk: (event: FormEvent<HTMLFormElement>) => void
 }
 
 export function RoleView({
@@ -31,16 +27,12 @@ export function RoleView({
   authIsSubmitting,
   authErrorMessage,
   apiClient,
-  question,
-  canSubmitQuestion,
-  chatIsSubmitting,
-  chatErrorMessage,
-  chatHistory,
+  answerBaseUrl,
+  accessToken,
+  sessionKey,
   onUsernameChange,
   onPasswordChange,
-  onQuestionChange,
   onLogin,
-  onAsk,
 }: RoleViewProps) {
   if (role === 'guest') {
     return (
@@ -62,13 +54,9 @@ export function RoleView({
 
   return (
     <UserWorkspace
-      question={question}
-      canSubmit={canSubmitQuestion}
-      isSubmitting={chatIsSubmitting}
-      errorMessage={chatErrorMessage}
-      history={chatHistory}
-      onQuestionChange={onQuestionChange}
-      onSubmit={onAsk}
+      answerBaseUrl={answerBaseUrl}
+      accessToken={accessToken}
+      sessionKey={sessionKey}
     />
   )
 }

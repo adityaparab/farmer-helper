@@ -18,15 +18,12 @@ export function ChatComposer({
   onSubmit,
 }: ChatComposerProps) {
   return (
-    <article className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
-      <h2 className="font-heading text-2xl font-semibold text-neutral-900">TanStack AI Chat</h2>
-      <p className="mt-1 text-sm text-neutral-600">
-        Ask grounded questions and continue from previous context in one workspace.
-      </p>
+    <article className="rounded-lg border border-neutral-200 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+      <h2 className="font-heading text-2xl font-semibold text-neutral-900 dark:text-neutral-50">AI SDK Chat</h2>
       <form onSubmit={onSubmit} className="mt-4 space-y-3" aria-label="Ask a farming question">
         <ChatStatusMessage isSubmitting={isSubmitting} errorMessage={errorMessage} />
         <textarea
-          className="min-h-28 w-full rounded-xl border border-neutral-300 px-3 py-2 outline-none transition focus:border-amber-500"
+          className="min-h-28 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900 outline-none transition focus:border-amber-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50 dark:placeholder:text-neutral-500"
           placeholder="Ask about crop planning, irrigation, or disease response..."
           value={question}
           disabled={isSubmitting}
@@ -35,7 +32,7 @@ export function ChatComposer({
         <button
           type="submit"
           disabled={!canSubmit || isSubmitting}
-          className="rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition enabled:hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-300"
+          className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition enabled:hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-300 dark:bg-amber-500 dark:text-neutral-950 dark:enabled:hover:bg-amber-400 dark:disabled:bg-neutral-700 dark:disabled:text-neutral-400"
         >
           {isSubmitting ? <SubmittingQuestionLabel /> : <AskQuestionLabel />}
         </button>
@@ -51,11 +48,11 @@ type ChatStatusMessageProps = {
 
 function ChatStatusMessage({ isSubmitting, errorMessage }: ChatStatusMessageProps) {
   if (isSubmitting) {
-    return <p className="text-sm text-neutral-600" role="status">Generating grounded answer...</p>
+    return <p className="text-sm text-neutral-600 dark:text-neutral-300" role="status">Generating grounded answer...</p>
   }
 
   if (errorMessage) {
-    return <p className="text-sm text-red-700" role="alert">{errorMessage}</p>
+    return <p className="text-sm text-red-700 dark:text-red-300" role="alert">{errorMessage}</p>
   }
 
   return null

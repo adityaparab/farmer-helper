@@ -1,38 +1,62 @@
+import { useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
-import type { ChatItem } from '../types'
+import { useChat } from '@ai-sdk/react'
+import { createAnswerChatTransport } from '../ai/answerTransport'
+import { initialChatMessages } from '../data/dashboard'
 import { ChatComposer } from './ChatComposer'
 import { QuestionHistory } from './QuestionHistory'
 
 type UserWorkspaceProps = {
-  question: string
-  canSubmit: boolean
-  isSubmitting: boolean
-  errorMessage: string | null
-  history: ChatItem[]
-  onQuestionChange: (value: string) => void
-  onSubmit: (event: FormEvent<HTMLFormElement>) => void
+  answerBaseUrl?: string
+  accessToken: string | null
+  sessionKey?: string
 }
 
 export function UserWorkspace({
-  question,
-  canSubmit,
-  isSubmitting,
-  errorMessage,
-  history,
-  onQuestionChange,
-  onSubmit,
+  answerBaseUrl,
+  accessToken,
+  sessionKey,
 }: UserWorkspaceProps) {
+  const [question, setQuestion] = useState('')
+  const transport = useMemo(
+    () =>
+      createAnswerChatTransport({
+        baseUrl: answerBaseUrl,
+        getAccessToken: () => accessToken,
+        sessionKey,
+      }),
+    [accessToken, answerBaseUrl, sessionKey],
+  )
+  const { messages, sendMessage, status, error, clearError } = useChat({
+    messages: initialChatMessages,
+    transport,
+  })
+  const isSubmitting = status === 'submitted' || status === 'streaming'
+  const canSubmit = question.trim().length > 0 && !isSubmitting
+
+  const submitQuestion = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    const submittedQuestion = question.trim()
+    if (!submittedQuestion || isSubmitting) {
+      return
+    }
+
+    clearError()
+    void sendMessage({ text: submittedQuestion })
+    setQuestion('')
+  }
+
   return (
     <section className="grid gap-6 lg:grid-cols-[1.2fr,0.8fr]" aria-label="User workspace">
       <ChatComposer
         question={question}
         canSubmit={canSubmit}
         isSubmitting={isSubmitting}
-        errorMessage={errorMessage}
-        onQuestionChange={onQuestionChange}
-        onSubmit={onSubmit}
+        errorMessage={error?.message ?? null}
+        onQuestionChange={setQuestion}
+        onSubmit={submitQuestion}
       />
-      <QuestionHistory history={history} />
+      <QuestionHistory messages={messages} />
     </section>
   )
 }

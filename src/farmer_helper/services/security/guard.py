@@ -63,6 +63,11 @@ class InMemoryRateLimiter:
             values.append(now_value)
             return True, 0
 
+    def reset(self) -> None:
+        """Reset all tracked rate-limit windows."""
+        with self._lock:
+            self._windows.clear()
+
 
 _rate_limiter = InMemoryRateLimiter()
 
@@ -78,8 +83,7 @@ def reset_rate_limiter() -> None:
     The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
     outputs, and orchestration boundaries from the source code.
     """
-    with _rate_limiter._lock:
-        _rate_limiter._windows.clear()
+    _rate_limiter.reset()
 
 
 def _security_principal(request: Request) -> str:
@@ -145,26 +149,29 @@ def evaluate_request_security(request: Request) -> JSONResponse | None:
     if request_path in {"/favicon.ico", "/manifest.webmanifest"}:
         return None
 
-    api_prefixes = ("/admin", "/embeddings", "/retrieval", "/answers")
-    if not request_path.startswith(api_prefixes):
+    protected_prefixes = ("/admin", "/embeddings", "/retrieval", "/answers")
+    if not request_path.startswith(protected_prefixes):
         return None
 
-    settings = get_settings()
-    expected_api_key = settings.security_api_key
-    provided_api_key = request.headers.get("x-api-key")
+    api_key_prefixes = ("/embeddings", "/retrieval", "/answers")
 
-    if expected_api_key is not None and (
-        provided_api_key is None or not compare_digest(provided_api_key, expected_api_key)
-    ):
-        _audit("auth.api_key", "rejected", request, "missing_or_invalid_api_key")
-        return JSONResponse(
-            status_code=401,
-            content={
-                "error_code": "AUTH_REQUIRED",
-                "message": "Valid API key is required",
-                "request_id": get_request_id(),
-            },
-        )
+    settings = get_settings()
+    if request_path.startswith(api_key_prefixes):
+        expected_api_key = settings.security_api_key
+        provided_api_key = request.headers.get("x-api-key")
+
+        if expected_api_key is not None and (
+            provided_api_key is None or not compare_digest(provided_api_key, expected_api_key)
+        ):
+            _audit("auth.api_key", "rejected", request, "missing_or_invalid_api_key")
+            return JSONResponse(
+                status_code=401,
+                content={
+                    "error_code": "AUTH_REQUIRED",
+                    "message": "Valid API key is required",
+                    "request_id": get_request_id(),
+                },
+            )
 
     if settings.security_rate_limit_requests > 0:
         key = _security_principal(request)

@@ -11,11 +11,11 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@tanstack/ai-client": "^0.12.0",
-    "@tanstack/ai-react": "^0.12.0",
+    "@ai-sdk/react": "^3.0.193",
     "@tanstack/react-query": "^5.100.14",
     "@tanstack/react-router": "^1.170.8",
     "@tanstack/react-router-devtools": "^1.167.0",
+    "ai": "^6.0.191",
     "clsx": "^2.1.1",
     "lucide-react": "^1.16.0",
     "react": "^19.2.6",

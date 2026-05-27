@@ -45,9 +45,9 @@ export function PdfUploadPanel({ onUpload }: PdfUploadPanelProps) {
   }
 
   return (
-    <article className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-sm">
-      <h2 className="font-heading text-2xl font-semibold text-neutral-900">Upload PDF</h2>
-      <p className="mt-1 text-sm text-neutral-600">
+    <article className="rounded-lg border border-neutral-200 bg-white p-6 shadow-sm dark:border-neutral-800 dark:bg-neutral-950">
+      <h2 className="font-heading text-2xl font-semibold text-neutral-900 dark:text-neutral-50">Upload PDF</h2>
+      <p className="mt-1 text-sm text-neutral-600 dark:text-neutral-300">
         Add curated source documents for ingestion, embedding, and grounded answer generation.
       </p>
       <input
@@ -58,10 +58,10 @@ export function PdfUploadPanel({ onUpload }: PdfUploadPanelProps) {
         className="sr-only"
         onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
       />
-      <label className="mt-4 block max-w-xs text-sm font-medium text-neutral-700">
+      <label className="mt-4 block max-w-xs text-sm font-medium text-neutral-700 dark:text-neutral-200">
         Content version
         <input
-          className="mt-1 w-full rounded-xl border border-neutral-300 px-3 py-2 outline-none transition focus:border-amber-500"
+          className="mt-1 w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 text-neutral-900 outline-none transition focus:border-amber-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-50"
           value={contentVersion}
           onChange={(event) => setContentVersion(event.target.value)}
         />
@@ -71,7 +71,7 @@ export function PdfUploadPanel({ onUpload }: PdfUploadPanelProps) {
       <button
         type="button"
         onClick={chooseFile}
-        className="mt-4 inline-flex items-center gap-2 rounded-xl border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50"
+        className="mt-4 inline-flex items-center gap-2 rounded-lg border border-neutral-300 px-4 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-50 dark:border-neutral-700 dark:text-neutral-200 dark:hover:bg-neutral-900"
       >
         <FileUp className="h-4 w-4" />
         Select PDF
@@ -80,7 +80,7 @@ export function PdfUploadPanel({ onUpload }: PdfUploadPanelProps) {
         type="button"
         onClick={uploadSelectedFile}
         disabled={uploadState.status === 'uploading'}
-        className="ml-3 mt-4 inline-flex items-center gap-2 rounded-xl bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-500"
+        className="ml-3 mt-4 inline-flex items-center gap-2 rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-neutral-800 disabled:cursor-not-allowed disabled:bg-neutral-500 dark:bg-amber-500 dark:text-neutral-950 dark:hover:bg-amber-400 dark:disabled:bg-neutral-700 dark:disabled:text-neutral-400"
       >
         Upload PDF
       </button>
@@ -93,7 +93,7 @@ type SelectedFileNameProps = {
 }
 
 function SelectedFileName({ name }: SelectedFileNameProps) {
-  return <p className="mt-3 text-sm text-neutral-700">Selected: {name}</p>
+  return <p className="mt-3 text-sm text-neutral-700 dark:text-neutral-300">Selected: {name}</p>
 }
 
 type UploadStateMessageProps = {
@@ -106,15 +106,15 @@ function UploadStateMessage({ state }: UploadStateMessageProps) {
   }
 
   if (state.status === 'uploading') {
-    return <p className="mt-3 text-sm text-neutral-600" role="status">Uploading PDF...</p>
+    return <p className="mt-3 text-sm text-neutral-600 dark:text-neutral-300" role="status">Uploading PDF...</p>
   }
 
   if (state.status === 'error') {
-    return <p className="mt-3 text-sm text-red-700" role="alert">{state.message}</p>
+    return <p className="mt-3 text-sm text-red-700 dark:text-red-300" role="alert">{state.message}</p>
   }
 
   return (
-    <p className="mt-3 text-sm text-emerald-700" role="status">
+    <p className="mt-3 text-sm text-emerald-700 dark:text-emerald-300" role="status">
       Upload accepted. Ingestion job {state.response.job_id} is {state.response.status}.
     </p>
   )

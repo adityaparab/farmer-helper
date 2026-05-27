@@ -136,6 +136,35 @@ def test_admin_dashboard_metrics_contract() -> None:
     assert payload["embedding_jobs_by_status"] == {}
 
 
+def test_admin_dashboard_metrics_does_not_require_api_key(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _reset_db()
+    monkeypatch.setenv("SECURITY_API_KEY", "guard-secret")
+    get_settings.cache_clear()
+
+    client = TestClient(app)
+    login = client.post("/auth/login", json={"username": "admin", "password": "P@ssw0rd"})
+    assert login.status_code == 200
+    token = login.json()["access_token"]
+
+    metrics = client.get(
+        "/admin/dashboard/metrics",
+        headers={"Authorization": f"Bearer {token}", "x-actor-id": "metrics-admin"},
+    )
+
+    assert metrics.status_code == 200
+    assert {item["label"] for item in metrics.json()["cards"]} == {
+        "Documents",
+        "Embedded chunks",
+        "Chat messages",
+        "QA review items",
+        "Audit events",
+    }
+
+    get_settings.cache_clear()
+
+
 def test_admin_pdf_upload_stores_file_starts_job_and_audits(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,

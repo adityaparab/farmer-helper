@@ -1,3 +1,4 @@
+import type { UIMessage } from 'ai'
 import type { ChatItem, Metric } from '../types'
 
 export const dashboardMetrics: Metric[] = [
@@ -20,5 +21,15 @@ export const initialChatHistory: ChatItem[] = [
   },
 ]
 
-export const draftAnswer =
-  'Draft answer generated from current backend contract. TanStack AI streaming integration is next in the implementation queue.'
+export const initialChatMessages: UIMessage[] = initialChatHistory.flatMap((item) => [
+  {
+    id: `${item.id}-user`,
+    role: 'user' as const,
+    parts: [{ type: 'text' as const, text: item.question }],
+  },
+  {
+    id: `${item.id}-assistant`,
+    role: 'assistant' as const,
+    parts: [{ type: 'text' as const, text: item.answer }],
+  },
+])

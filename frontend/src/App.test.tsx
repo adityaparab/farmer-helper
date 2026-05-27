@@ -54,6 +54,7 @@ function mockAuthSuccess(role: 'admin' | 'user') {
 describe('App', () => {
   afterEach(() => {
     vi.restoreAllMocks()
+    document.documentElement.classList.remove('dark')
   })
 
   it('renders a concise landing and authentication experience for guests', () => {
@@ -61,8 +62,20 @@ describe('App', () => {
 
     expect(screen.getByText('Precision support for farm operations')).toBeInTheDocument()
     expect(screen.getByText('Grounded AI Guidance')).toBeInTheDocument()
+    expect(screen.getByText('AI SDK chat flow for real-time support.')).toBeInTheDocument()
     expect(screen.getByRole('form', { name: 'Login or register' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Continue' })).toBeInTheDocument()
+  })
+
+  it('toggles between light and dark themes', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.click(screen.getByRole('button', { name: 'Switch to dark theme' }))
+    expect(document.documentElement).toHaveClass('dark')
+
+    await user.click(screen.getByRole('button', { name: 'Switch to light theme' }))
+    expect(document.documentElement).not.toHaveClass('dark')
   })
 
   it('routes backend admin users to the admin dashboard', async () => {
@@ -129,7 +142,7 @@ describe('App', () => {
     expect(screen.getByRole('complementary', { name: 'Question history' })).toBeInTheDocument()
   })
 
-  it('adds submitted user questions to the top of history', async () => {
+  it('adds submitted user questions to the AI SDK message history', async () => {
     const fetchSpy = mockAuthSuccess('user')
     fetchSpy.mockResolvedValueOnce(
       jsonResponse({
@@ -190,7 +203,8 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Ask question' }))
 
     expect(await screen.findByRole('alert')).toHaveTextContent('Answer service unavailable')
-    expect(screen.queryByText('Q: What next?')).not.toBeInTheDocument()
+    expect(screen.getByText('Q: What next?')).toBeInTheDocument()
+    expect(screen.queryByText('A: Answer service unavailable')).not.toBeInTheDocument()
   })
 
   it('shows a backend login error without entering a role view', async () => {

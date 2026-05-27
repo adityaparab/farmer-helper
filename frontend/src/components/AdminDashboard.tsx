@@ -91,7 +91,7 @@ function AdminMetricsView({ state }: AdminMetricsViewProps) {
 
 function MetricsLoading() {
   return (
-    <div className="rounded-2xl border border-neutral-200 bg-white p-4 text-sm text-neutral-600" role="status">
+    <div className="rounded-lg border border-neutral-200 bg-white p-4 text-sm text-neutral-600 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-300" role="status">
       Loading admin metrics...
     </div>
   )
@@ -103,7 +103,7 @@ type MetricsErrorProps = {
 
 function MetricsError({ message }: MetricsErrorProps) {
   return (
-    <div className="rounded-2xl border border-red-200 bg-red-50 p-4 text-sm text-red-700" role="alert">
+    <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950 dark:text-red-200" role="alert">
       {message}
     </div>
   )

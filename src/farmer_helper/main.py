@@ -5,6 +5,7 @@ from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 
 from farmer_helper.api.middleware.request_id import request_id_middleware
 from farmer_helper.api.routes.admin import router as admin_router
@@ -147,6 +148,14 @@ def create_app() -> FastAPI:
     _register_frontend_routes(app, settings)
 
     app.add_exception_handler(Exception, global_exception_handler)
+
+    app.add_middleware(
+      CORSMiddleware,
+      allow_origins=["http://localhost:5173"],  # Your frontend URL
+      allow_credentials=True,
+      allow_methods=["*"],      # Allows all methods (GET, POST, PUT, DELETE, etc.)
+      allow_headers=["*"],      # Allows all headers
+    )
 
     return app
 
