@@ -5,15 +5,15 @@
 Integrate deterministic offline evaluation execution into CI so material quality regressions fail the pipeline.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add CI task wiring for eval dataset load, run, and report generation.
-2. Define regression thresholds and failure conditions.
-3. Ensure deterministic artifact generation for debugging.
-4. Add tests/docs updates for CI behavior.
+## What was done
+1. Added eval execution script `scripts/run-evals.py` for loader, runner, report generation, and threshold gating.
+2. Added seeded eval dataset file `docs/evaluation/EVAL_DATASET_SEED.jsonl`.
+3. Integrated eval gate and report artifact upload in `.github/workflows/ci.yml`.
+4. Added CI gate unit tests in `tests/unit/test_eval_ci_gate.py`.
 
 ## Decisions made
 - CI integration should consume existing typed loader/runner/reporting contracts.
