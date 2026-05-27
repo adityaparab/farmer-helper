@@ -1,19 +1,25 @@
 from farmer_helper.schemas.answering import (
     AnswerGenerationRequest,
     AnswerGenerationResponse,
-    Citation,
     LLMGenerateRequest,
     LLMMessage,
     PromptBuildRequest,
 )
+from farmer_helper.services.answering.citation_mapper import CitationMapper
 from farmer_helper.services.answering.prompt_builder import PromptBuilder
 from farmer_helper.services.answering.provider import LLMProvider
 
 
 class AnswerGenerationService:
-    def __init__(self, prompt_builder: PromptBuilder, provider: LLMProvider) -> None:
+    def __init__(
+        self,
+        prompt_builder: PromptBuilder,
+        provider: LLMProvider,
+        citation_mapper: CitationMapper | None = None,
+    ) -> None:
         self._prompt_builder = prompt_builder
         self._provider = provider
+        self._citation_mapper = citation_mapper or CitationMapper()
 
     def generate(self, request: AnswerGenerationRequest) -> AnswerGenerationResponse:
         prompt_result = self._prompt_builder.build(
@@ -50,14 +56,10 @@ class AnswerGenerationService:
             )
         )
 
-        citations = [
-            Citation(
-                document_id=chunk.citation.document_id,
-                chunk_index=chunk.citation.chunk_index,
-                content_hash=chunk.citation.content_hash,
-            )
-            for chunk in request.retrieved_chunks[: request.max_chunks]
-        ]
+        citations = self._citation_mapper.map_citations(
+            chunks=request.retrieved_chunks,
+            max_citations=request.max_chunks,
+        )
 
         return AnswerGenerationResponse(
             decision="answer",

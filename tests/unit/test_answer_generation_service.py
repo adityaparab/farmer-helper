@@ -71,6 +71,27 @@ def test_answer_generation_service_returns_answer_with_citations() -> None:
     assert response.model == "mock-chat-v1"
 
 
+def test_answer_generation_service_citations_are_deduped_and_deterministic() -> None:
+    service = AnswerGenerationService(
+        prompt_builder=PromptBuilder(),
+        provider=FakeSuccessProvider(),
+    )
+
+    response = service.generate(
+        AnswerGenerationRequest(
+            question="How do I manage soil moisture?",
+            retrieved_chunks=[
+                _chunk(2, 0, "Lower score duplicate", 0.6),
+                _chunk(1, 1, "Higher ranked", 0.9),
+                _chunk(2, 0, "Higher score duplicate", 0.8),
+            ],
+            max_chunks=5,
+        )
+    )
+
+    assert [(c.document_id, c.chunk_index) for c in response.citations] == [(1, 1), (2, 0)]
+
+
 def test_answer_generation_service_skips_provider_when_clarification_needed() -> None:
     provider = CountingProvider()
     service = AnswerGenerationService(

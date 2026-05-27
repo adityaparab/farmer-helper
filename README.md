@@ -192,8 +192,10 @@ Prompting foundation:
 - `src/farmer_helper/services/answering/provider.py`
 - `src/farmer_helper/services/answering/generation_service.py`
 - `src/farmer_helper/services/answering/mock_provider.py`
+- `src/farmer_helper/services/answering/citation_mapper.py`
 - `src/farmer_helper/api/routes/answers.py`
 - `tests/unit/test_prompt_builder.py`
 - `tests/unit/test_llm_provider_abstraction.py`
 - `tests/unit/test_answer_generation_service.py`
 - `tests/unit/test_answer_generation_route.py`
+- `tests/unit/test_citation_mapper.py`
