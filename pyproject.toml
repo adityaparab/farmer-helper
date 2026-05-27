@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "farmer-helper"
-version = "0.1.0"
+dynamic = ["version"]
 description = "Backend-first AI system for grounded agricultural Q&A"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -23,6 +23,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+  "build>=1.2.2,<2.0.0",
   "pytest>=8.4.1,<9.0.0",
   "pytest-cov>=5.0.0,<6.0.0",
   "httpx>=0.28.1,<1.0.0",
@@ -34,6 +35,9 @@ dev = [
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/farmer_helper"]
+
+[tool.hatch.version]
+path = "src/farmer_helper/__about__.py"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

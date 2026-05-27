@@ -1,0 +1,194 @@
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: Semantic version bump to apply when version is not provided.
+        required: true
+        default: patch
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      version:
+        description: Optional explicit semantic version override, for example 1.4.0.
+        required: false
+        type: string
+      ref:
+        description: Git ref to release. Use main unless intentionally releasing another ref.
+        required: true
+        default: main
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-production
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: production
+    env:
+      SECURITY_API_KEY: ""
+
+    steps:
+      - name: Resolve release token
+        id: token
+        env:
+          RELEASE_PAT: ${{ secrets.RELEASE_PAT }}
+          GITHUB_TOKEN_VALUE: ${{ github.token }}
+        run: |
+          if [ -n "$RELEASE_PAT" ]; then
+            echo "value=$RELEASE_PAT" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=$GITHUB_TOKEN_VALUE" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Check out source
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ inputs.ref }}
+          token: ${{ steps.token.outputs.value }}
+
+      - name: Validate release ref
+        run: |
+          current_branch="$(git rev-parse --abbrev-ref HEAD)"
+          if [ "$current_branch" != "main" ]; then
+            echo "Releases must be cut from main. Current ref: $current_branch" >&2
+            exit 1
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install backend dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+
+      - name: Install frontend dependencies
+        run: npm ci
+        working-directory: frontend
+
+      - name: Bump release version
+        id: version
+        env:
+          RELEASE_TYPE: ${{ inputs.release_type }}
+          RELEASE_VERSION: ${{ inputs.version }}
+        run: |
+          if [ -n "$RELEASE_VERSION" ]; then
+            resolved_version="$(python scripts/release_version.py --check-sync --set-version "$RELEASE_VERSION" --apply)"
+          else
+            resolved_version="$(python scripts/release_version.py --check-sync --release-type "$RELEASE_TYPE" --apply)"
+          fi
+
+          echo "version=$resolved_version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$resolved_version" >> "$GITHUB_OUTPUT"
+
+      - name: Validate backend quality gates
+        run: |
+          ruff check src tests
+          black --check src tests
+          mypy src
+          pytest -q
+          pytest -q --cov=src/farmer_helper --cov-report=term-missing --cov-report=xml:artifacts/coverage.xml
+          python scripts/run-evals.py --min-average-score 6.0 --report-out artifacts/eval-report.json
+
+      - name: Validate frontend quality gates
+        run: |
+          npm run lint
+          npm run test
+          npm run build
+        working-directory: frontend
+
+      - name: Build Python distribution artifacts
+        run: python -m build
+
+      - name: Package frontend distribution artifact
+        run: |
+          mkdir -p artifacts
+          tar -czf "artifacts/frontend-dist-${{ steps.version.outputs.version }}.tar.gz" -C frontend dist
+
+      - name: Write release metadata artifact
+        env:
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+          RELEASE_SHA: ${{ github.sha }}
+          RELEASE_REF: ${{ github.ref_name }}
+        run: |
+          python - <<'PY'
+          import json
+          import os
+          from datetime import datetime, timezone
+          from pathlib import Path
+
+          payload = {
+              "version": os.environ["RELEASE_VERSION"],
+              "tag": os.environ["RELEASE_TAG"],
+              "commit": os.environ["RELEASE_SHA"],
+              "ref": os.environ["RELEASE_REF"],
+              "created_at": datetime.now(timezone.utc).isoformat(),
+          }
+
+          Path("artifacts").mkdir(exist_ok=True)
+          Path("artifacts/release-metadata.json").write_text(
+              json.dumps(payload, indent=2) + "\n",
+              encoding="utf-8",
+          )
+          PY
+
+      - name: Upload release artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-bundle-${{ steps.version.outputs.tag }}
+          path: |
+            dist/*
+            artifacts/coverage.xml
+            artifacts/eval-report.json
+            artifacts/release-metadata.json
+            artifacts/frontend-dist-${{ steps.version.outputs.version }}.tar.gz
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Commit release version files
+        run: |
+          git add src/farmer_helper/__about__.py frontend/package.json frontend/package-lock.json
+          git commit -m "Release ${{ steps.version.outputs.tag }}"
+
+      - name: Create release tag
+        run: git tag "${{ steps.version.outputs.tag }}"
+
+      - name: Push release commit and tag
+        run: git push origin main --follow-tags
+
+      - name: Create GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          token: ${{ steps.token.outputs.value }}
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: ${{ steps.version.outputs.tag }}
+          generate_release_notes: true
+          files: |
+            dist/*
+            artifacts/coverage.xml
+            artifacts/eval-report.json
+            artifacts/release-metadata.json
+            artifacts/frontend-dist-${{ steps.version.outputs.version }}.tar.gz

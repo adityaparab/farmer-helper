@@ -20,6 +20,13 @@ Health checks:
 1. `http://127.0.0.1:8000/health/live`
 2. `http://127.0.0.1:8000/health/ready`
 
+## Releases
+Production releases use semantic versioning and are cut through the GitHub Actions `Release` workflow.
+
+1. Trigger `.github/workflows/release.yml` from `main` with either a `patch`, `minor`, or `major` bump, or an approved explicit version.
+2. The workflow validates backend and frontend quality gates, builds release artifacts, creates a `vX.Y.Z` tag, and publishes a GitHub Release.
+3. Release operations and post-deploy checks are documented in `docs/deployment/RELEASE_RUNBOOK.md`.
+
 ## Planning
 The engineering roadmap is documented in `docs/plan/PHASES.md`.
 
