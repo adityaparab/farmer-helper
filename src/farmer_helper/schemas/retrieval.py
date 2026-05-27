@@ -18,3 +18,15 @@ class VectorRetrievalItem(BaseModel):
 
 class VectorRetrievalResponse(BaseModel):
     items: list[VectorRetrievalItem]
+
+
+class KeywordRetrievalRequest(BaseModel):
+    query_text: str = Field(min_length=1)
+    top_k: int = Field(ge=1, le=100, default=5)
+    provider: str = Field(min_length=1)
+    model: str = Field(min_length=1)
+    version: str = Field(min_length=1, default="v1")
+
+
+class KeywordRetrievalResponse(BaseModel):
+    items: list[VectorRetrievalItem]

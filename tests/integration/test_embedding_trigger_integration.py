@@ -7,7 +7,9 @@ from farmer_helper.repositories.chunk_embedding_repository import ChunkEmbedding
 
 
 def test_embedding_trigger_persists_vectors_end_to_end() -> None:
-    Base.metadata.create_all(bind=get_engine())
+    engine = get_engine()
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
 
     document_id = 9101
     cleanup_session = SessionLocal()

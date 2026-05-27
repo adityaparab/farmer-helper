@@ -47,6 +47,7 @@ class EmbeddingOrchestrationService:
                     dimensions=response.dimensions,
                     vector=item.vector,
                     content_hash=source_chunk.content_hash,
+                    chunk_text=source_chunk.text,
                 )
 
             return EmbeddingOrchestrationResult(

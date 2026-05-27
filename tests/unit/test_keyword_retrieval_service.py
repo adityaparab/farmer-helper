@@ -3,8 +3,8 @@ from sqlalchemy.orm import Session
 
 from farmer_helper.db.models.base import Base
 from farmer_helper.repositories.chunk_embedding_repository import ChunkEmbeddingRepository
-from farmer_helper.schemas.retrieval import VectorRetrievalRequest
-from farmer_helper.services.retrieval.vector_retrieval_service import VectorRetrievalService
+from farmer_helper.schemas.retrieval import KeywordRetrievalRequest
+from farmer_helper.services.retrieval.keyword_retrieval_service import KeywordRetrievalService
 
 
 def _session() -> Session:
@@ -13,10 +13,10 @@ def _session() -> Session:
     return Session(bind=engine)
 
 
-def test_vector_retrieval_returns_top_k_in_deterministic_order() -> None:
+def test_keyword_retrieval_scores_and_orders_results() -> None:
     session = _session()
     repository = ChunkEmbeddingRepository(session)
-    service = VectorRetrievalService(repository)
+    service = KeywordRetrievalService(repository)
 
     repository.upsert(
         document_id=1,
@@ -24,10 +24,10 @@ def test_vector_retrieval_returns_top_k_in_deterministic_order() -> None:
         provider="mock-provider",
         model="mock-embedding-v1",
         version="v1",
-        dimensions=3,
-        vector=[1.0, 0.0, 0.0],
+        dimensions=2,
+        vector=[0.1, 0.2],
         content_hash="h1",
-        chunk_text="soil health baseline",
+        chunk_text="soil health and soil moisture",
     )
     repository.upsert(
         document_id=2,
@@ -35,10 +35,10 @@ def test_vector_retrieval_returns_top_k_in_deterministic_order() -> None:
         provider="mock-provider",
         model="mock-embedding-v1",
         version="v1",
-        dimensions=3,
-        vector=[0.8, 0.2, 0.0],
+        dimensions=2,
+        vector=[0.3, 0.4],
         content_hash="h2",
-        chunk_text="water usage guidance",
+        chunk_text="water management for crops",
     )
     repository.upsert(
         document_id=3,
@@ -46,15 +46,15 @@ def test_vector_retrieval_returns_top_k_in_deterministic_order() -> None:
         provider="mock-provider",
         model="mock-embedding-v1",
         version="v1",
-        dimensions=3,
-        vector=[0.0, 1.0, 0.0],
+        dimensions=2,
+        vector=[0.5, 0.6],
         content_hash="h3",
-        chunk_text="crop rotation planning",
+        chunk_text="soil preparation guidance",
     )
 
     response = service.retrieve(
-        VectorRetrievalRequest(
-            query_vector=[1.0, 0.0, 0.0],
+        KeywordRetrievalRequest(
+            query_text="soil moisture",
             top_k=2,
             provider="mock-provider",
             model="mock-embedding-v1",
@@ -63,14 +63,14 @@ def test_vector_retrieval_returns_top_k_in_deterministic_order() -> None:
     )
 
     assert len(response.items) == 2
-    assert [item.document_id for item in response.items] == [1, 2]
-    assert response.items[0].score >= response.items[1].score
+    assert [item.document_id for item in response.items] == [1, 3]
+    assert response.items[0].score > response.items[1].score
 
 
-def test_vector_retrieval_filters_by_provider_model_version() -> None:
+def test_keyword_retrieval_applies_filtering() -> None:
     session = _session()
     repository = ChunkEmbeddingRepository(session)
-    service = VectorRetrievalService(repository)
+    service = KeywordRetrievalService(repository)
 
     repository.upsert(
         document_id=10,
@@ -79,9 +79,9 @@ def test_vector_retrieval_filters_by_provider_model_version() -> None:
         model="model-a",
         version="v1",
         dimensions=2,
-        vector=[1.0, 0.0],
+        vector=[0.0, 0.0],
         content_hash="ha",
-        chunk_text="alpha",
+        chunk_text="soil nutrient plan",
     )
     repository.upsert(
         document_id=11,
@@ -90,14 +90,14 @@ def test_vector_retrieval_filters_by_provider_model_version() -> None:
         model="model-a",
         version="v1",
         dimensions=2,
-        vector=[1.0, 0.0],
+        vector=[0.0, 0.0],
         content_hash="hb",
-        chunk_text="beta",
+        chunk_text="soil nutrient plan",
     )
 
     response = service.retrieve(
-        VectorRetrievalRequest(
-            query_vector=[1.0, 0.0],
+        KeywordRetrievalRequest(
+            query_text="soil",
             top_k=5,
             provider="provider-a",
             model="model-a",
@@ -109,10 +109,10 @@ def test_vector_retrieval_filters_by_provider_model_version() -> None:
     assert response.items[0].document_id == 10
 
 
-def test_vector_retrieval_skips_dimension_mismatch_candidates() -> None:
+def test_keyword_retrieval_returns_empty_for_no_matches() -> None:
     session = _session()
     repository = ChunkEmbeddingRepository(session)
-    service = VectorRetrievalService(repository)
+    service = KeywordRetrievalService(repository)
 
     repository.upsert(
         document_id=20,
@@ -120,15 +120,15 @@ def test_vector_retrieval_skips_dimension_mismatch_candidates() -> None:
         provider="mock-provider",
         model="mock-embedding-v1",
         version="v1",
-        dimensions=3,
-        vector=[1.0, 0.0, 0.0],
+        dimensions=2,
+        vector=[0.1, 0.2],
         content_hash="hc",
-        chunk_text="gamma",
+        chunk_text="irrigation guide",
     )
 
     response = service.retrieve(
-        VectorRetrievalRequest(
-            query_vector=[1.0, 0.0],
+        KeywordRetrievalRequest(
+            query_text="fertilizer",
             top_k=5,
             provider="mock-provider",
             model="mock-embedding-v1",

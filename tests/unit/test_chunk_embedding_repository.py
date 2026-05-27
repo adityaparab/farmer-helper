@@ -24,11 +24,13 @@ def test_chunk_embedding_repository_inserts_new_record() -> None:
         dimensions=3,
         vector=[0.1, 0.2, 0.3],
         content_hash="hash-a",
+        chunk_text="chunk text a",
     )
 
     assert created.id > 0
     assert created.document_id == 1
     assert created.chunk_index == 0
+    assert created.chunk_text == "chunk text a"
     assert created.vector_json == [0.1, 0.2, 0.3]
 
 
@@ -45,6 +47,7 @@ def test_chunk_embedding_repository_updates_existing_identity() -> None:
         dimensions=2,
         vector=[1.0, 2.0],
         content_hash="hash-b",
+        chunk_text="old text",
     )
 
     second = repository.upsert(
@@ -56,9 +59,11 @@ def test_chunk_embedding_repository_updates_existing_identity() -> None:
         dimensions=2,
         vector=[3.0, 4.0],
         content_hash="hash-c",
+        chunk_text="new text",
     )
 
     assert first.id == second.id
+    assert second.chunk_text == "new text"
     assert second.vector_json == [3.0, 4.0]
     assert second.content_hash == "hash-c"
 
@@ -79,6 +84,7 @@ def test_chunk_embedding_repository_keeps_distinct_identities() -> None:
         dimensions=2,
         vector=[0.0, 0.1],
         content_hash="hash-1",
+        chunk_text="first text",
     )
     repository.upsert(
         document_id=3,
@@ -89,6 +95,7 @@ def test_chunk_embedding_repository_keeps_distinct_identities() -> None:
         dimensions=2,
         vector=[0.2, 0.3],
         content_hash="hash-2",
+        chunk_text="second text",
     )
 
     all_for_document = repository.list_for_document(document_id=3)

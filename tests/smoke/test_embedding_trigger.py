@@ -6,7 +6,9 @@ from farmer_helper.main import app
 
 
 def test_embedding_trigger_smoke_success() -> None:
-    Base.metadata.create_all(bind=get_engine())
+    engine = get_engine()
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
 
     client = TestClient(app)
     response = client.post(
@@ -26,7 +28,9 @@ def test_embedding_trigger_smoke_success() -> None:
 
 
 def test_embedding_trigger_smoke_validation_error() -> None:
-    Base.metadata.create_all(bind=get_engine())
+    engine = get_engine()
+    Base.metadata.drop_all(bind=engine)
+    Base.metadata.create_all(bind=engine)
 
     client = TestClient(app)
     response = client.post(

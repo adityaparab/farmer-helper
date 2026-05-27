@@ -5,14 +5,15 @@
 Implement deterministic keyword retrieval over chunk text signals to complement vector retrieval.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add keyword retrieval request/response schema contracts.
-2. Implement keyword scoring and ranking service.
-3. Add unit tests for ranking and tie-break determinism.
+## What was done
+1. Added keyword retrieval schema contracts in `src/farmer_helper/schemas/retrieval.py`.
+2. Added keyword retrieval service in `src/farmer_helper/services/retrieval/keyword_retrieval_service.py`.
+3. Added unit tests in `tests/unit/test_keyword_retrieval_service.py`.
+4. Extended embedding persistence to store `chunk_text` for keyword scoring.
 
 ## Decisions made
 - Keep keyword retrieval implementation deterministic and dependency-light.

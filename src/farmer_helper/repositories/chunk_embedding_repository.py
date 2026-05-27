@@ -43,6 +43,7 @@ class ChunkEmbeddingRepository:
         dimensions: int,
         vector: list[float],
         content_hash: str,
+        chunk_text: str,
     ) -> ChunkEmbedding:
         existing = self._session.scalar(
             select(ChunkEmbedding).where(
@@ -62,12 +63,14 @@ class ChunkEmbeddingRepository:
                 model=model,
                 version=version,
                 dimensions=dimensions,
+                chunk_text=chunk_text,
                 vector_json=vector,
                 content_hash=content_hash,
             )
             self._session.add(record)
         else:
             existing.dimensions = dimensions
+            existing.chunk_text = chunk_text
             existing.vector_json = vector
             existing.content_hash = content_hash
             self._session.add(existing)

@@ -50,6 +50,7 @@ class ChunkEmbedding(Base):
     model: Mapped[str] = mapped_column(String(128), nullable=False)
     version: Mapped[str] = mapped_column(String(64), nullable=False, default="v1")
     dimensions: Mapped[int] = mapped_column(Integer, nullable=False)
+    chunk_text: Mapped[str] = mapped_column(Text, nullable=False)
     vector_json: Mapped[list[float]] = mapped_column(JSON, nullable=False)
     content_hash: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
     updated_at: Mapped[datetime] = mapped_column(
