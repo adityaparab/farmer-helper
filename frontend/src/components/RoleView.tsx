@@ -14,6 +14,8 @@ type RoleViewProps = {
   apiClient: ApiClient
   question: string
   canSubmitQuestion: boolean
+  chatIsSubmitting: boolean
+  chatErrorMessage: string | null
   chatHistory: ChatItem[]
   onUsernameChange: (value: string) => void
   onPasswordChange: (value: string) => void
@@ -31,6 +33,8 @@ export function RoleView({
   apiClient,
   question,
   canSubmitQuestion,
+  chatIsSubmitting,
+  chatErrorMessage,
   chatHistory,
   onUsernameChange,
   onPasswordChange,
@@ -60,6 +64,8 @@ export function RoleView({
     <UserWorkspace
       question={question}
       canSubmit={canSubmitQuestion}
+      isSubmitting={chatIsSubmitting}
+      errorMessage={chatErrorMessage}
       history={chatHistory}
       onQuestionChange={onQuestionChange}
       onSubmit={onAsk}

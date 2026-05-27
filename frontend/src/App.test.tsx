@@ -130,7 +130,29 @@ describe('App', () => {
   })
 
   it('adds submitted user questions to the top of history', async () => {
-    mockAuthSuccess('user')
+    const fetchSpy = mockAuthSuccess('user')
+    fetchSpy.mockResolvedValueOnce(
+      jsonResponse({
+        response_mode: 'concise',
+        language: 'en',
+        decision: 'answer',
+        answer: 'Increase organic matter and mulch around the root zone.',
+        citations: [],
+        clarification_message: null,
+        clarification_code: null,
+        refusal_reason: null,
+        refusal_code: null,
+        model: 'mock-chat-v1',
+        finish_reason: 'stop',
+        input_tokens: 12,
+        output_tokens: 9,
+        reliability_status: 'normal',
+        reliability_retryable: null,
+        reliability_code: null,
+        degraded: false,
+        degradation_code: null,
+      }),
+    )
     const user = userEvent.setup()
     render(<App />)
 
@@ -145,10 +167,30 @@ describe('App', () => {
 
     expect(screen.getByText('Q: How do I improve soil moisture retention?')).toBeInTheDocument()
     expect(
-      screen.getByText(
-        'A: Draft answer generated from current backend contract. TanStack AI streaming integration is next in the implementation queue.',
-      ),
+      screen.getByText('A: Increase organic matter and mulch around the root zone.'),
     ).toBeInTheDocument()
+    expect(fetchSpy).toHaveBeenCalledWith('/answers/generate', expect.any(Object))
+  })
+
+  it('shows a chat error when answer generation fails', async () => {
+    const fetchSpy = mockAuthSuccess('user')
+    fetchSpy.mockResolvedValueOnce(
+      jsonResponse(
+        { detail: { code: 'ANSWER_UNAVAILABLE', message: 'Answer service unavailable' } },
+        { status: 503, statusText: 'Service Unavailable' },
+      ),
+    )
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.type(screen.getByLabelText('Username'), 'field-user')
+    await user.click(screen.getByRole('button', { name: 'Continue' }))
+    await screen.findByRole('region', { name: 'User workspace' })
+    await user.type(screen.getByPlaceholderText('Ask about crop planning, irrigation, or disease response...'), 'What next?')
+    await user.click(screen.getByRole('button', { name: 'Ask question' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Answer service unavailable')
+    expect(screen.queryByText('Q: What next?')).not.toBeInTheDocument()
   })
 
   it('shows a backend login error without entering a role view', async () => {

@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { ApiError, createApiClient } from './api/client'
-import type { ApiClient, AuthUserResponse } from './api/client'
+import type { AnswerGenerationResponse, ApiClient, AuthUserResponse } from './api/client'
 import { AppHeader } from './components/AppHeader'
 import { RoleView } from './components/RoleView'
-import { draftAnswer, initialChatHistory } from './data/dashboard'
+import { initialChatHistory } from './data/dashboard'
 import type { ChatItem, Role } from './types'
 
 type AppProps = {
@@ -25,6 +25,30 @@ function authErrorMessage(error: unknown): string {
   return 'Unable to sign in. Please try again.'
 }
 
+function chatErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    return error.message
+  }
+
+  return 'Unable to generate an answer. Please try again.'
+}
+
+function answerText(response: AnswerGenerationResponse): string {
+  if (response.decision === 'answer' && response.answer) {
+    return response.answer
+  }
+
+  if (response.decision === 'clarify' && response.clarification_message) {
+    return response.clarification_message
+  }
+
+  if (response.decision === 'refuse' && response.refusal_reason) {
+    return response.refusal_reason
+  }
+
+  return 'The answer service returned no displayable response.'
+}
+
 function App({ apiClient: injectedApiClient }: AppProps) {
   const [session, setSession] = useState<AuthSession | null>(null)
   const [username, setUsername] = useState('')
@@ -32,9 +56,14 @@ function App({ apiClient: injectedApiClient }: AppProps) {
   const [authIsSubmitting, setAuthIsSubmitting] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
   const [question, setQuestion] = useState('')
+  const [chatIsSubmitting, setChatIsSubmitting] = useState(false)
+  const [chatError, setChatError] = useState<string | null>(null)
   const [chatHistory, setChatHistory] = useState<ChatItem[]>(initialChatHistory)
 
-  const canSubmitQuestion = useMemo(() => question.trim().length > 0, [question])
+  const canSubmitQuestion = useMemo(
+    () => question.trim().length > 0 && !chatIsSubmitting,
+    [chatIsSubmitting, question],
+  )
   const role: Role = session?.user.role ?? 'guest'
   const apiClient = useMemo(
     () =>
@@ -74,21 +103,36 @@ function App({ apiClient: injectedApiClient }: AppProps) {
     }
   }
 
-  const handleAsk = (event: FormEvent<HTMLFormElement>) => {
+  const handleAsk = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     if (!canSubmitQuestion) {
       return
     }
 
-    setChatHistory((previous) => [
-      {
-        id: `q-${Date.now()}`,
-        question: question.trim(),
-        answer: draftAnswer,
-      },
-      ...previous,
-    ])
-    setQuestion('')
+    const submittedQuestion = question.trim()
+    setChatIsSubmitting(true)
+    setChatError(null)
+
+    try {
+      const response = await apiClient.answers.generate({
+        question: submittedQuestion,
+        session_key: session ? `user-${session.user.id}` : undefined,
+        response_mode: 'concise',
+      })
+      setChatHistory((previous) => [
+        {
+          id: `q-${Date.now()}`,
+          question: submittedQuestion,
+          answer: answerText(response),
+        },
+        ...previous,
+      ])
+      setQuestion('')
+    } catch (error) {
+      setChatError(chatErrorMessage(error))
+    } finally {
+      setChatIsSubmitting(false)
+    }
   }
 
   const signOut = async () => {
@@ -119,6 +163,8 @@ function App({ apiClient: injectedApiClient }: AppProps) {
         apiClient={apiClient}
         question={question}
         canSubmitQuestion={canSubmitQuestion}
+        chatIsSubmitting={chatIsSubmitting}
+        chatErrorMessage={chatError}
         chatHistory={chatHistory}
         onUsernameChange={setUsername}
         onPasswordChange={setPassword}

@@ -6,6 +6,8 @@ import { QuestionHistory } from './QuestionHistory'
 type UserWorkspaceProps = {
   question: string
   canSubmit: boolean
+  isSubmitting: boolean
+  errorMessage: string | null
   history: ChatItem[]
   onQuestionChange: (value: string) => void
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
@@ -14,6 +16,8 @@ type UserWorkspaceProps = {
 export function UserWorkspace({
   question,
   canSubmit,
+  isSubmitting,
+  errorMessage,
   history,
   onQuestionChange,
   onSubmit,
@@ -23,6 +27,8 @@ export function UserWorkspace({
       <ChatComposer
         question={question}
         canSubmit={canSubmit}
+        isSubmitting={isSubmitting}
+        errorMessage={errorMessage}
         onQuestionChange={onQuestionChange}
         onSubmit={onSubmit}
       />
