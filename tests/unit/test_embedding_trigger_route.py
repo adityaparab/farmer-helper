@@ -124,6 +124,7 @@ def test_embedding_trigger_route_uses_env_model_and_provider(
         embedding_model = "env-embedding-model"
 
     monkeypatch.setattr(embeddings_route, "get_settings", lambda: FakeSettings())
+
     class CapturingService:
         def __init__(self, provider_name: str) -> None:
             self.provider_name = provider_name

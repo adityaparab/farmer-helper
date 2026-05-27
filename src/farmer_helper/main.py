@@ -150,11 +150,11 @@ def create_app() -> FastAPI:
     app.add_exception_handler(Exception, global_exception_handler)
 
     app.add_middleware(
-      CORSMiddleware,
-      allow_origins=["http://localhost:5173"],  # Your frontend URL
-      allow_credentials=True,
-      allow_methods=["*"],      # Allows all methods (GET, POST, PUT, DELETE, etc.)
-      allow_headers=["*"],      # Allows all headers
+        CORSMiddleware,
+        allow_origins=["http://localhost:5173"],  # Your frontend URL
+        allow_credentials=True,
+        allow_methods=["*"],  # Allows all methods (GET, POST, PUT, DELETE, etc.)
+        allow_headers=["*"],  # Allows all headers
     )
 
     return app
