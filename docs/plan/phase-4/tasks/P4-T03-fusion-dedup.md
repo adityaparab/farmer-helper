@@ -5,14 +5,14 @@
 Merge vector and keyword retrieval outputs into a single deterministic ranked list with explicit fusion and deduplication semantics.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Define fused result schema and score composition strategy.
-2. Implement deduplication rules across retrieval sources.
-3. Add unit tests for deterministic fusion ordering.
+## What was done
+1. Added fused retrieval schemas in `src/farmer_helper/schemas/retrieval.py`.
+2. Added explicit fusion and dedup service in `src/farmer_helper/services/retrieval/fusion_service.py`.
+3. Added deterministic ordering and dedup tests in `tests/unit/test_retrieval_fusion_service.py`.
 
 ## Decisions made
 - Fusion must preserve deterministic tie-break rules.

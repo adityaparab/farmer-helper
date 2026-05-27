@@ -30,3 +30,21 @@ class KeywordRetrievalRequest(BaseModel):
 
 class KeywordRetrievalResponse(BaseModel):
     items: list[VectorRetrievalItem]
+
+
+class FusedRetrievalRequest(BaseModel):
+    vector_results: list[VectorRetrievalItem]
+    keyword_results: list[VectorRetrievalItem]
+    top_k: int = Field(ge=1, le=100, default=5)
+    vector_weight: float = Field(ge=0.0, le=1.0, default=0.7)
+    keyword_weight: float = Field(ge=0.0, le=1.0, default=0.3)
+
+
+class FusedRetrievalItem(VectorRetrievalItem):
+    vector_score: float = 0.0
+    keyword_score: float = 0.0
+    fused_score: float
+
+
+class FusedRetrievalResponse(BaseModel):
+    items: list[FusedRetrievalItem]
