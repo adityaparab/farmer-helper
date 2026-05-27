@@ -39,17 +39,30 @@ class PromptBuilder:
                 system_prompt=self._system_prompt(),
                 user_prompt=normalized_question,
                 refusal_reason="Question requests harmful or unsafe guidance.",
+                refusal_code="REFUSAL_UNSAFE_REQUEST",
             )
 
-        if self._should_clarify(lowered_question, request.retrieved_chunks):
+        clarification_code = self._clarification_code(
+            lowered_question,
+            request.retrieved_chunks,
+        )
+        if clarification_code is not None:
+            clarification_message = (
+                "Please clarify your question with a specific crop, "
+                "condition, or goal so I can answer precisely."
+            )
+            if clarification_code == "CLARIFY_MISSING_CONTEXT":
+                clarification_message = (
+                    "I do not have grounded context for this request yet. "
+                    "Please provide more context or retrieve relevant sources first."
+                )
+
             return PromptBuildResult(
                 decision="clarify",
                 system_prompt=self._system_prompt(),
                 user_prompt=normalized_question,
-                clarification_message=(
-                    "Please clarify your question with a specific crop, "
-                    "condition, or goal so I can answer precisely."
-                ),
+                clarification_message=clarification_message,
+                clarification_code=clarification_code,
             )
 
         context_block = self._context_block(request)
@@ -78,17 +91,17 @@ class PromptBuilder:
         terms = self._tokenize(question)
         return any(term in self._REFUSAL_TERMS for term in terms)
 
-    def _should_clarify(self, question: str, chunks: Sequence[object]) -> bool:
+    def _clarification_code(self, question: str, chunks: Sequence[object]) -> str | None:
         terms = self._tokenize(question)
         if not terms:
-            return True
+            return "CLARIFY_NEED_DETAIL"
         if len(terms) <= 2:
-            return True
+            return "CLARIFY_NEED_DETAIL"
         if not chunks:
-            return True
+            return "CLARIFY_MISSING_CONTEXT"
         if any(token in self._AMBIGUOUS_PATTERNS for token in terms) and len(terms) <= 7:
-            return True
-        return False
+            return "CLARIFY_AMBIGUOUS_REQUEST"
+        return None
 
     def _context_block(self, request: PromptBuildRequest) -> str:
         rendered: list[str] = []

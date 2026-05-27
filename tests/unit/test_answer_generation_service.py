@@ -107,6 +107,7 @@ def test_answer_generation_service_skips_provider_when_clarification_needed() ->
     )
 
     assert response.decision == "clarify"
+    assert response.clarification_code == "CLARIFY_AMBIGUOUS_REQUEST"
     assert provider.calls == 0
 
 
@@ -125,4 +126,5 @@ def test_answer_generation_service_skips_provider_when_refused() -> None:
     )
 
     assert response.decision == "refuse"
+    assert response.refusal_code == "REFUSAL_UNSAFE_REQUEST"
     assert provider.calls == 0

@@ -33,6 +33,15 @@ class FakeFailService:
         )
 
 
+class FakeClarifyService:
+    def generate(self, request):  # type: ignore[no-untyped-def]
+        return AnswerGenerationResponse(
+            decision="clarify",
+            clarification_message="Please provide more detail.",
+            clarification_code="CLARIFY_NEED_DETAIL",
+        )
+
+
 def test_answer_generation_route_success(monkeypatch) -> None:
     from farmer_helper.api.routes import answers as answers_route
 
@@ -99,3 +108,37 @@ def test_answer_generation_route_provider_failure(monkeypatch) -> None:
     payload = response.json()["detail"]
     assert payload["error_code"] == "LLM_PROVIDER_UNAVAILABLE"
     assert payload["retryable"] is True
+
+
+def test_answer_generation_route_clarification_payload(monkeypatch) -> None:
+    from farmer_helper.api.routes import answers as answers_route
+
+    monkeypatch.setattr(
+        answers_route,
+        "build_answer_generation_service",
+        lambda: FakeClarifyService(),
+    )
+
+    client = TestClient(app)
+    response = client.post(
+        "/answers/generate",
+        json={
+            "question": "Help?",
+            "retrieved_chunks": [
+                {
+                    "citation": {
+                        "document_id": 1,
+                        "chunk_index": 0,
+                        "content_hash": "h-1-0",
+                    },
+                    "text": "Mulching helps reduce evaporation.",
+                    "score": 0.9,
+                }
+            ],
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["decision"] == "clarify"
+    assert payload["clarification_code"] == "CLARIFY_NEED_DETAIL"

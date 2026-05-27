@@ -28,7 +28,9 @@ class PromptBuildResult(BaseModel):
     system_prompt: str
     user_prompt: str
     clarification_message: str | None = None
+    clarification_code: str | None = None
     refusal_reason: str | None = None
+    refusal_code: str | None = None
 
 
 Role = Literal["system", "user", "assistant"]
@@ -75,7 +77,9 @@ class AnswerGenerationResponse(BaseModel):
     answer: str | None = None
     citations: list[Citation] = Field(default_factory=list)
     clarification_message: str | None = None
+    clarification_code: str | None = None
     refusal_reason: str | None = None
+    refusal_code: str | None = None
     model: str | None = None
     finish_reason: Literal["stop", "length", "content_filter"] | None = None
     input_tokens: int = Field(ge=0, default=0)

@@ -5,14 +5,15 @@
 Harden answer-generation behavior for unsafe or ambiguous requests with explicit, user-facing refusal and clarification handling.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Define stable refusal and clarification response payload semantics.
-2. Improve policy coverage for harmful and ambiguous query patterns.
-3. Add regression unit tests for refusal and clarification outcomes at service and route levels.
+## What was done
+1. Added stable policy code fields to prompt and answer schemas in `src/farmer_helper/schemas/answering.py`.
+2. Hardened refusal and clarification policy logic in `src/farmer_helper/services/answering/prompt_builder.py`.
+3. Propagated policy codes through answer generation in `src/farmer_helper/services/answering/generation_service.py`.
+4. Added regression tests in `tests/unit/test_prompt_builder.py`, `tests/unit/test_answer_generation_service.py`, and `tests/unit/test_answer_generation_route.py`.
 
 ## Decisions made
 - Decision outputs must remain deterministic for testability.

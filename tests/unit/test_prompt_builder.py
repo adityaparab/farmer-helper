@@ -46,6 +46,7 @@ def test_prompt_builder_returns_clarify_for_ambiguous_question() -> None:
 
     assert result.decision == "clarify"
     assert result.clarification_message is not None
+    assert result.clarification_code == "CLARIFY_AMBIGUOUS_REQUEST"
     assert result.refusal_reason is None
 
 
@@ -60,6 +61,7 @@ def test_prompt_builder_returns_clarify_when_no_retrieved_chunks() -> None:
 
     assert result.decision == "clarify"
     assert result.clarification_message is not None
+    assert result.clarification_code == "CLARIFY_MISSING_CONTEXT"
 
 
 def test_prompt_builder_returns_refuse_for_unsafe_request() -> None:
@@ -73,4 +75,18 @@ def test_prompt_builder_returns_refuse_for_unsafe_request() -> None:
 
     assert result.decision == "refuse"
     assert result.refusal_reason is not None
+    assert result.refusal_code == "REFUSAL_UNSAFE_REQUEST"
     assert result.clarification_message is None
+
+
+def test_prompt_builder_returns_clarify_need_detail_for_short_question() -> None:
+    builder = PromptBuilder()
+    result = builder.build(
+        PromptBuildRequest(
+            question="Help?",
+            retrieved_chunks=[_chunk(1, 0, "General farming note.", 0.5)],
+        )
+    )
+
+    assert result.decision == "clarify"
+    assert result.clarification_code == "CLARIFY_NEED_DETAIL"

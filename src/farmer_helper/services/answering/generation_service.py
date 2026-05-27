@@ -34,6 +34,7 @@ class AnswerGenerationService:
             return AnswerGenerationResponse(
                 decision="refuse",
                 refusal_reason=prompt_result.refusal_reason,
+                refusal_code=prompt_result.refusal_code,
                 clarification_message=None,
             )
 
@@ -41,6 +42,7 @@ class AnswerGenerationService:
             return AnswerGenerationResponse(
                 decision="clarify",
                 clarification_message=prompt_result.clarification_message,
+                clarification_code=prompt_result.clarification_code,
                 refusal_reason=None,
             )
 
