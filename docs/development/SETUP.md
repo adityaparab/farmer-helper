@@ -57,6 +57,8 @@ pytest -q
 
 ## Pre-commit hooks
 ```powershell
-pre-commit install
+pre-commit install --hook-type pre-commit --hook-type commit-msg
 pre-commit run --all-files
 ```
+
+Commit messages should follow conventional commit style, for example `feat: add retry policy` or `fix(api): validate input`.
