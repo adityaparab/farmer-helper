@@ -26,6 +26,16 @@ class AnswerGenerationService:
         context_resolver: FollowUpContextResolver | None = None,
         model_router: LLMModelRouter | None = None,
     ) -> None:
+        """Init for answer-generation workflows.
+
+        Initialize AnswerGenerationService for answer-generation workflows. Inputs are
+        prompt_builder, provider, citation_mapper, diagnostics_logger, context_resolver,
+        model_router. It runs synchronously and returns when local processing is complete. The
+        operation is executed for its side effects and does not return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         self._prompt_builder = prompt_builder
         self._provider = provider
         self._citation_mapper = citation_mapper or CitationMapper()
@@ -34,6 +44,16 @@ class AnswerGenerationService:
         self._model_router = model_router or LLMModelRouter()
 
     def generate(self, request: AnswerGenerationRequest) -> AnswerGenerationResponse:
+        """Generate for answer-generation workflows.
+
+        This AnswerGenerationService method belongs to the answer-generation service layer.
+        Inputs are request. It runs synchronously and returns when local processing is complete.
+        Returns a AnswerGenerationResponse value that downstream API or orchestration layers can
+        consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         start = time.perf_counter()
         effective_question = request.question
         if request.session_key and self._context_resolver is not None:
@@ -144,6 +164,16 @@ class AnswerGenerationService:
 
     @staticmethod
     def _estimate_confidence(citations_count: int, finish_reason: str) -> float:
+        """Estimate confidence for answer-generation workflows.
+
+        This private helper belongs to the answer-generation service layer. Inputs are
+        citations_count, finish_reason. It runs synchronously and returns when local processing
+        is complete. Returns a float value that downstream API or orchestration layers can
+        consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         confidence = min(1.0, 0.4 + (0.1 * citations_count))
         if finish_reason == "length":
             confidence = max(0.0, confidence - 0.1)

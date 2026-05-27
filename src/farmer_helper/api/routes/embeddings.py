@@ -52,6 +52,16 @@ def build_orchestration_service(
     batch_size: int,
     dimensions: int,
 ) -> EmbeddingOrchestrationService:
+    """Assemble the embedding orchestration stack for a request.
+
+    The stack includes a mock embedding provider wrapped with timeout, retry, and circuit-
+    breaker policies, plus a batch service and repository-backed persistence. The explicit
+    construction boundary gives future MCP tooling a clear place to map embedding
+    capabilities to their provider, version, dimensions, and reliability settings.
+
+    Returns:
+        EmbeddingOrchestrationService ready to embed and persist chunk vectors.
+    """
     settings = get_settings()
     primary_provider = RetryingEmbeddingProvider(
         provider=TimeoutEmbeddingProvider(
@@ -84,9 +94,29 @@ async def trigger_embeddings(
     request: EmbeddingTriggerRequest,
     db: Session = Depends(get_db_session),
 ) -> EmbeddingOrchestrationResult:  # noqa: B008
+    """Generate and persist embeddings synchronously for submitted chunks.
+
+    The endpoint accepts document, model, provider, version, dimensions, batching, and chunk
+    payload details. It supports idempotency replay, records route-level reliability
+    telemetry, and returns a degraded response instead of failing hard when the embedding
+    provider reports a retryable provider error.
+
+    Returns:
+        EmbeddingOrchestrationResult containing persistence counts and reliability
+        metadata for OpenAPI clients and future MCP tool callers.
+
+    Raises:
+        HTTPException: 409 when an idempotency key is reused with a different request.
+    """
     started_at = time.perf_counter()
 
     def _log_route_completed(response: EmbeddingOrchestrationResult) -> None:
+        """Record completion telemetry for a synchronous embedding request.
+
+        The helper logs elapsed route time, reliability status, and persisted vector counts.
+        These fields are useful for operations dashboards and for future MCP server adapters
+        that may need to surface provider degradation to callers.
+        """
         route_ms = (time.perf_counter() - started_at) * 1000
         logger.info(
             "embeddings.route.completed",
@@ -187,6 +217,13 @@ async def _run_async_embedding_job(
     service: EmbeddingOrchestrationService,
     request: EmbeddingTriggerRequest,
 ) -> None:
+    """Execute a queued embedding job outside the request-response cycle.
+
+    The background task marks the job running, delegates embedding and persistence to the
+    orchestration service, stores the completed result, and releases queue capacity.
+    Failures are captured on the job record so polling clients and future MCP workflows can
+    inspect terminal state without losing context.
+    """
     store = get_embedding_async_job_store()
     work_queue = get_embedding_work_queue()
     store.mark_running(job_id)
@@ -211,6 +248,18 @@ async def trigger_embeddings_async(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
 ) -> EmbeddingAsyncTriggerResponse:  # noqa: B008
+    """Queue an asynchronous embedding generation job.
+
+    The endpoint reserves queue capacity, creates a durable in-memory job record, and
+    schedules background execution for long-running embedding work. It returns immediately
+    with a job identifier that clients can poll through the job status endpoint.
+
+    Returns:
+        EmbeddingAsyncTriggerResponse containing the queued job identifier.
+
+    Raises:
+        HTTPException: 503 when the embedding work queue is at capacity.
+    """
     settings = get_settings()
     work_queue = get_embedding_work_queue()
     try:
@@ -245,6 +294,19 @@ async def trigger_embeddings_async(
 
 @router.get("/jobs/{job_id}", response_model=EmbeddingAsyncJobStatusResponse)
 def get_async_embedding_job(job_id: str) -> EmbeddingAsyncJobStatusResponse:
+    """Retrieve the status and result of an asynchronous embedding job.
+
+    Clients use the job identifier returned by the async trigger endpoint to inspect whether
+    work is pending, running, completed, or failed. Completed jobs include the orchestration
+    result, making this endpoint a natural MCP polling primitive for long-running embedding
+    tools.
+
+    Returns:
+        EmbeddingAsyncJobStatusResponse with status, optional result, and error data.
+
+    Raises:
+        HTTPException: 404 when the job identifier is unknown.
+    """
     store = get_embedding_async_job_store()
     job = store.get(job_id)
     if job is None:

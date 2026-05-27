@@ -17,6 +17,16 @@ logger = logging.getLogger(__name__)
 
 class InMemoryRateLimiter:
     def __init__(self) -> None:
+        """Init for security workflows.
+
+        Initialize InMemoryRateLimiter for security workflows. This operation does not require
+        explicit caller-supplied arguments. It runs synchronously and returns when local
+        processing is complete. The operation is executed for its side effects and does not
+        return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         self._windows: dict[str, deque[float]] = {}
         self._lock = Lock()
 
@@ -28,6 +38,16 @@ class InMemoryRateLimiter:
         window_seconds: int,
         now: float | None = None,
     ) -> tuple[bool, int]:
+        """Check allowance for security workflows.
+
+        This InMemoryRateLimiter method belongs to the security service layer. Inputs are key,
+        limit, window_seconds, now. It runs synchronously and returns when local processing is
+        complete. Returns a tuple[bool, int] value that downstream API or orchestration layers
+        can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         now_value = time.time() if now is None else now
         window_start = now_value - float(window_seconds)
 
@@ -48,11 +68,30 @@ _rate_limiter = InMemoryRateLimiter()
 
 
 def reset_rate_limiter() -> None:
+    """Reset rate limiter for security workflows.
+
+    This module-level service helper belongs to the security service layer. This operation
+    does not require explicit caller-supplied arguments. It runs synchronously and returns
+    when local processing is complete. The operation is executed for its side effects and
+    does not return a payload.
+
+    The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+    outputs, and orchestration boundaries from the source code.
+    """
     with _rate_limiter._lock:
         _rate_limiter._windows.clear()
 
 
 def _security_principal(request: Request) -> str:
+    """Security principal for security workflows.
+
+    This private helper belongs to the security service layer. Inputs are request. It runs
+    synchronously and returns when local processing is complete. Returns a str value that
+    downstream API or orchestration layers can consume.
+
+    The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+    outputs, and orchestration boundaries from the source code.
+    """
     api_key = request.headers.get("x-api-key")
     if api_key:
         return f"api-key:{api_key[:6]}"
@@ -62,6 +101,15 @@ def _security_principal(request: Request) -> str:
 
 
 def _audit(event: str, outcome: str, request: Request, detail: str) -> None:
+    """Audit for security workflows.
+
+    This private helper belongs to the security service layer. Inputs are event, outcome,
+    request, detail. It runs synchronously and returns when local processing is complete.
+    The operation is executed for its side effects and does not return a payload.
+
+    The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+    outputs, and orchestration boundaries from the source code.
+    """
     logger.warning(
         "security.audit",
         extra={
@@ -76,6 +124,15 @@ def _audit(event: str, outcome: str, request: Request, detail: str) -> None:
 
 
 def evaluate_request_security(request: Request) -> JSONResponse | None:
+    """Evaluate request security for security workflows.
+
+    This module-level service helper belongs to the security service layer. Inputs are
+    request. It runs synchronously and returns when local processing is complete. Returns a
+    JSONResponse | None value that downstream API or orchestration layers can consume.
+
+    The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+    outputs, and orchestration boundaries from the source code.
+    """
     if request.url.path.startswith("/health"):
         return None
 

@@ -43,6 +43,15 @@ class PromptBuilder:
     )
 
     def build(self, request: PromptBuildRequest) -> PromptBuildResult:
+        """Construct for answer-generation workflows.
+
+        This PromptBuilder method belongs to the answer-generation service layer. Inputs are
+        request. It runs synchronously and returns when local processing is complete. Returns a
+        PromptBuildResult value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         normalized_question = request.question.strip()
         lowered_question = normalized_question.lower()
 
@@ -112,19 +121,56 @@ class PromptBuilder:
         )
 
     def _system_prompt(self) -> str:
+        """System prompt for answer-generation workflows.
+
+        This private helper belongs to the answer-generation service layer. This operation does
+        not require explicit caller-supplied arguments. It runs synchronously and returns when
+        local processing is complete. Returns a str value that downstream API or orchestration
+        layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         return (
             "You are Farmer Helper, a grounded agricultural assistant. "
             "Prioritize factual, safe, and practical guidance based strictly on supplied evidence."
         )
 
     def _should_refuse(self, question: str) -> bool:
+        """Determine whether should refuse for answer-generation workflows.
+
+        This private helper belongs to the answer-generation service layer. Inputs are question.
+        It runs synchronously and returns when local processing is complete. Returns a bool
+        value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         terms = self._tokenize(question)
         return any(term in self._REFUSAL_TERMS for term in terms)
 
     def _is_prompt_injection_attempt(self, question: str) -> bool:
+        """Determine whether is prompt injection attempt for answer-generation workflows.
+
+        This private helper belongs to the answer-generation service layer. Inputs are question.
+        It runs synchronously and returns when local processing is complete. Returns a bool
+        value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         return any(pattern in question for pattern in self._PROMPT_INJECTION_PATTERNS)
 
     def _clarification_code(self, question: str, chunks: Sequence[object]) -> str | None:
+        """Clarification code for answer-generation workflows.
+
+        This private helper belongs to the answer-generation service layer. Inputs are question,
+        chunks. It runs synchronously and returns when local processing is complete. Returns a
+        str | None value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         terms = self._tokenize(question)
         if not terms:
             return "CLARIFY_NEED_DETAIL"
@@ -137,6 +183,15 @@ class PromptBuilder:
         return None
 
     def _context_block(self, request: PromptBuildRequest) -> str:
+        """Context block for answer-generation workflows.
+
+        This private helper belongs to the answer-generation service layer. Inputs are request.
+        It runs synchronously and returns when local processing is complete. Returns a str value
+        that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         rendered: list[str] = []
         for chunk in request.retrieved_chunks[: request.max_chunks]:
             rendered.append(
@@ -152,4 +207,13 @@ class PromptBuilder:
 
     @staticmethod
     def _tokenize(text: str) -> list[str]:
+        """Tokenize for answer-generation workflows.
+
+        This private helper belongs to the answer-generation service layer. Inputs are text. It
+        runs synchronously and returns when local processing is complete. Returns a list[str]
+        value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         return re.findall(r"[a-z0-9]+", text.lower())

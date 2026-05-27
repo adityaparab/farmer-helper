@@ -38,6 +38,11 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 
 
 def _actor_id(x_actor_id: str | None) -> str:
+    """Normalize the optional actor header into an audit actor identifier.
+
+    Administrative endpoints call this helper so every audit entry has a non-empty actor. If
+    no header is supplied, the operation is attributed to ``system``.
+    """
     return (x_actor_id or "system").strip() or "system"
 
 
@@ -51,6 +56,13 @@ def _audit(
     target_id: str,
     details: dict[str, str] | None = None,
 ) -> None:
+    """Persist an administrative access audit event.
+
+    The helper records actor, action, target, request ID, and optional details for
+    operations that mutate or inspect maintainability data. This produces a stable audit
+    surface for administrators and future MCP automation that performs admin workflows on
+    behalf of a caller.
+    """
     AccessAuditLogRepository(db).create(
         actor_id=actor_id,
         action=action,
@@ -68,6 +80,16 @@ def create_ingestion_job(
     db: Session = Depends(get_db_session),
     x_actor_id: str | None = Header(default=None),
 ) -> AdminJobResponse:  # noqa: B008
+    """Create an administrative ingestion job for a new source document.
+
+    The endpoint creates a document record, starts an ingestion job, writes an audit entry,
+    and returns the new job identifier. It is the administrative entry point for adding
+    source material that will later be chunked, embedded, retrieved, and used for grounded
+    answer generation.
+
+    Returns:
+        AdminJobResponse with the ingestion job ID, document ID, and pending status.
+    """
     document = DocumentRepository(db).create(
         source_path=payload.source_path,
         content_hash=payload.content_hash,
@@ -100,6 +122,16 @@ def create_reindex_job(
     db: Session = Depends(get_db_session),
     x_actor_id: str | None = Header(default=None),
 ) -> AdminJobResponse:  # noqa: B008
+    """Create an administrative reindex job for an existing document.
+
+    The endpoint starts a reindex workflow with pipeline and model version metadata, then
+    records an audit entry. It supports maintenance workflows where content, embedding
+    models, or retrieval behavior need to be refreshed without creating a new source
+    document.
+
+    Returns:
+        AdminJobResponse with the reindex job ID, document ID, and pending status.
+    """
     status_service = IngestionStatusService(
         repository=IngestionJobRepository(db),
         trace_logger=IngestionTraceLogger(),
@@ -135,6 +167,20 @@ def update_job_status(
     db: Session = Depends(get_db_session),
     x_actor_id: str | None = Header(default=None),
 ) -> AdminJobResponse:  # noqa: B008
+    """Update the lifecycle status of an ingestion or reindex job.
+
+    The endpoint transitions jobs through processing, succeeded, or failed states and
+    requires structured error details when marking failure. It records an audit entry for
+    every status update so administrative automation and future MCP tools can trace
+    operational changes.
+
+    Returns:
+        AdminJobResponse reflecting the persisted job status.
+
+    Raises:
+        HTTPException: 400 for invalid transitions or incomplete failure details.
+        HTTPException: 404 when the job cannot be found.
+    """
     status_service = IngestionStatusService(
         repository=IngestionJobRepository(db),
         trace_logger=IngestionTraceLogger(),
@@ -183,6 +229,15 @@ def create_version_tracking_record(
     db: Session = Depends(get_db_session),
     x_actor_id: str | None = Header(default=None),
 ) -> VersionTrackingResponse:  # noqa: B008
+    """Create a version tracking record for content, model, and pipeline releases.
+
+    The endpoint records the version tuple and optional notes with the acting user. Version
+    records help connect production behavior to the content corpus, model configuration, and
+    pipeline code that produced it.
+
+    Returns:
+        VersionTrackingResponse describing the created version record.
+    """
     actor = _actor_id(x_actor_id)
     record = VersionTrackingRepository(db).create(
         content_version=payload.content_version,
@@ -215,6 +270,15 @@ def create_version_tracking_record(
 def list_version_tracking_records(
     db: Session = Depends(get_db_session),
 ) -> list[VersionTrackingResponse]:  # noqa: B008
+    """List recent version tracking records.
+
+    The endpoint returns the most recent content, model, and pipeline version records for
+    operations review, release notes, and future MCP maintenance workflows that need to
+    reason about currently active versions.
+
+    Returns:
+        List of VersionTrackingResponse records in recent-first repository order.
+    """
     records = VersionTrackingRepository(db).list_recent()
     return [
         VersionTrackingResponse(
@@ -237,6 +301,15 @@ def create_gold_answer(
     db: Session = Depends(get_db_session),
     x_actor_id: str | None = Header(default=None),
 ) -> GoldAnswerResponse:  # noqa: B008
+    """Create a curated gold answer for evaluation and quality review.
+
+    The endpoint stores a reference question, answer text, optional metadata, and the
+    editing actor. Gold answers become reusable quality assets for regression tests,
+    evaluation runs, and future MCP-assisted review workflows.
+
+    Returns:
+        GoldAnswerResponse describing the created gold answer.
+    """
     actor = _actor_id(x_actor_id)
     item = GoldAnswerRepository(db).create(
         question=payload.question,
@@ -273,6 +346,18 @@ def update_gold_answer(
     db: Session = Depends(get_db_session),
     x_actor_id: str | None = Header(default=None),
 ) -> GoldAnswerResponse:  # noqa: B008
+    """Update the status or answer text for a curated gold answer.
+
+    The endpoint applies editor changes, records an audit event, and returns the updated
+    reference answer. It allows maintainers to approve, revise, or retire quality examples
+    as the agricultural corpus and answer behavior evolve.
+
+    Returns:
+        GoldAnswerResponse describing the updated gold answer.
+
+    Raises:
+        HTTPException: 404 when the gold answer does not exist.
+    """
     actor = _actor_id(x_actor_id)
     try:
         item = GoldAnswerRepository(db).update(
@@ -310,6 +395,15 @@ def update_gold_answer(
 def list_gold_answers(
     db: Session = Depends(get_db_session),
 ) -> list[GoldAnswerResponse]:  # noqa: B008
+    """List recent curated gold answers.
+
+    The endpoint exposes reference answers used for evaluation and review. Future MCP
+    maintenance tools can use this operation to inspect available quality examples before
+    proposing updates or running targeted checks.
+
+    Returns:
+        List of GoldAnswerResponse records in recent-first repository order.
+    """
     records = GoldAnswerRepository(db).list_recent()
     return [
         GoldAnswerResponse(
@@ -333,6 +427,15 @@ def create_review_queue_item(
     db: Session = Depends(get_db_session),
     x_actor_id: str | None = Header(default=None),
 ) -> QaReviewResponse:  # noqa: B008
+    """Create a quality-review queue item.
+
+    The endpoint records a document or source-path issue that needs human attention,
+    including issue type and details. It writes an audit event so review workflow creation
+    is traceable across UI, script, and future MCP automation paths.
+
+    Returns:
+        QaReviewResponse describing the created review queue item.
+    """
     actor = _actor_id(x_actor_id)
     item = QaReviewRepository(db).create(
         document_id=payload.document_id,
@@ -371,6 +474,18 @@ def update_review_queue_item(
     db: Session = Depends(get_db_session),
     x_actor_id: str | None = Header(default=None),
 ) -> QaReviewResponse:  # noqa: B008
+    """Update assignment, status, or resolution notes for a review queue item.
+
+    The endpoint lets maintainers triage and resolve quality-review work while preserving
+    audit history. It supports workflows where automated MCP tools may prepare updates but
+    human operators still need traceable state transitions.
+
+    Returns:
+        QaReviewResponse describing the updated review queue item.
+
+    Raises:
+        HTTPException: 404 when the review queue item does not exist.
+    """
     actor = _actor_id(x_actor_id)
     try:
         item = QaReviewRepository(db).update(
@@ -410,6 +525,15 @@ def update_review_queue_item(
 def list_review_queue_items(
     db: Session = Depends(get_db_session),
 ) -> list[QaReviewResponse]:  # noqa: B008
+    """List recent quality-review queue items.
+
+    The endpoint returns review items for operational dashboards, triage screens, and future
+    MCP maintenance workflows that need to inspect pending source or document quality
+    issues.
+
+    Returns:
+        List of QaReviewResponse records in recent-first repository order.
+    """
     records = QaReviewRepository(db).list_recent()
     return [
         QaReviewResponse(
@@ -432,6 +556,15 @@ def list_review_queue_items(
 def list_access_audit_logs(
     db: Session = Depends(get_db_session),
 ) -> list[AccessAuditLogResponse]:  # noqa: B008
+    """List recent administrative access audit log entries.
+
+    The endpoint exposes recent actor, action, target, request, and detail records for admin
+    operations. It is useful for compliance review, incident investigation, and future MCP
+    automation that needs to report what maintenance actions were taken.
+
+    Returns:
+        List of AccessAuditLogResponse records in recent-first repository order.
+    """
     records = AccessAuditLogRepository(db).list_recent()
     return [
         AccessAuditLogResponse(

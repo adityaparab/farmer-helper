@@ -15,6 +15,16 @@ async def request_id_middleware(
     request: Request,
     call_next: Callable[[Request], Awaitable[Response]],
 ) -> Response:
+    """Request id middleware for HTTP middleware workflows.
+
+    This module-level function documents a stable application boundary used by API handlers,
+    service orchestration, validation, persistence, or runtime setup. Inputs are request,
+    call_next. It runs asynchronously and may await downstream I/O before returning. It
+    returns Response for downstream callers.
+
+    The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+    the source self-describing for future MCP server generation.
+    """
     request_id = request.headers.get("x-request-id", str(uuid.uuid4()))
     set_request_id(request_id)
 

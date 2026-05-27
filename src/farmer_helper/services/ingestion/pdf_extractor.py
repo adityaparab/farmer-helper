@@ -7,6 +7,15 @@ from farmer_helper.services.ingestion.file_validator import FileValidator, Inges
 
 class PdfExtractionError(Exception):
     def __init__(self, code: str, message: str) -> None:
+        """Init for ingestion workflows.
+
+        Initialize PdfExtractionError for ingestion workflows. Inputs are code, message. It runs
+        synchronously and returns when local processing is complete. The operation is executed
+        for its side effects and does not return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         super().__init__(message)
         self.code = code
         self.message = message
@@ -14,9 +23,27 @@ class PdfExtractionError(Exception):
 
 class PdfExtractor:
     def __init__(self, validator: FileValidator | None = None) -> None:
+        """Init for ingestion workflows.
+
+        Initialize PdfExtractor for ingestion workflows. Inputs are validator. It runs
+        synchronously and returns when local processing is complete. The operation is executed
+        for its side effects and does not return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         self._validator = validator or FileValidator(allowed_extensions=(".pdf",))
 
     def extract(self, file_path: str) -> ExtractedDocument:
+        """Extract for ingestion workflows.
+
+        This PdfExtractor method belongs to the ingestion service layer. Inputs are file_path.
+        It runs synchronously and returns when local processing is complete. Returns a
+        ExtractedDocument value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         try:
             validated = self._validator.validate(file_path)
         except IngestionValidationError as exc:

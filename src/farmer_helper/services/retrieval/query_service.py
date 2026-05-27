@@ -27,6 +27,16 @@ class RetrievalQueryService:
         reranker: Reranker | None = None,
         diagnostics_logger: RetrievalDiagnosticsLogger | None = None,
     ) -> None:
+        """Init for retrieval workflows.
+
+        Initialize RetrievalQueryService for retrieval workflows. Inputs are vector_service,
+        keyword_service, fusion_service, reranker, diagnostics_logger. It runs synchronously and
+        returns when local processing is complete. The operation is executed for its side
+        effects and does not return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         self._vector_service = vector_service
         self._keyword_service = keyword_service
         self._fusion_service = fusion_service
@@ -34,6 +44,15 @@ class RetrievalQueryService:
         self._diagnostics_logger = diagnostics_logger or RetrievalDiagnosticsLogger()
 
     def retrieve(self, request: RetrievalRequest) -> RetrievalResponse:
+        """Retrieve for retrieval workflows.
+
+        This RetrievalQueryService method belongs to the retrieval service layer. Inputs are
+        request. It runs synchronously and returns when local processing is complete. Returns a
+        RetrievalResponse value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         total_start = time.perf_counter()
 
         vector_start = time.perf_counter()

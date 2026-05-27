@@ -43,6 +43,12 @@ _answer_cache: TTLCache[str, AnswerGenerationResponse] = TTLCache(max_entries=51
 
 
 def _to_concise_text(answer: str) -> str:
+    """Trim generated answer text to the concise response contract.
+
+    The helper preserves short answers unchanged and truncates longer answers to a bounded
+    preview with an ellipsis. It supports accessibility and compact-client modes without
+    changing the underlying answer-generation service.
+    """
     trimmed = answer.strip()
     if len(trimmed) <= 280:
         return trimmed
@@ -53,6 +59,16 @@ def _apply_accessibility_contract(
     response: AnswerGenerationResponse,
     request: AnswerGenerationRequest,
 ) -> AnswerGenerationResponse:
+    """Apply response-mode and language metadata to an answer response.
+
+    The helper enforces concise output when requested and mirrors the caller's response mode
+    and language selections onto the response. Keeping this logic in a single helper makes
+    the generated and streamed answer endpoints consistent for Swagger, OpenAPI clients, and
+    future MCP adapters.
+
+    Returns:
+        AnswerGenerationResponse adjusted to the requested presentation contract.
+    """
     updated = response
     if request.response_mode == "concise" and response.answer is not None:
         updated = updated.model_copy(update={"answer": _to_concise_text(response.answer)})
@@ -65,6 +81,16 @@ def _apply_accessibility_contract(
 
 
 def build_answer_generation_service(db: Session) -> AnswerGenerationService:
+    """Assemble the answer-generation service stack for a request.
+
+    The stack includes prompt construction, session follow-up context resolution, a mock LLM
+    provider, timeout protection, retries, and circuit-breaker fallback. The function
+    documents the service boundary behind answer endpoints so future MCP tooling can
+    understand where grounded response generation is orchestrated.
+
+    Returns:
+        AnswerGenerationService ready to process answer-generation requests.
+    """
     settings = get_settings()
     primary_provider = RetryingLLMProvider(
         provider=TimeoutLLMProvider(
@@ -94,9 +120,30 @@ def generate_answer(
     request: AnswerGenerationRequest,
     db: Session = Depends(get_db_session),
 ) -> AnswerGenerationResponse:  # noqa: B008
+    """Generate a grounded answer for a user question.
+
+    The endpoint supports response-mode and language contracts, idempotent replay, optional
+    response caching, follow-up session context, citation-aware answer construction, and
+    reliability fallbacks. Provider degradation returns a structured clarification response
+    so clients and future MCP tools can decide whether to retry or ask the user for a
+    narrower request.
+
+    Returns:
+        AnswerGenerationResponse with answer, clarification, citation, and reliability
+        fields as applicable.
+
+    Raises:
+        HTTPException: 409 when an idempotency key is reused with a different request.
+    """
     started_at = time.perf_counter()
 
     def _log_route_completed(response: AnswerGenerationResponse) -> None:
+        """Record completion telemetry for answer generation.
+
+        The helper logs route duration, generation decision, and reliability status for
+        observability. These fields help operations staff and future MCP adapters explain
+        whether an answer was produced, clarified, cached, or degraded.
+        """
         route_ms = (time.perf_counter() - started_at) * 1000
         logger.info(
             "answers.route.completed",
@@ -202,6 +249,16 @@ def generate_answer_stream(
     request: AnswerGenerationRequest,
     db: Session = Depends(get_db_session),
 ) -> StreamingResponse:  # noqa: B008
+    """Stream a generated answer as newline-delimited JSON events.
+
+    The endpoint runs the same generation pipeline as the standard answer endpoint and emits
+    metadata, answer chunks, and a final response event. It is designed for clients that
+    want incremental display while preserving a machine-readable final payload for OpenAPI
+    and future MCP bridge implementations.
+
+    Returns:
+        StreamingResponse with ``application/x-ndjson`` event records.
+    """
     service = build_answer_generation_service(db)
     try:
         response = service.generate(request)
@@ -223,6 +280,12 @@ def generate_answer_stream(
     payload = contracted.model_dump(mode="json")
 
     def _event_stream() -> Iterator[str]:
+        """Yield answer-generation streaming events.
+
+        The generator emits an initial metadata event, zero or more answer text chunks, and a
+        final event containing the complete response payload. Keeping the event schema explicit
+        makes downstream streaming clients and MCP transports easier to implement consistently.
+        """
         yield json.dumps(
             {
                 "event": "metadata",
@@ -246,5 +309,14 @@ def generate_answer_stream(
 
 @router.post("/feedback", response_model=AnswerFeedbackResponse, status_code=202)
 def submit_answer_feedback(request: AnswerFeedbackRequest) -> AnswerFeedbackResponse:
+    """Record user feedback for an answer-generation result.
+
+    The endpoint accepts feedback signals that can be used by evaluation, monitoring, and
+    future improvement workflows. It intentionally returns quickly with an accepted response
+    so UI clients and MCP tools can submit feedback without waiting for offline analysis.
+
+    Returns:
+        AnswerFeedbackResponse acknowledging that the feedback signal was accepted.
+    """
     feedback_signal_logger.log_answer_feedback(request)
     return AnswerFeedbackResponse()

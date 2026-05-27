@@ -9,6 +9,16 @@ class CitationMapper:
         chunks: Sequence[RetrievedChunk],
         max_citations: int,
     ) -> list[Citation]:
+        """Map citations for answer-generation workflows.
+
+        This CitationMapper method belongs to the answer-generation service layer. Inputs are
+        chunks, max_citations. It runs synchronously and returns when local processing is
+        complete. Returns a list[Citation] value that downstream API or orchestration layers can
+        consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         best_by_key: dict[tuple[int, int, str], RetrievedChunk] = {}
 
         for chunk in chunks:

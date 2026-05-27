@@ -26,6 +26,16 @@ class PromptBuildRequest(BaseModel):
     @field_validator("question")
     @classmethod
     def validate_question(cls, value: str) -> str:
+        """Validate question for answering schema validation workflows.
+
+        This PromptBuildRequest method documents a stable application boundary used by API
+        handlers, service orchestration, validation, persistence, or runtime setup. Inputs are
+        value. It runs synchronously and returns after local processing is complete. It returns
+        str for downstream callers.
+
+        The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+        the source self-describing for future MCP server generation.
+        """
         normalized = value.strip()
         if not normalized:
             raise ValueError("question must not be blank")
@@ -54,6 +64,16 @@ class LLMMessage(BaseModel):
     @field_validator("content")
     @classmethod
     def validate_content(cls, value: str) -> str:
+        """Validate content for answering schema validation workflows.
+
+        This LLMMessage method documents a stable application boundary used by API handlers,
+        service orchestration, validation, persistence, or runtime setup. Inputs are value. It
+        runs synchronously and returns after local processing is complete. It returns str for
+        downstream callers.
+
+        The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+        the source self-describing for future MCP server generation.
+        """
         if not value.strip():
             raise ValueError("message content must not be blank")
         return value
@@ -91,6 +111,16 @@ class AnswerGenerationRequest(BaseModel):
     @field_validator("question")
     @classmethod
     def validate_question(cls, value: str) -> str:
+        """Validate question for answering schema validation workflows.
+
+        This AnswerGenerationRequest method documents a stable application boundary used by API
+        handlers, service orchestration, validation, persistence, or runtime setup. Inputs are
+        value. It runs synchronously and returns after local processing is complete. It returns
+        str for downstream callers.
+
+        The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+        the source self-describing for future MCP server generation.
+        """
         normalized = value.strip()
         if not normalized:
             raise ValueError("question must not be blank")
@@ -99,6 +129,16 @@ class AnswerGenerationRequest(BaseModel):
     @field_validator("language")
     @classmethod
     def validate_language(cls, value: str) -> str:
+        """Validate language for answering schema validation workflows.
+
+        This AnswerGenerationRequest method documents a stable application boundary used by API
+        handlers, service orchestration, validation, persistence, or runtime setup. Inputs are
+        value. It runs synchronously and returns after local processing is complete. It returns
+        str for downstream callers.
+
+        The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+        the source self-describing for future MCP server generation.
+        """
         normalized = value.strip().lower()
         if not normalized:
             raise ValueError("language must not be blank")
@@ -140,6 +180,16 @@ class AnswerFeedbackRequest(BaseModel):
     @field_validator("question")
     @classmethod
     def validate_question(cls, value: str) -> str:
+        """Validate question for answering schema validation workflows.
+
+        This AnswerFeedbackRequest method documents a stable application boundary used by API
+        handlers, service orchestration, validation, persistence, or runtime setup. Inputs are
+        value. It runs synchronously and returns after local processing is complete. It returns
+        str for downstream callers.
+
+        The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+        the source self-describing for future MCP server generation.
+        """
         normalized = value.strip()
         if not normalized:
             raise ValueError("question must not be blank")

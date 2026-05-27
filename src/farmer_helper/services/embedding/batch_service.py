@@ -4,12 +4,31 @@ from farmer_helper.services.embedding.provider import EmbeddingProvider, Embeddi
 
 class EmbeddingBatchService:
     def __init__(self, provider: EmbeddingProvider, batch_size: int = 32) -> None:
+        """Init for embedding workflows.
+
+        Initialize EmbeddingBatchService for embedding workflows. Inputs are provider,
+        batch_size. It runs synchronously and returns when local processing is complete. The
+        operation is executed for its side effects and does not return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         if batch_size <= 0:
             raise ValueError("batch_size must be positive")
         self._provider = provider
         self._batch_size = batch_size
 
     def embed_texts(self, texts: list[str], model: str) -> EmbeddingResponse:
+        """Embed texts for embedding workflows.
+
+        This EmbeddingBatchService method belongs to the embedding service layer. Inputs are
+        texts, model. It runs synchronously and returns when local processing is complete.
+        Returns a EmbeddingResponse value that downstream API or orchestration layers can
+        consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         request = EmbeddingRequest(texts=texts, model=model)
 
         aggregated_items: list[EmbeddingItem] = []
@@ -62,6 +81,15 @@ class EmbeddingBatchService:
         expected_count: int,
         model: str,
     ) -> None:
+        """Validate batch response for embedding workflows.
+
+        This private helper belongs to the embedding service layer. Inputs are response,
+        expected_count, model. It runs synchronously and returns when local processing is
+        complete. The operation is executed for its side effects and does not return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         if response.model != model:
             raise EmbeddingProviderError(
                 code="EMBEDDING_PROVIDER_MODEL_MISMATCH",

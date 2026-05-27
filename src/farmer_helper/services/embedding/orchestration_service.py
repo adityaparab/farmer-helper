@@ -13,6 +13,16 @@ class EmbeddingOrchestrationService:
         provider: str,
         version: str = "v1",
     ) -> None:
+        """Init for embedding workflows.
+
+        Initialize EmbeddingOrchestrationService for embedding workflows. Inputs are
+        batch_service, embedding_repository, provider, version. It runs synchronously and
+        returns when local processing is complete. The operation is executed for its side
+        effects and does not return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         self._batch_service = batch_service
         self._embedding_repository = embedding_repository
         self._provider = provider
@@ -25,6 +35,16 @@ class EmbeddingOrchestrationService:
         model: str,
         chunks: list[EmbeddingSourceChunk],
     ) -> EmbeddingOrchestrationResult:
+        """Embed and persist for embedding workflows.
+
+        This EmbeddingOrchestrationService method belongs to the embedding service layer. Inputs
+        are document_id, model, chunks. It may await provider, database, or orchestration work
+        before returning. Returns a EmbeddingOrchestrationResult value that downstream API or
+        orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         if not chunks:
             raise ValueError("chunks must not be empty")
 

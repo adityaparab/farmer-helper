@@ -29,6 +29,18 @@ _retrieval_cache: TTLCache[str, RetrievalResponse] = TTLCache(max_entries=512)
 
 
 def _build_reranker(name: str) -> Reranker | None:
+    """Resolve a reranker name into a retrieval reranker implementation.
+
+    Supported values disable reranking, pass results through unchanged, or apply a keyword
+    boost. Centralizing this mapping keeps OpenAPI-visible retrieval options aligned with
+    service construction and future MCP parameter validation.
+
+    Returns:
+        A Reranker implementation, or None when reranking is disabled.
+
+    Raises:
+        ValueError: When the requested reranker name is unsupported.
+    """
     normalized = name.strip().lower()
     if normalized in {"", "none", "disabled"}:
         return None
@@ -40,6 +52,15 @@ def _build_reranker(name: str) -> Reranker | None:
 
 
 def build_retrieval_service(db: Session, reranker_name: str) -> RetrievalQueryService:
+    """Assemble the hybrid retrieval service for a request.
+
+    The service combines vector retrieval, keyword retrieval, fusion, and optional reranking
+    over the same chunk embedding repository. This boundary documents the retrieval pipeline
+    that OpenAPI clients and future MCP tools invoke through the query endpoint.
+
+    Returns:
+        RetrievalQueryService configured for the requested reranker behavior.
+    """
     repository = ChunkEmbeddingRepository(db)
     return RetrievalQueryService(
         vector_service=VectorRetrievalService(repository=repository),
@@ -54,6 +75,19 @@ def query_retrieval(
     request: RetrievalRequest,
     db: Session = Depends(get_db_session),
 ) -> RetrievalResponse:  # noqa: B008
+    """Run hybrid retrieval for a user query.
+
+    The endpoint optionally expands follow-up questions with session context, routes the
+    effective query through vector and keyword retrieval, fuses and reranks the results, and
+    applies response- mode and language metadata. Cache hits are used when configured and
+    safe for stateless requests.
+
+    Returns:
+        RetrievalResponse containing ranked context candidates and request metadata.
+
+    Raises:
+        HTTPException: 400 when retrieval parameters are invalid.
+    """
     try:
         settings = get_settings()
         effective_request = request

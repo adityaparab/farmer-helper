@@ -17,6 +17,16 @@ class EvalDatasetItem(BaseModel):
     @field_validator("id", "question")
     @classmethod
     def validate_non_blank(cls, value: str) -> str:
+        """Validate non blank for evaluation schema validation workflows.
+
+        This EvalDatasetItem method documents a stable application boundary used by API
+        handlers, service orchestration, validation, persistence, or runtime setup. Inputs are
+        value. It runs synchronously and returns after local processing is complete. It returns
+        str for downstream callers.
+
+        The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+        the source self-describing for future MCP server generation.
+        """
         if not value.strip():
             raise ValueError("value must not be blank")
         return value
@@ -24,6 +34,16 @@ class EvalDatasetItem(BaseModel):
     @field_validator("expected_topics", "expected_keywords")
     @classmethod
     def validate_terms(cls, value: list[str]) -> list[str]:
+        """Validate terms for evaluation schema validation workflows.
+
+        This EvalDatasetItem method documents a stable application boundary used by API
+        handlers, service orchestration, validation, persistence, or runtime setup. Inputs are
+        value. It runs synchronously and returns after local processing is complete. It returns
+        list[str] for downstream callers.
+
+        The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+        the source self-describing for future MCP server generation.
+        """
         for term in value:
             if not term.strip():
                 raise ValueError("terms must not contain blank values")
@@ -43,6 +63,16 @@ class EvalScoreBreakdown(BaseModel):
     clarity_actionability: int = Field(ge=0, le=2)
 
     def total(self) -> int:
+        """Calculate total for evaluation schema validation workflows.
+
+        This EvalScoreBreakdown method documents a stable application boundary used by API
+        handlers, service orchestration, validation, persistence, or runtime setup. The function
+        does not require explicit caller-supplied arguments. It runs synchronously and returns
+        after local processing is complete. It returns int for downstream callers.
+
+        The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+        the source self-describing for future MCP server generation.
+        """
         return (
             self.retrieval_relevance
             + self.groundedness

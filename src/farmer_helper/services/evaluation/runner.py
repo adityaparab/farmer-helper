@@ -18,10 +18,28 @@ class EvalRunner:
         scorer: EvalScorer | None = None,
         config: EvalRunConfig | None = None,
     ) -> None:
+        """Init for evaluation workflows.
+
+        Initialize EvalRunner for evaluation workflows. Inputs are scorer, config. It runs
+        synchronously and returns when local processing is complete. The operation is executed
+        for its side effects and does not return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         self._scorer = scorer or self._default_scorer
         self._config = config or EvalRunConfig()
 
     def run(self, dataset: EvalDataset) -> EvalRunResult:
+        """Run for evaluation workflows.
+
+        This EvalRunner method belongs to the evaluation service layer. Inputs are dataset. It
+        runs synchronously and returns when local processing is complete. Returns a
+        EvalRunResult value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         ordered_items = sorted(dataset.items, key=lambda item: item.id)
 
         item_results: list[EvalItemRunResult] = []
@@ -61,6 +79,15 @@ class EvalRunner:
 
     @staticmethod
     def _default_scorer(item: EvalDatasetItem) -> EvalScoreBreakdown:
+        """Default scorer for evaluation workflows.
+
+        This private helper belongs to the evaluation service layer. Inputs are item. It runs
+        synchronously and returns when local processing is complete. Returns a
+        EvalScoreBreakdown value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         citation_score = 2 if item.must_cite_source else 1
         clarity_score = 2 if item.expected_keywords else 1
         safety_score = 2 if item.difficulty == "hard" else 1

@@ -14,6 +14,15 @@ class _Entry[V]:
 
 class TTLCache[K, V]:
     def __init__(self, max_entries: int) -> None:
+        """Init for performance workflows.
+
+        Initialize TTLCache for performance workflows. Inputs are max_entries. It runs
+        synchronously and returns when local processing is complete. The operation is executed
+        for its side effects and does not return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         if max_entries < 1:
             raise ValueError("max_entries must be >= 1")
         self._max_entries = max_entries
@@ -21,6 +30,15 @@ class TTLCache[K, V]:
         self._lock = Lock()
 
     def get(self, key: K) -> V | None:
+        """Retrieve for performance workflows.
+
+        This TTLCache method belongs to the performance service layer. Inputs are key. It runs
+        synchronously and returns when local processing is complete. Returns a V | None value
+        that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         now = time.time()
         with self._lock:
             entry = self._items.get(key)
@@ -33,6 +51,15 @@ class TTLCache[K, V]:
             return entry.value
 
     def set(self, key: K, value: V, ttl_seconds: int) -> None:
+        """Set for performance workflows.
+
+        This TTLCache method belongs to the performance service layer. Inputs are key, value,
+        ttl_seconds. It runs synchronously and returns when local processing is complete. The
+        operation is executed for its side effects and does not return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         if ttl_seconds <= 0:
             return
 

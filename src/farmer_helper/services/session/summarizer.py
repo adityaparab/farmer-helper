@@ -4,9 +4,27 @@ from farmer_helper.schemas.session import SessionSummaryRequest, SessionSummaryR
 
 class SessionSummarizer:
     def __init__(self, repository: ChatSessionRepository) -> None:
+        """Init for session-memory workflows.
+
+        Initialize SessionSummarizer for session-memory workflows. Inputs are repository. It
+        runs synchronously and returns when local processing is complete. The operation is
+        executed for its side effects and does not return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         self._repository = repository
 
     def summarize(self, request: SessionSummaryRequest) -> SessionSummaryResponse:
+        """Summarize for session-memory workflows.
+
+        This SessionSummarizer method belongs to the session-memory service layer. Inputs are
+        request. It runs synchronously and returns when local processing is complete. Returns a
+        SessionSummaryResponse value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         session = self._repository.get_session_by_key(request.session_key)
         if session is None:
             raise ValueError(f"Session not found: {request.session_key}")
@@ -37,6 +55,15 @@ class SessionSummarizer:
 
     @staticmethod
     def _compact(text: str, limit: int = 120) -> str:
+        """Compact for session-memory workflows.
+
+        This private helper belongs to the session-memory service layer. Inputs are text, limit.
+        It runs synchronously and returns when local processing is complete. Returns a str value
+        that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         cleaned = " ".join(text.split())
         if len(cleaned) <= limit:
             return cleaned

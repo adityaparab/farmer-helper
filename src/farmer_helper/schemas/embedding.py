@@ -10,6 +10,16 @@ class EmbeddingRequest(BaseModel):
     @field_validator("texts")
     @classmethod
     def validate_texts(cls, value: list[str]) -> list[str]:
+        """Validate texts for embedding schema validation workflows.
+
+        This EmbeddingRequest method documents a stable application boundary used by API
+        handlers, service orchestration, validation, persistence, or runtime setup. Inputs are
+        value. It runs synchronously and returns after local processing is complete. It returns
+        list[str] for downstream callers.
+
+        The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+        the source self-describing for future MCP server generation.
+        """
         for text in value:
             if not text.strip():
                 raise ValueError("texts must not contain blank values")
@@ -28,6 +38,17 @@ class EmbeddingResponse(BaseModel):
 
     @model_validator(mode="after")
     def validate_dimensions(self) -> "EmbeddingResponse":
+        """Validate dimensions for embedding schema validation workflows.
+
+        This EmbeddingResponse method documents a stable application boundary used by API
+        handlers, service orchestration, validation, persistence, or runtime setup. The function
+        does not require explicit caller-supplied arguments. It runs synchronously and returns
+        after local processing is complete. It returns 'EmbeddingResponse' for downstream
+        callers.
+
+        The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+        the source self-describing for future MCP server generation.
+        """
         expected = self.dimensions
         for item in self.items:
             if len(item.vector) != expected:

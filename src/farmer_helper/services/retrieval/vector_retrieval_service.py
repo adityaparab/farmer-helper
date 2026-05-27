@@ -10,9 +10,27 @@ from farmer_helper.schemas.retrieval import (
 
 class VectorRetrievalService:
     def __init__(self, repository: ChunkEmbeddingRepository) -> None:
+        """Init for retrieval workflows.
+
+        Initialize VectorRetrievalService for retrieval workflows. Inputs are repository. It
+        runs synchronously and returns when local processing is complete. The operation is
+        executed for its side effects and does not return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         self._repository = repository
 
     def retrieve(self, request: VectorRetrievalRequest) -> VectorRetrievalResponse:
+        """Retrieve for retrieval workflows.
+
+        This VectorRetrievalService method belongs to the retrieval service layer. Inputs are
+        request. It runs synchronously and returns when local processing is complete. Returns a
+        VectorRetrievalResponse value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         candidates = self._repository.list_for_retrieval(
             provider=request.provider,
             model=request.model,
@@ -44,6 +62,15 @@ class VectorRetrievalService:
 
     @staticmethod
     def _cosine_similarity(left: list[float], right: list[float], left_norm: float) -> float:
+        """Cosine similarity for retrieval workflows.
+
+        This private helper belongs to the retrieval service layer. Inputs are left, right,
+        left_norm. It runs synchronously and returns when local processing is complete. Returns
+        a float value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         right_norm = VectorRetrievalService._norm(right)
         if right_norm == 0:
             return 0.0
@@ -55,4 +82,13 @@ class VectorRetrievalService:
 
     @staticmethod
     def _norm(vector: list[float]) -> float:
+        """Norm for retrieval workflows.
+
+        This private helper belongs to the retrieval service layer. Inputs are vector. It runs
+        synchronously and returns when local processing is complete. Returns a float value that
+        downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         return math.sqrt(sum(value * value for value in vector))

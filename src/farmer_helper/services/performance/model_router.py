@@ -3,6 +3,15 @@ from farmer_helper.core.config import get_settings
 
 class LLMModelRouter:
     def route(self, *, request_model: str, question: str) -> str:
+        """Route for performance workflows.
+
+        This LLMModelRouter method belongs to the performance service layer. Inputs are
+        request_model, question. It runs synchronously and returns when local processing is
+        complete. Returns a str value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         if request_model != "auto":
             return request_model
 

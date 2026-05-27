@@ -75,4 +75,14 @@ class Settings(BaseSettings):
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
+    """Retrieve settings for core runtime workflows.
+
+    This module-level function documents a stable application boundary used by API handlers,
+    service orchestration, validation, persistence, or runtime setup. The function does not
+    require explicit caller-supplied arguments. It runs synchronously and returns after
+    local processing is complete. It returns Settings for downstream callers.
+
+    The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+    the source self-describing for future MCP server generation.
+    """
     return Settings()

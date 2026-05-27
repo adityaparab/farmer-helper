@@ -8,6 +8,15 @@ from farmer_helper.schemas.retrieval import (
 
 class RetrievalFusionService:
     def fuse(self, request: FusedRetrievalRequest) -> FusedRetrievalResponse:
+        """Combine for retrieval workflows.
+
+        This RetrievalFusionService method belongs to the retrieval service layer. Inputs are
+        request. It runs synchronously and returns when local processing is complete. Returns a
+        FusedRetrievalResponse value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         if request.vector_weight == 0 and request.keyword_weight == 0:
             raise ValueError("At least one fusion weight must be > 0")
 
@@ -68,4 +77,13 @@ class RetrievalFusionService:
 
     @staticmethod
     def _key(item: VectorRetrievalItem) -> tuple[int, int, str]:
+        """Key for retrieval workflows.
+
+        This private helper belongs to the retrieval service layer. Inputs are item. It runs
+        synchronously and returns when local processing is complete. Returns a tuple[int, int,
+        str] value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         return (item.document_id, item.chunk_index, item.content_hash)

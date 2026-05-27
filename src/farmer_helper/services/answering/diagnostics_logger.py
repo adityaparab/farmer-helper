@@ -3,6 +3,16 @@ import logging
 
 class AnswerDiagnosticsLogger:
     def __init__(self) -> None:
+        """Init for answer-generation workflows.
+
+        Initialize AnswerDiagnosticsLogger for answer-generation workflows. This operation does
+        not require explicit caller-supplied arguments. It runs synchronously and returns when
+        local processing is complete. The operation is executed for its side effects and does
+        not return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         self._logger = logging.getLogger(__name__)
 
     def generation_completed(
@@ -16,6 +26,16 @@ class AnswerDiagnosticsLogger:
         confidence: float,
         total_ms: float,
     ) -> None:
+        """Generation completed for answer-generation workflows.
+
+        This AnswerDiagnosticsLogger method belongs to the answer-generation service layer.
+        Inputs are decision, model, citations_count, input_tokens, output_tokens, confidence,
+        total_ms. It runs synchronously and returns when local processing is complete. The
+        operation is executed for its side effects and does not return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         self._logger.info(
             "answer.generation.completed",
             extra={

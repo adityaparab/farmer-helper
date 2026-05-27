@@ -11,6 +11,15 @@ class EvalDatasetLoaderError(Exception):
 
 class EvalDatasetLoader:
     def load(self, file_path: str | Path) -> EvalDataset:
+        """Load for evaluation workflows.
+
+        This EvalDatasetLoader method belongs to the evaluation service layer. Inputs are
+        file_path. It runs synchronously and returns when local processing is complete. Returns
+        a EvalDataset value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         path = Path(file_path)
         if not path.exists() or not path.is_file():
             raise EvalDatasetLoaderError(f"Dataset file not found: {path}")
@@ -30,6 +39,15 @@ class EvalDatasetLoader:
         return dataset
 
     def _load_jsonl(self, path: Path) -> dict[str, Any]:
+        """Load jsonl for evaluation workflows.
+
+        This private helper belongs to the evaluation service layer. Inputs are path. It runs
+        synchronously and returns when local processing is complete. Returns a dict[str, Any]
+        value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         items: list[dict[str, Any]] = []
         try:
             lines = path.read_text(encoding="utf-8").splitlines()
@@ -57,6 +75,15 @@ class EvalDatasetLoader:
         return {"version": "v1", "items": items}
 
     def _load_json(self, path: Path) -> dict[str, Any]:
+        """Load json for evaluation workflows.
+
+        This private helper belongs to the evaluation service layer. Inputs are path. It runs
+        synchronously and returns when local processing is complete. Returns a dict[str, Any]
+        value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         try:
             parsed = json.loads(path.read_text(encoding="utf-8"))
         except OSError as exc:
@@ -79,6 +106,15 @@ class EvalDatasetLoader:
         )
 
     def _validate_unique_ids(self, items: list[EvalDatasetItem]) -> None:
+        """Validate unique ids for evaluation workflows.
+
+        This private helper belongs to the evaluation service layer. Inputs are items. It runs
+        synchronously and returns when local processing is complete. The operation is executed
+        for its side effects and does not return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         seen: set[str] = set()
         for item in items:
             if item.id in seen:

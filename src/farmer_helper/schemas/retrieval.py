@@ -83,6 +83,16 @@ class RetrievalRequest(BaseModel):
     @field_validator("query_text", "provider", "model", "version", "reranker")
     @classmethod
     def validate_non_blank(cls, value: str) -> str:
+        """Validate non blank for retrieval schema validation workflows.
+
+        This RetrievalRequest method documents a stable application boundary used by API
+        handlers, service orchestration, validation, persistence, or runtime setup. Inputs are
+        value. It runs synchronously and returns after local processing is complete. It returns
+        str for downstream callers.
+
+        The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+        the source self-describing for future MCP server generation.
+        """
         normalized = value.strip()
         if not normalized:
             raise ValueError("value must not be blank")
@@ -91,6 +101,16 @@ class RetrievalRequest(BaseModel):
     @field_validator("language")
     @classmethod
     def validate_language(cls, value: str) -> str:
+        """Validate language for retrieval schema validation workflows.
+
+        This RetrievalRequest method documents a stable application boundary used by API
+        handlers, service orchestration, validation, persistence, or runtime setup. Inputs are
+        value. It runs synchronously and returns after local processing is complete. It returns
+        str for downstream callers.
+
+        The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+        the source self-describing for future MCP server generation.
+        """
         normalized = value.strip().lower()
         if not normalized:
             raise ValueError("value must not be blank")

@@ -10,6 +10,16 @@ from farmer_helper.core.config import get_settings
 
 
 def _build_engine(url: str) -> Engine:
+    """Construct engine for database workflows.
+
+    This module-level function documents a stable application boundary used by API handlers,
+    service orchestration, validation, persistence, or runtime setup. Inputs are url. It
+    runs synchronously and returns after local processing is complete. It returns Engine for
+    downstream callers.
+
+    The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+    the source self-describing for future MCP server generation.
+    """
     settings = get_settings()
     max_overflow = max(0, settings.database_pool_max - settings.database_pool_min)
 
@@ -34,6 +44,16 @@ def _build_engine(url: str) -> Engine:
 
 @lru_cache(maxsize=1)
 def get_engine() -> Engine:
+    """Retrieve engine for database workflows.
+
+    This module-level function documents a stable application boundary used by API handlers,
+    service orchestration, validation, persistence, or runtime setup. The function does not
+    require explicit caller-supplied arguments. It runs synchronously and returns after
+    local processing is complete. It returns Engine for downstream callers.
+
+    The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+    the source self-describing for future MCP server generation.
+    """
     settings = get_settings()
     return _build_engine(settings.database_url)
 
@@ -42,6 +62,16 @@ SessionLocal = sessionmaker(bind=get_engine(), autoflush=False, autocommit=False
 
 
 def get_db_session() -> Iterator[Session]:
+    """Retrieve db session for database workflows.
+
+    This module-level function documents a stable application boundary used by API handlers,
+    service orchestration, validation, persistence, or runtime setup. The function does not
+    require explicit caller-supplied arguments. It runs synchronously and returns after
+    local processing is complete. It returns Iterator[Session] for downstream callers.
+
+    The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+    the source self-describing for future MCP server generation.
+    """
     db = SessionLocal()
     try:
         yield db

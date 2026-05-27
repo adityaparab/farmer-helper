@@ -12,9 +12,28 @@ from farmer_helper.schemas.session import (
 
 class FollowUpContextResolver:
     def __init__(self, repository: ChatSessionRepository) -> None:
+        """Init for session-memory workflows.
+
+        Initialize FollowUpContextResolver for session-memory workflows. Inputs are repository.
+        It runs synchronously and returns when local processing is complete. The operation is
+        executed for its side effects and does not return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         self._repository = repository
 
     def resolve(self, request: FollowUpContextRequest) -> FollowUpContextResponse:
+        """Resolve for session-memory workflows.
+
+        This FollowUpContextResolver method belongs to the session-memory service layer. Inputs
+        are request. It runs synchronously and returns when local processing is complete.
+        Returns a FollowUpContextResponse value that downstream API or orchestration layers can
+        consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         session = self._repository.get_session_by_key(request.session_key)
         if session is None:
             raise ValueError(f"Session not found: {request.session_key}")
@@ -62,12 +81,30 @@ class FollowUpContextResolver:
 
     @staticmethod
     def _to_message_role(role: str) -> MessageRole:
+        """To message role for session-memory workflows.
+
+        This private helper belongs to the session-memory service layer. Inputs are role. It
+        runs synchronously and returns when local processing is complete. Returns a MessageRole
+        value that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         if role not in {"system", "user", "assistant"}:
             raise ValueError(f"Unsupported message role: {role}")
         return cast(MessageRole, role)
 
     @staticmethod
     def _compact(text: str, limit: int) -> str:
+        """Compact for session-memory workflows.
+
+        This private helper belongs to the session-memory service layer. Inputs are text, limit.
+        It runs synchronously and returns when local processing is complete. Returns a str value
+        that downstream API or orchestration layers can consume.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         normalized = " ".join(text.split())
         if len(normalized) <= limit:
             return normalized

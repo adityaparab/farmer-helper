@@ -15,6 +15,16 @@ class ChatSessionCreateRequest(BaseModel):
     @field_validator("session_key")
     @classmethod
     def validate_session_key(cls, value: str) -> str:
+        """Validate session key for session schema validation workflows.
+
+        This ChatSessionCreateRequest method documents a stable application boundary used by API
+        handlers, service orchestration, validation, persistence, or runtime setup. Inputs are
+        value. It runs synchronously and returns after local processing is complete. It returns
+        str for downstream callers.
+
+        The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+        the source self-describing for future MCP server generation.
+        """
         cleaned = value.strip()
         if not cleaned:
             raise ValueError("session_key must not be blank")
@@ -39,6 +49,16 @@ class ChatMessageCreateRequest(BaseModel):
     @field_validator("content")
     @classmethod
     def validate_content(cls, value: str) -> str:
+        """Validate content for session schema validation workflows.
+
+        This ChatMessageCreateRequest method documents a stable application boundary used by API
+        handlers, service orchestration, validation, persistence, or runtime setup. Inputs are
+        value. It runs synchronously and returns after local processing is complete. It returns
+        str for downstream callers.
+
+        The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+        the source self-describing for future MCP server generation.
+        """
         cleaned = value.strip()
         if not cleaned:
             raise ValueError("content must not be blank")

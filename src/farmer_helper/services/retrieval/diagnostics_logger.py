@@ -3,6 +3,16 @@ import logging
 
 class RetrievalDiagnosticsLogger:
     def __init__(self) -> None:
+        """Init for retrieval workflows.
+
+        Initialize RetrievalDiagnosticsLogger for retrieval workflows. This operation does not
+        require explicit caller-supplied arguments. It runs synchronously and returns when local
+        processing is complete. The operation is executed for its side effects and does not
+        return a payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         self._logger = logging.getLogger(__name__)
 
     def query_completed(
@@ -25,6 +35,18 @@ class RetrievalDiagnosticsLogger:
         rerank_ms: float,
         total_ms: float,
     ) -> None:
+        """Query completed for retrieval workflows.
+
+        This RetrievalDiagnosticsLogger method belongs to the retrieval service layer. Inputs
+        are provider, model, version, top_k, reranker, vector_weight, keyword_weight,
+        vector_count, keyword_count, fused_count, returned_count, vector_ms, keyword_ms,
+        fusion_ms, rerank_ms, total_ms. It runs synchronously and returns when local processing
+        is complete. The operation is executed for its side effects and does not return a
+        payload.
+
+        The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
+        outputs, and orchestration boundaries from the source code.
+        """
         self._logger.info(
             "retrieval.query.completed",
             extra={

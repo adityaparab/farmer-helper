@@ -8,6 +8,16 @@ logger = logging.getLogger(__name__)
 
 
 def configure_sentry(settings: "Settings") -> bool:
+    """Configure sentry for core runtime workflows.
+
+    This module-level function documents a stable application boundary used by API handlers,
+    service orchestration, validation, persistence, or runtime setup. Inputs are settings.
+    It runs synchronously and returns after local processing is complete. It returns bool
+    for downstream callers.
+
+    The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+    the source self-describing for future MCP server generation.
+    """
     if not settings.sentry_dsn:
         return False
 
