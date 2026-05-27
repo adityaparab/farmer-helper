@@ -274,5 +274,7 @@ Eval dataset foundation:
 - `src/farmer_helper/schemas/evaluation.py`
 - `src/farmer_helper/services/evaluation/dataset_loader.py`
 - `src/farmer_helper/services/evaluation/runner.py`
+- `src/farmer_helper/services/evaluation/reporting.py`
 - `tests/unit/test_eval_dataset_loader.py`
 - `tests/unit/test_eval_runner.py`
+- `tests/unit/test_eval_reporting.py`

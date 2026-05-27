@@ -34,6 +34,7 @@
 23. Structured reliability observability fields for degraded and conflict paths with low-cardinality codes.
 24. Evaluation dataset loading foundation with strict typed validation for JSON/JSONL inputs.
 25. Deterministic eval runner foundation with typed per-item scoring and aggregate pass/fail metrics.
+26. Deterministic offline eval reporting foundation with stable JSON serialization output.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`

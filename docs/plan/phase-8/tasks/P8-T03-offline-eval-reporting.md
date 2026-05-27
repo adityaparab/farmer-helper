@@ -5,15 +5,15 @@
 Produce deterministic offline evaluation reports from eval runner outputs with stable summary metrics and per-item breakdowns suitable for CI consumption.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Define report schema and serialization format.
-2. Implement report builder for runner outputs.
-3. Add tests for deterministic ordering and metric totals.
-4. Ensure compatibility with future CI integration step.
+## What was done
+1. Added typed offline report schemas in `src/farmer_helper/schemas/evaluation.py`.
+2. Added deterministic report builder in `src/farmer_helper/services/evaluation/reporting.py`.
+3. Added unit tests for deterministic timestamps, metric consistency, and stable JSON serialization.
+4. Kept report contract machine-readable for CI integration in the next step.
 
 ## Decisions made
 - Reporting should consume typed runner outputs without re-scoring.

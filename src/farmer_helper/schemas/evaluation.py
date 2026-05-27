@@ -74,3 +74,28 @@ class EvalRunResult(BaseModel):
     failed_items: int = Field(ge=0)
     average_score: float = Field(ge=0.0, le=10.0)
     item_results: list[EvalItemRunResult] = Field(min_length=1)
+
+
+class EvalOfflineReportSummary(BaseModel):
+    total_items: int = Field(ge=1)
+    passed_items: int = Field(ge=0)
+    failed_items: int = Field(ge=0)
+    average_score: float = Field(ge=0.0, le=10.0)
+
+
+class EvalOfflineReportItem(BaseModel):
+    id: str = Field(min_length=1)
+    question: str = Field(min_length=1)
+    difficulty: Difficulty
+    must_cite_source: bool
+    total_score: int = Field(ge=0, le=10)
+    max_score: int = Field(ge=1)
+    passed: bool
+    score_breakdown: EvalScoreBreakdown
+
+
+class EvalOfflineReport(BaseModel):
+    generated_at_utc: str = Field(min_length=1)
+    dataset_version: str = Field(min_length=1)
+    summary: EvalOfflineReportSummary
+    items: list[EvalOfflineReportItem] = Field(min_length=1)
