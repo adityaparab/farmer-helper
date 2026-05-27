@@ -61,6 +61,6 @@ pre-commit install --hook-type pre-commit --hook-type commit-msg
 pre-commit run --all-files
 ```
 
-The pre-commit chain runs lint-fix, Black, Ruff, backend unit tests, backend integration tests, and commit-message validation.
+The pre-commit chain runs lint-fix, Black, Ruff, the full backend test suite, and commit-message validation.
 
 Commit messages should follow conventional commit style, for example `feat: add retry policy` or `fix(api): validate input`.

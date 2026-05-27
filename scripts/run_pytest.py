@@ -5,17 +5,15 @@ from pathlib import Path
 
 
 def main() -> int:
-    if len(sys.argv) != 2:
-        print("Usage: run_pytest.py <unit|integration>", file=sys.stderr)
-        return 2
-
-    suite = sys.argv[1]
+    suite = sys.argv[1] if len(sys.argv) == 2 else "all"
     if suite == "unit":
         args = ["-q", "tests/unit"]
     elif suite == "integration":
         args = ["-q", "tests/integration"]
+    elif suite == "all":
+        args = ["-q"]
     else:
-        print("Suite must be 'unit' or 'integration'", file=sys.stderr)
+        print("Suite must be 'unit', 'integration', or 'all'", file=sys.stderr)
         return 2
 
     src_path = Path(__file__).resolve().parents[1] / "src"
