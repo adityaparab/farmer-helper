@@ -39,6 +39,8 @@
 28. Typed online feedback signal capture endpoint with structured low-cardinality observability logs.
 29. Incrementally expanded seed eval dataset with deterministic ID ordering and integrity coverage tests.
 30. Evaluation maintenance runbook for CI triage, metric interpretation, and dataset expansion policy.
+31. Observability baseline with request lifecycle logs, route-level timings, and optional Sentry initialization.
+32. Centralized log privacy redaction filter for sensitive top-level and nested fields.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`
@@ -47,6 +49,8 @@
 4. Answering pipeline guide: `docs/development/ANSWERING_PIPELINE.md`
 5. Session behavior guide: `docs/development/SESSION_BEHAVIOR.md`
 6. Reliability runbook: `docs/development/RELIABILITY_RUNBOOK.md`
+7. Evaluation runbook: `docs/development/EVALUATION_RUNBOOK.md`
+8. Observability runbook: `docs/development/OBSERVABILITY_RUNBOOK.md`
 
 ## Next phases
 1. Hybrid retrieval and reranking pipeline.

@@ -10,12 +10,14 @@ from farmer_helper.api.routes.health import router as health_router
 from farmer_helper.api.routes.retrieval import router as retrieval_router
 from farmer_helper.core.config import get_settings
 from farmer_helper.core.logging import RequestContextFilter, configure_logging
+from farmer_helper.core.observability import configure_sentry
 from farmer_helper.core.request_context import get_request_id
 
 
 def create_app() -> FastAPI:
     settings = get_settings()
     configure_logging(settings.app_log_level)
+    configure_sentry(settings)
     logging.getLogger().addFilter(RequestContextFilter(get_request_id))
 
     app = FastAPI(title=settings.app_name)

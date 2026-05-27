@@ -1,4 +1,5 @@
 import logging
+import time
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -66,6 +67,20 @@ def generate_answer(
     request: AnswerGenerationRequest,
     db: Session = Depends(get_db_session),
 ) -> AnswerGenerationResponse:  # noqa: B008
+    started_at = time.perf_counter()
+
+    def _log_route_completed(response: AnswerGenerationResponse) -> None:
+        route_ms = (time.perf_counter() - started_at) * 1000
+        logger.info(
+            "answers.route.completed",
+            extra={
+                "route": "answers.generate",
+                "answer_route_decision": response.decision,
+                "answer_route_reliability_status": response.reliability_status,
+                "answer_route_total_ms": round(route_ms, 4),
+            },
+        )
+
     if request.idempotency_key is not None:
         store = get_idempotency_store()
         request_hash = compute_request_hash(request.model_dump(mode="json"))
@@ -95,7 +110,9 @@ def generate_answer(
             ) from exc
 
         if replay_payload is not None:
-            return AnswerGenerationResponse.model_validate(replay_payload)
+            replay_response = AnswerGenerationResponse.model_validate(replay_payload)
+            _log_route_completed(replay_response)
+            return replay_response
 
     service = build_answer_generation_service(db)
     try:
@@ -131,6 +148,7 @@ def generate_answer(
             request_hash=compute_request_hash(request.model_dump(mode="json")),
             response_payload=response.model_dump(mode="json"),
         )
+    _log_route_completed(response)
     return response
 
 

@@ -1,3 +1,4 @@
+import logging
 import time
 import uuid
 from collections.abc import Awaitable, Callable
@@ -5,6 +6,8 @@ from collections.abc import Awaitable, Callable
 from fastapi import Request, Response
 
 from farmer_helper.core.request_context import set_request_id
+
+logger = logging.getLogger(__name__)
 
 
 async def request_id_middleware(
@@ -20,4 +23,14 @@ async def request_id_middleware(
 
     response.headers["x-request-id"] = request_id
     response.headers["x-response-time-ms"] = str(latency_ms)
+    logger.info(
+        "http.request.completed",
+        extra={
+            "request_id": request_id,
+            "http_method": request.method,
+            "http_route": request.url.path,
+            "http_status_code": response.status_code,
+            "http_latency_ms": latency_ms,
+        },
+    )
     return response

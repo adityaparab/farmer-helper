@@ -11,7 +11,9 @@ At minimum set:
 2. `APP_LOG_LEVEL=INFO`
 3. `DATABASE_URL=<railway-postgres-url>`
 4. `SENTRY_DSN=<optional>`
-5. Provider configuration values (`LLM_PROVIDER`, `LLM_MODEL`, `EMBEDDING_PROVIDER`, `EMBEDDING_MODEL`)
+5. `SENTRY_TRACES_SAMPLE_RATE=<optional, default 0.0>`
+6. `SENTRY_ENVIRONMENT=<optional, default APP_ENV>`
+7. Provider configuration values (`LLM_PROVIDER`, `LLM_MODEL`, `EMBEDDING_PROVIDER`, `EMBEDDING_MODEL`)
 
 ## Health checks
 1. Liveness: `/health/live`

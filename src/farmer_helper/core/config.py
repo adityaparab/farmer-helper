@@ -44,6 +44,9 @@ class Settings(BaseSettings):
         default=30.0,
         alias="LLM_CIRCUIT_BREAKER_RECOVERY_TIMEOUT_SECONDS",
     )
+    sentry_dsn: str | None = Field(default=None, alias="SENTRY_DSN")
+    sentry_traces_sample_rate: float = Field(default=0.0, alias="SENTRY_TRACES_SAMPLE_RATE")
+    sentry_environment: str | None = Field(default=None, alias="SENTRY_ENVIRONMENT")
 
 
 @lru_cache(maxsize=1)

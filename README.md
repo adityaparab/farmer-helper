@@ -59,6 +59,10 @@ Active implementation tracking for Phase 8 lives in:
 - `docs/plan/phase-8/EPIC.md`
 - `docs/plan/phase-8/tasks/`
 
+Active implementation tracking for Phase 9 lives in:
+- `docs/plan/phase-9/EPIC.md`
+- `docs/plan/phase-9/tasks/`
+
 GitHub issue status comment standard:
 - `docs/plan/ISSUE_COMMENT_TEMPLATE.md`
 - `scripts/post-issue-status-comment.ps1`
@@ -289,3 +293,17 @@ Eval dataset foundation:
 
 Evaluation maintenance documentation:
 - `docs/development/EVALUATION_RUNBOOK.md`
+
+## Phase 9 observability progress
+Observability and alerting implementation:
+- `src/farmer_helper/core/logging.py`
+- `src/farmer_helper/core/observability.py`
+- `src/farmer_helper/api/middleware/request_id.py`
+- `src/farmer_helper/api/routes/answers.py`
+- `src/farmer_helper/api/routes/embeddings.py`
+- `tests/unit/test_core_logging_privacy.py`
+- `tests/unit/test_request_observability.py`
+- `tests/unit/test_observability_sentry.py`
+
+Observability documentation:
+- `docs/development/OBSERVABILITY_RUNBOOK.md`

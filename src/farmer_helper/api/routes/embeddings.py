@@ -1,4 +1,5 @@
 import logging
+import time
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
@@ -73,6 +74,20 @@ async def trigger_embeddings(
     request: EmbeddingTriggerRequest,
     db: Session = Depends(get_db_session),
 ) -> EmbeddingOrchestrationResult:  # noqa: B008
+    started_at = time.perf_counter()
+
+    def _log_route_completed(response: EmbeddingOrchestrationResult) -> None:
+        route_ms = (time.perf_counter() - started_at) * 1000
+        logger.info(
+            "embeddings.route.completed",
+            extra={
+                "route": "embeddings.trigger",
+                "embeddings_route_reliability_status": response.reliability_status,
+                "embeddings_route_persisted_count": response.persisted_count,
+                "embeddings_route_total_ms": round(route_ms, 4),
+            },
+        )
+
     if request.idempotency_key is not None:
         store = get_idempotency_store()
         request_hash = compute_request_hash(request.model_dump(mode="json"))
@@ -102,7 +117,9 @@ async def trigger_embeddings(
             ) from exc
 
         if replay_payload is not None:
-            return EmbeddingOrchestrationResult.model_validate(replay_payload)
+            replay_response = EmbeddingOrchestrationResult.model_validate(replay_payload)
+            _log_route_completed(replay_response)
+            return replay_response
 
     service = build_orchestration_service(
         db=db,
@@ -150,4 +167,5 @@ async def trigger_embeddings(
             request_hash=compute_request_hash(request.model_dump(mode="json")),
             response_payload=response.model_dump(mode="json"),
         )
+    _log_route_completed(response)
     return response
