@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from farmer_helper.core.config import get_settings
 from farmer_helper.db.base import get_engine
 from farmer_helper.db.models.base import Base
 from farmer_helper.main import app
@@ -15,7 +16,11 @@ def _admin_headers(client: TestClient, actor_id: str) -> dict[str, str]:
     login = client.post("/auth/login", json={"username": "admin", "password": "P@ssw0rd"})
     assert login.status_code == 200
     token = login.json()["access_token"]
-    return {"Authorization": f"Bearer {token}", "x-actor-id": actor_id}
+    headers = {"Authorization": f"Bearer {token}", "x-actor-id": actor_id}
+    api_key = get_settings().security_api_key
+    if api_key is not None:
+        headers["x-api-key"] = api_key
+    return headers
 
 
 def test_admin_ingestion_reindex_and_status_workflow() -> None:

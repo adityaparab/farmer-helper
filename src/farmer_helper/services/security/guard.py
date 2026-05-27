@@ -145,6 +145,10 @@ def evaluate_request_security(request: Request) -> JSONResponse | None:
     if request_path in {"/favicon.ico", "/manifest.webmanifest"}:
         return None
 
+    api_prefixes = ("/admin", "/embeddings", "/retrieval", "/answers")
+    if not request_path.startswith(api_prefixes):
+        return None
+
     settings = get_settings()
     expected_api_key = settings.security_api_key
     provided_api_key = request.headers.get("x-api-key")

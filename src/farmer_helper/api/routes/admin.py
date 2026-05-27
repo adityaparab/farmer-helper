@@ -31,9 +31,9 @@ from farmer_helper.schemas.admin import (
     VersionTrackingCreateRequest,
     VersionTrackingResponse,
 )
+from farmer_helper.services.auth.dependencies import require_admin_user
 from farmer_helper.services.ingestion.status_service import IngestionStatusService
 from farmer_helper.services.ingestion.trace_logger import IngestionTraceLogger
-from farmer_helper.services.auth.dependencies import require_admin_user
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin_user)])
 

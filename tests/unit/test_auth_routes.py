@@ -1,5 +1,6 @@
 from fastapi.testclient import TestClient
 
+from farmer_helper.core.config import get_settings
 from farmer_helper.db.base import get_engine
 from farmer_helper.db.models.base import Base
 from farmer_helper.main import app
@@ -9,6 +10,13 @@ def _reset_db() -> None:
     engine = get_engine()
     Base.metadata.drop_all(bind=engine)
     Base.metadata.create_all(bind=engine)
+
+
+def _api_key_headers() -> dict[str, str]:
+    api_key = get_settings().security_api_key
+    if api_key is None:
+        return {}
+    return {"x-api-key": api_key}
 
 
 def test_default_admin_can_login_and_resolve_current_user() -> None:
@@ -56,7 +64,10 @@ def test_user_role_cannot_access_admin_endpoints() -> None:
     )
     token = registered.json()["access_token"]
 
-    denied = client.get("/admin/access-audit", headers={"Authorization": f"Bearer {token}"})
+    denied = client.get(
+        "/admin/access-audit",
+        headers={**_api_key_headers(), "Authorization": f"Bearer {token}"},
+    )
 
     assert denied.status_code == 403
     assert denied.json()["detail"] == "Admin role required"
@@ -66,7 +77,7 @@ def test_anonymous_admin_request_is_rejected() -> None:
     _reset_db()
     client = TestClient(app)
 
-    denied = client.get("/admin/access-audit")
+    denied = client.get("/admin/access-audit", headers=_api_key_headers())
 
     assert denied.status_code == 401
     assert denied.json()["detail"] == "Authentication required"
