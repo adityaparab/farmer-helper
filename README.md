@@ -286,3 +286,6 @@ Eval dataset foundation:
 - `tests/unit/test_eval_ci_gate.py`
 - `tests/unit/test_feedback_signals.py`
 - `tests/unit/test_answer_feedback_route.py`
+
+Evaluation maintenance documentation:
+- `docs/development/EVALUATION_RUNBOOK.md`

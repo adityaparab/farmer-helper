@@ -5,15 +5,15 @@
 Document how to maintain the eval dataset, interpret metrics, and respond to regressions in a consistent way.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Publish metric interpretation guidance for item scores and aggregate thresholds.
-2. Define runbook steps for handling CI eval gate failures.
-3. Document dataset expansion policy with example review checklist.
-4. Add references to CI workflow and local eval command usage.
+## What was done
+1. Added `docs/development/EVALUATION_RUNBOOK.md` with local command and CI behavior guidance.
+2. Documented metric interpretation guidance for per-item and aggregate outcomes.
+3. Added explicit regression triage workflow for eval gate failures.
+4. Documented dataset expansion policy and operational constraints.
 
 ## Decisions made
 - Documentation should prioritize operational clarity for contributors.

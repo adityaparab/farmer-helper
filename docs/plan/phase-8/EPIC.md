@@ -7,7 +7,7 @@ Continuously measure retrieval and answer quality with reproducible evaluation f
 This Epic maps to Phase 8 in `docs/plan/PHASES.md` and tracks local sub-issue status.
 
 ## Epic status
-- Status: In progress
+- Status: Completed
 - Started on: 2026-05-27
 
 ## Sub-issues
@@ -19,4 +19,4 @@ This Epic maps to Phase 8 in `docs/plan/PHASES.md` and tracks local sub-issue st
 | P8-T04 | Integrate evals into CI | Completed | 2026-05-27 | Added CI eval gate with threshold check and report artifact upload |
 | P8-T05 | Log online feedback signals | Completed | 2026-05-27 | Added typed feedback schema, /answers/feedback route, structured logging hooks, and tests |
 | P8-T06 | Expand eval set incrementally | Completed | 2026-05-27 | Expanded seed dataset to 15 scenarios and added dataset integrity coverage tests |
-| P8-T07 | Document eval maintenance and interpretation | In progress | 2026-05-27 | Next active task |
+| P8-T07 | Document eval maintenance and interpretation | Completed | 2026-05-27 | Added evaluation runbook with local/CI workflow, metric interpretation, and regression triage guidance |

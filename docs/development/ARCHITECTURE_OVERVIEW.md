@@ -38,6 +38,7 @@
 27. CI-integrated eval regression gate with deterministic threshold checks and report artifact generation.
 28. Typed online feedback signal capture endpoint with structured low-cardinality observability logs.
 29. Incrementally expanded seed eval dataset with deterministic ID ordering and integrity coverage tests.
+30. Evaluation maintenance runbook for CI triage, metric interpretation, and dataset expansion policy.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`
