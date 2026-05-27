@@ -74,6 +74,28 @@ def generate_stable_operation_id(route: APIRoute) -> str:
     return f"{tag}_{route.name}".replace("-", "_")
 
 
+async def global_exception_handler(_: Request, exc: Exception) -> JSONResponse:
+    """Global exception handler for main.py workflows.
+
+    This module-level function documents a stable application boundary used by API handlers,
+    service orchestration, validation, persistence, or runtime setup. Inputs are _, exc. It
+    runs asynchronously and may await downstream I/O before returning. It returns
+    JSONResponse for downstream callers.
+
+    The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
+    the source self-describing for future MCP server generation.
+    """
+    logging.getLogger(__name__).exception("Unhandled exception", extra={"error": str(exc)})
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error_code": "INTERNAL_UNHANDLED_ERROR",
+            "message": "An unexpected error occurred",
+            "request_id": get_request_id(),
+        },
+    )
+
+
 def create_app() -> FastAPI:
     """Create app for main.py workflows.
 
@@ -115,27 +137,7 @@ def create_app() -> FastAPI:
     app.include_router(retrieval_router)
     app.include_router(answers_router)
 
-    @app.exception_handler(Exception)
-    async def global_exception_handler(_: Request, exc: Exception) -> JSONResponse:
-        """Global exception handler for main.py workflows.
-
-        This module-level function documents a stable application boundary used by API handlers,
-        service orchestration, validation, persistence, or runtime setup. Inputs are _, exc. It
-        runs asynchronously and may await downstream I/O before returning. It returns
-        JSONResponse for downstream callers.
-
-        The explicit docstring supports Swagger/OpenAPI inspection where applicable and keeps
-        the source self-describing for future MCP server generation.
-        """
-        logging.getLogger(__name__).exception("Unhandled exception", extra={"error": str(exc)})
-        return JSONResponse(
-            status_code=500,
-            content={
-                "error_code": "INTERNAL_UNHANDLED_ERROR",
-                "message": "An unexpected error occurred",
-                "request_id": get_request_id(),
-            },
-        )
+    app.add_exception_handler(Exception, global_exception_handler)
 
     return app
 
