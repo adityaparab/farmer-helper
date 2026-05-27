@@ -18,6 +18,6 @@ This Epic maps to Phase 6 in `docs/plan/PHASES.md` and tracks local sub-issue st
 | P6-T03 | Add optional summarization for long sessions | Completed | 2026-05-27 | Added deterministic optional session summarizer and threshold-based tests |
 | P6-T04 | Pass bounded context through retrieval and answering | Completed | 2026-05-27 | Added bounded session-context propagation into retrieval and answer-generation flows |
 | P6-T05 | Add expiry or archival rules | Completed | 2026-05-27 | Added deterministic archive/expiry lifecycle transitions and tests |
-| P6-T06 | Add multi-turn integration tests | In progress | 2026-05-27 | Next active task |
-| P6-T07 | Add transcript export/import | Not started | - | Pending |
+| P6-T06 | Add multi-turn integration tests | Completed | 2026-05-27 | Added deterministic multi-turn integration coverage across answer/retrieval/session services |
+| P6-T07 | Add transcript export/import | In progress | 2026-05-27 | Next active task |
 | P6-T08 | Document session behavior and extension points | Not started | - | Pending |

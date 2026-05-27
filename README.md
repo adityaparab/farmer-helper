@@ -202,6 +202,7 @@ Prompting foundation:
 - `tests/unit/test_prompt_builder.py`
 - `tests/unit/test_llm_provider_abstraction.py`
 - `tests/unit/test_answer_generation_service.py`
+- `tests/integration/test_multi_turn_session_flow.py`
 - `tests/unit/test_answer_generation_route.py`
 - `tests/unit/test_citation_mapper.py`
 - `tests/integration/test_answer_generation_regression.py`

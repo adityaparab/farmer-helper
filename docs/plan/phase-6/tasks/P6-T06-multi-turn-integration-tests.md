@@ -5,14 +5,14 @@
 Validate end-to-end multi-turn behavior including session context resolution, summarization triggers, and bounded context propagation.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add integration test flows across multiple session turns.
-2. Validate bounded context and policy outputs in multi-turn scenarios.
-3. Add deterministic assertions for session lifecycle interactions.
+## What was done
+1. Added integration tests in `tests/integration/test_multi_turn_session_flow.py`.
+2. Validated multi-turn answer and retrieval calls with session context.
+3. Validated summarization and expiry interactions in end-to-end test flow.
 
 ## Decisions made
 - Integration tests should be deterministic and use local mock providers.
