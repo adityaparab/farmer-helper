@@ -3,6 +3,7 @@ from typing import Literal
 from pydantic import BaseModel, Field, field_validator
 
 Decision = Literal["answer", "clarify", "refuse"]
+ResponseMode = Literal["concise", "detailed"]
 
 
 class Citation(BaseModel):
@@ -81,6 +82,8 @@ class AnswerGenerationRequest(BaseModel):
     context_max_messages: int = Field(ge=1, le=50, default=8)
     context_max_turns: int = Field(ge=1, le=50, default=8)
     model: str = Field(min_length=1, default="mock-chat-v1")
+    response_mode: ResponseMode = "concise"
+    language: str = Field(min_length=2, max_length=16, default="en")
     max_chunks: int = Field(ge=1, le=20, default=5)
     max_answer_tokens: int = Field(ge=1, le=4096, default=512)
     temperature: float = Field(ge=0.0, le=1.0, default=0.0)
@@ -93,8 +96,18 @@ class AnswerGenerationRequest(BaseModel):
             raise ValueError("question must not be blank")
         return normalized
 
+    @field_validator("language")
+    @classmethod
+    def validate_language(cls, value: str) -> str:
+        normalized = value.strip().lower()
+        if not normalized:
+            raise ValueError("language must not be blank")
+        return normalized
+
 
 class AnswerGenerationResponse(BaseModel):
+    response_mode: ResponseMode = "concise"
+    language: str = "en"
     decision: Decision
     answer: str | None = None
     citations: list[Citation] = Field(default_factory=list)

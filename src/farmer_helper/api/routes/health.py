@@ -5,6 +5,7 @@ from farmer_helper.db.base import get_db_session
 from farmer_helper.repositories.health_repository import HealthRepository
 from farmer_helper.schemas.health import HealthLiveResponse, HealthReadyResponse
 from farmer_helper.services.health_service import HealthService
+from farmer_helper.services.reliability.response_contracts import build_error_detail
 
 router = APIRouter(prefix="/health", tags=["health"])
 
@@ -25,9 +26,23 @@ def ready(
     try:
         ready_state = service.is_ready()
     except Exception as exc:  # pragma: no cover - readiness failure path tested via API behavior
-        raise HTTPException(status_code=503, detail="Database not ready") from exc
+        raise HTTPException(
+            status_code=503,
+            detail=build_error_detail(
+                code="DATABASE_NOT_READY",
+                message="Database not ready",
+                retryable=True,
+            ),
+        ) from exc
 
     if not ready_state:
-        raise HTTPException(status_code=503, detail="Database not ready")
+        raise HTTPException(
+            status_code=503,
+            detail=build_error_detail(
+                code="DATABASE_NOT_READY",
+                message="Database not ready",
+                retryable=True,
+            ),
+        )
 
     return HealthReadyResponse(status="ok", database="up")

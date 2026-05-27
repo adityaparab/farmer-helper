@@ -69,6 +69,8 @@ def test_retrieval_query_route_success(monkeypatch: pytest.MonkeyPatch) -> None:
 
     assert response.status_code == 200
     payload = response.json()
+    assert payload["response_mode"] == "concise"
+    assert payload["language"] == "en"
     assert len(payload["items"]) == 1
     assert payload["items"][0]["citation"]["document_id"] == 42
     assert payload["items"][0]["fused_score"] == payload["items"][0]["score"]
@@ -91,7 +93,10 @@ def test_retrieval_query_route_rejects_unsupported_reranker() -> None:
     )
 
     assert response.status_code == 400
-    assert "Unsupported reranker" in response.json()["detail"]
+    detail = response.json()["detail"]
+    assert detail["status"] == "error"
+    assert detail["error_code"] == "INVALID_RETRIEVAL_REQUEST"
+    assert "Unsupported reranker" in detail["message"]
 
 
 def test_retrieval_query_route_requires_query_vector() -> None:
@@ -129,7 +134,43 @@ def test_retrieval_query_route_rejects_missing_session_context() -> None:
     )
 
     assert response.status_code == 400
-    assert "Session not found" in response.json()["detail"]
+    detail = response.json()["detail"]
+    assert detail["status"] == "error"
+    assert detail["error_code"] == "INVALID_RETRIEVAL_REQUEST"
+    assert "Session not found" in detail["message"]
+
+
+def test_retrieval_query_route_supports_detailed_mode_and_language(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from farmer_helper.api.routes import retrieval as retrieval_route
+
+    monkeypatch.setattr(
+        retrieval_route,
+        "build_retrieval_service",
+        lambda **_kwargs: FakeRetrievalService(),
+    )
+
+    client = TestClient(app)
+    response = client.post(
+        "/retrieval/query",
+        json={
+            "query_text": "soil moisture",
+            "query_vector": [0.1, 0.2, 0.3],
+            "top_k": 3,
+            "provider": "mock-provider",
+            "model": "mock-embedding-v1",
+            "version": "v1",
+            "reranker": "none",
+            "response_mode": "detailed",
+            "language": "hi",
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["response_mode"] == "detailed"
+    assert payload["language"] == "hi"
 
 
 def test_retrieval_query_route_uses_cache_when_enabled(monkeypatch: pytest.MonkeyPatch) -> None:

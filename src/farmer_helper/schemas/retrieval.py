@@ -1,4 +1,8 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field, field_validator
+
+ResponseMode = Literal["concise", "detailed"]
 
 
 class VectorRetrievalRequest(BaseModel):
@@ -69,6 +73,8 @@ class RetrievalRequest(BaseModel):
     top_k: int = Field(ge=1, le=100, default=5)
     provider: str = Field(min_length=1, max_length=128)
     model: str = Field(min_length=1, max_length=128)
+    response_mode: ResponseMode = Field(default="concise", pattern="^(concise|detailed)$")
+    language: str = Field(min_length=2, max_length=16, default="en")
     version: str = Field(min_length=1, max_length=64, default="v1")
     vector_weight: float = Field(ge=0.0, le=1.0, default=0.7)
     keyword_weight: float = Field(ge=0.0, le=1.0, default=0.3)
@@ -78,6 +84,14 @@ class RetrievalRequest(BaseModel):
     @classmethod
     def validate_non_blank(cls, value: str) -> str:
         normalized = value.strip()
+        if not normalized:
+            raise ValueError("value must not be blank")
+        return normalized
+
+    @field_validator("language")
+    @classmethod
+    def validate_language(cls, value: str) -> str:
+        normalized = value.strip().lower()
         if not normalized:
             raise ValueError("value must not be blank")
         return normalized
@@ -108,5 +122,7 @@ class RetrievalMetrics(BaseModel):
 
 
 class RetrievalResponse(BaseModel):
+    response_mode: ResponseMode = "concise"
+    language: str = "en"
     items: list[RetrievalItem]
     metrics: RetrievalMetrics

@@ -216,7 +216,14 @@ async def trigger_embeddings_async(
     try:
         work_queue.reserve(settings.embedding_job_queue_max_size)
     except QueueCapacityError as exc:
-        raise HTTPException(status_code=503, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=503,
+            detail=build_error_detail(
+                code="EMBEDDING_QUEUE_CAPACITY_EXCEEDED",
+                message=str(exc),
+                retryable=True,
+            ),
+        ) from exc
 
     service = build_orchestration_service(
         db=db,
@@ -241,7 +248,14 @@ def get_async_embedding_job(job_id: str) -> EmbeddingAsyncJobStatusResponse:
     store = get_embedding_async_job_store()
     job = store.get(job_id)
     if job is None:
-        raise HTTPException(status_code=404, detail=f"Embedding job not found: {job_id}")
+        raise HTTPException(
+            status_code=404,
+            detail=build_error_detail(
+                code="EMBEDDING_JOB_NOT_FOUND",
+                message=f"Embedding job not found: {job_id}",
+                retryable=False,
+            ),
+        )
 
     return EmbeddingAsyncJobStatusResponse(
         job_id=job.job_id,

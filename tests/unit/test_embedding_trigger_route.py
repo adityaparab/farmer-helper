@@ -421,4 +421,17 @@ def test_embedding_trigger_async_route_rejects_when_queue_is_full(
     )
 
     assert response.status_code == 503
-    assert "at capacity" in response.json()["detail"]
+    detail = response.json()["detail"]
+    assert detail["status"] == "error"
+    assert detail["error_code"] == "EMBEDDING_QUEUE_CAPACITY_EXCEEDED"
+    assert "at capacity" in detail["message"]
+
+
+def test_embedding_async_job_status_not_found_returns_structured_error() -> None:
+    client = TestClient(app)
+    response = client.get("/embeddings/jobs/missing-job")
+
+    assert response.status_code == 404
+    detail = response.json()["detail"]
+    assert detail["status"] == "error"
+    assert detail["error_code"] == "EMBEDDING_JOB_NOT_FOUND"

@@ -1,7 +1,10 @@
+import json
 import logging
 import time
+from collections.abc import Iterator
 
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
 
 from farmer_helper.core.config import get_settings
@@ -37,6 +40,28 @@ router = APIRouter(prefix="/answers", tags=["answers"])
 logger = logging.getLogger(__name__)
 feedback_signal_logger = OnlineFeedbackSignalLogger(logger)
 _answer_cache: TTLCache[str, AnswerGenerationResponse] = TTLCache(max_entries=512)
+
+
+def _to_concise_text(answer: str) -> str:
+    trimmed = answer.strip()
+    if len(trimmed) <= 280:
+        return trimmed
+    return f"{trimmed[:277].rstrip()}..."
+
+
+def _apply_accessibility_contract(
+    response: AnswerGenerationResponse,
+    request: AnswerGenerationRequest,
+) -> AnswerGenerationResponse:
+    updated = response
+    if request.response_mode == "concise" and response.answer is not None:
+        updated = updated.model_copy(update={"answer": _to_concise_text(response.answer)})
+    return updated.model_copy(
+        update={
+            "response_mode": request.response_mode,
+            "language": request.language,
+        }
+    )
 
 
 def build_answer_generation_service(db: Session) -> AnswerGenerationService:
@@ -91,8 +116,9 @@ def generate_answer(
         cached = _answer_cache.get(cache_key)
         if cached is not None:
             logger.info("answers.cache.hit", extra={"route": "answers.generate"})
-            _log_route_completed(cached)
-            return cached
+            contracted_cached = _apply_accessibility_contract(cached, request)
+            _log_route_completed(contracted_cached)
+            return contracted_cached
 
     if request.idempotency_key is not None:
         store = get_idempotency_store()
@@ -124,8 +150,9 @@ def generate_answer(
 
         if replay_payload is not None:
             replay_response = AnswerGenerationResponse.model_validate(replay_payload)
-            _log_route_completed(replay_response)
-            return replay_response
+            contracted_replay = _apply_accessibility_contract(replay_response, request)
+            _log_route_completed(contracted_replay)
+            return contracted_replay
 
     service = build_answer_generation_service(db)
     try:
@@ -153,6 +180,8 @@ def generate_answer(
             degradation_code=exc.code,
         )
 
+    response = _apply_accessibility_contract(response, request)
+
     if request.idempotency_key is not None:
         store = get_idempotency_store()
         store.save(
@@ -166,6 +195,53 @@ def generate_answer(
         logger.info("answers.cache.miss", extra={"route": "answers.generate"})
     _log_route_completed(response)
     return response
+
+
+@router.post("/generate-stream")
+def generate_answer_stream(
+    request: AnswerGenerationRequest,
+    db: Session = Depends(get_db_session),
+) -> StreamingResponse:  # noqa: B008
+    service = build_answer_generation_service(db)
+    try:
+        response = service.generate(request)
+    except LLMProviderError as exc:
+        response = AnswerGenerationResponse(
+            decision="clarify",
+            clarification_message=(
+                "Answer generation is temporarily degraded. " "Please retry this request shortly."
+            ),
+            clarification_code="CLARIFY_SERVICE_DEGRADED",
+            reliability_status="degraded",
+            reliability_retryable=exc.retryable,
+            reliability_code=exc.code,
+            degraded=True,
+            degradation_code=exc.code,
+        )
+
+    contracted = _apply_accessibility_contract(response, request)
+    payload = contracted.model_dump(mode="json")
+
+    def _event_stream() -> Iterator[str]:
+        yield json.dumps(
+            {
+                "event": "metadata",
+                "response_mode": payload["response_mode"],
+                "language": payload["language"],
+                "decision": payload["decision"],
+            }
+        ) + "\n"
+
+        answer_text = payload.get("answer")
+        if isinstance(answer_text, str) and answer_text:
+            words = answer_text.split()
+            for index in range(0, len(words), 12):
+                chunk = " ".join(words[index : index + 12])
+                yield json.dumps({"event": "chunk", "text": chunk}) + "\n"
+
+        yield json.dumps({"event": "final", "response": payload}) + "\n"
+
+    return StreamingResponse(_event_stream(), media_type="application/x-ndjson")
 
 
 @router.post("/feedback", response_model=AnswerFeedbackResponse, status_code=202)

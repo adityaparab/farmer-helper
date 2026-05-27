@@ -79,6 +79,10 @@ Active implementation tracking for Phase 13 lives in:
 - `docs/plan/phase-13/EPIC.md`
 - `docs/plan/phase-13/tasks/`
 
+Active implementation tracking for Phase 14 lives in:
+- `docs/plan/phase-14/EPIC.md`
+- `docs/plan/phase-14/tasks/`
+
 GitHub issue status comment standard:
 - `docs/plan/ISSUE_COMMENT_TEMPLATE.md`
 - `scripts/post-issue-status-comment.ps1`
@@ -383,3 +387,21 @@ Concurrency validation:
 
 Scalability documentation:
 - `docs/development/SCALABILITY_RUNBOOK.md`
+
+## Phase 14 accessibility-ready API progress
+Response compatibility implementation:
+- `src/farmer_helper/schemas/answering.py`
+- `src/farmer_helper/schemas/retrieval.py`
+- `src/farmer_helper/api/routes/answers.py`
+- `src/farmer_helper/api/routes/retrieval.py`
+- `src/farmer_helper/api/routes/health.py`
+- `src/farmer_helper/api/routes/embeddings.py`
+
+Response compatibility validation:
+- `tests/unit/test_answer_generation_route.py`
+- `tests/unit/test_retrieval_route.py`
+- `tests/unit/test_embedding_trigger_route.py`
+- `tests/unit/test_health_error_contracts.py`
+
+Response compatibility documentation:
+- `docs/development/RESPONSE_COMPATIBILITY_GUIDE.md`

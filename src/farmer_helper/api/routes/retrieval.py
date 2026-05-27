@@ -11,6 +11,7 @@ from farmer_helper.schemas.retrieval import RetrievalRequest, RetrievalResponse
 from farmer_helper.schemas.session import FollowUpContextRequest
 from farmer_helper.services.performance.cache import TTLCache
 from farmer_helper.services.reliability.idempotency import compute_request_hash
+from farmer_helper.services.reliability.response_contracts import build_error_detail
 from farmer_helper.services.retrieval.fusion_service import RetrievalFusionService
 from farmer_helper.services.retrieval.keyword_retrieval_service import KeywordRetrievalService
 from farmer_helper.services.retrieval.query_service import RetrievalQueryService
@@ -86,11 +87,28 @@ def query_retrieval(
                 logger.info("retrieval.cache.hit", extra={"route": "retrieval.query"})
                 return cached
 
-            response = service.retrieve(effective_request)
+            response = service.retrieve(effective_request).model_copy(
+                update={
+                    "response_mode": request.response_mode,
+                    "language": request.language,
+                }
+            )
             _retrieval_cache.set(cache_key, response, ttl_seconds=cache_ttl)
             logger.info("retrieval.cache.miss", extra={"route": "retrieval.query"})
             return response
 
-        return service.retrieve(effective_request)
+        return service.retrieve(effective_request).model_copy(
+            update={
+                "response_mode": request.response_mode,
+                "language": request.language,
+            }
+        )
     except ValueError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+        raise HTTPException(
+            status_code=400,
+            detail=build_error_detail(
+                code="INVALID_RETRIEVAL_REQUEST",
+                message=str(exc),
+                retryable=False,
+            ),
+        ) from exc

@@ -481,3 +481,73 @@ def test_answer_generation_route_uses_cache_when_enabled(monkeypatch: pytest.Mon
     assert second.status_code == 200
     assert first.json() == second.json()
     assert service.calls == 1
+
+
+def test_answer_generation_route_supports_detailed_mode_and_language(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    reset_idempotency_store()
+    from farmer_helper.api.routes import answers as answers_route
+
+    monkeypatch.setattr(answers_route, "build_answer_generation_service", _build_fake_success)
+
+    client = TestClient(app)
+    response = client.post(
+        "/answers/generate",
+        json={
+            "question": "How can I improve soil moisture retention?",
+            "response_mode": "detailed",
+            "language": "hi",
+            "retrieved_chunks": [
+                {
+                    "citation": {
+                        "document_id": 1,
+                        "chunk_index": 0,
+                        "content_hash": "h-1-0",
+                    },
+                    "text": "Mulching helps reduce evaporation.",
+                    "score": 0.9,
+                }
+            ],
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["response_mode"] == "detailed"
+    assert payload["language"] == "hi"
+
+
+def test_answer_generation_stream_route_returns_ndjson_events(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    reset_idempotency_store()
+    from farmer_helper.api.routes import answers as answers_route
+
+    monkeypatch.setattr(answers_route, "build_answer_generation_service", _build_fake_success)
+
+    client = TestClient(app)
+    response = client.post(
+        "/answers/generate-stream",
+        json={
+            "question": "How can I improve soil moisture retention?",
+            "response_mode": "concise",
+            "language": "en",
+            "retrieved_chunks": [
+                {
+                    "citation": {
+                        "document_id": 1,
+                        "chunk_index": 0,
+                        "content_hash": "h-1-0",
+                    },
+                    "text": "Mulching helps reduce evaporation.",
+                    "score": 0.9,
+                }
+            ],
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("application/x-ndjson")
+    assert '"event": "metadata"' in response.text
+    assert '"event": "final"' in response.text

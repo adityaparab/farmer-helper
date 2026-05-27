@@ -53,6 +53,9 @@
 42. Configurable SQLAlchemy connection pooling for concurrent runtime usage.
 43. Async embedding worker queue capacity guard with persistent job status/result records.
 44. Concurrent mixed embedding/retrieval integration coverage for coexistence validation.
+45. Accessibility-ready API contracts with response-mode and language hooks.
+46. Standardized structured error payloads across retrieval/health/embedding asynchronous flows.
+47. Answer streaming prototype endpoint with NDJSON event contracts.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`
@@ -67,6 +70,7 @@
 10. Performance and cost runbook: `docs/development/PERFORMANCE_COST_RUNBOOK.md`
 11. Admin operations runbook: `docs/development/ADMIN_OPERATIONS_RUNBOOK.md`
 12. Scalability and concurrency runbook: `docs/development/SCALABILITY_RUNBOOK.md`
+13. Response compatibility guide: `docs/development/RESPONSE_COMPATIBILITY_GUIDE.md`
 
 ## Next phases
 1. Hybrid retrieval and reranking pipeline.
