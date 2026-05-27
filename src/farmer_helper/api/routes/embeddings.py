@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -29,6 +31,7 @@ from farmer_helper.services.reliability.idempotency import (
 from farmer_helper.services.reliability.response_contracts import build_error_detail
 
 router = APIRouter(prefix="/embeddings", tags=["embeddings"])
+logger = logging.getLogger(__name__)
 
 
 def build_orchestration_service(
@@ -80,6 +83,15 @@ async def trigger_embeddings(
                 request_hash=request_hash,
             )
         except IdempotencyConflictError as exc:
+            logger.warning(
+                "reliability.conflict",
+                extra={
+                    "route": "embeddings.trigger",
+                    "reliability_status": "error",
+                    "reliability_code": "IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST",
+                    "reliability_retryable": False,
+                },
+            )
             raise HTTPException(
                 status_code=409,
                 detail=build_error_detail(
@@ -107,6 +119,15 @@ async def trigger_embeddings(
             chunks=request.chunks,
         )
     except EmbeddingProviderError as exc:
+        logger.warning(
+            "reliability.degraded",
+            extra={
+                "route": "embeddings.trigger",
+                "reliability_status": "degraded",
+                "reliability_code": exc.code,
+                "reliability_retryable": exc.retryable,
+            },
+        )
         response = EmbeddingOrchestrationResult(
             document_id=request.document_id,
             model=request.model,

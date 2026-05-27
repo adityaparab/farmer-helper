@@ -5,15 +5,15 @@
 Add structured observability fields for reliability failures and degraded outcomes so operational analysis can distinguish retry, timeout, circuit-open, and idempotency conflict paths.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add structured reliability observability fields to relevant logs.
-2. Ensure degraded and conflict outcomes emit stable, queryable identifiers.
-3. Add tests for observability payload field presence/values.
-4. Keep observability fields low-cardinality and deterministic.
+## What was done
+1. Added structured reliability log events for degraded outcomes and idempotency conflicts in answers and embeddings routes.
+2. Added stable observability fields: route, reliability_status, reliability_code, reliability_retryable.
+3. Added route-level tests that assert observability log emission and field values.
+4. Kept observability identifiers low-cardinality and deterministic.
 
 ## Decisions made
 - Observability fields should align with normalized reliability contract codes.

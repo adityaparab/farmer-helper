@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
@@ -24,6 +26,7 @@ from farmer_helper.services.reliability.response_contracts import build_error_de
 from farmer_helper.services.session.context_resolver import FollowUpContextResolver
 
 router = APIRouter(prefix="/answers", tags=["answers"])
+logger = logging.getLogger(__name__)
 
 
 def build_answer_generation_service(db: Session) -> AnswerGenerationService:
@@ -66,6 +69,15 @@ def generate_answer(
                 request_hash=request_hash,
             )
         except IdempotencyConflictError as exc:
+            logger.warning(
+                "reliability.conflict",
+                extra={
+                    "route": "answers.generate",
+                    "reliability_status": "error",
+                    "reliability_code": "IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST",
+                    "reliability_retryable": False,
+                },
+            )
             raise HTTPException(
                 status_code=409,
                 detail=build_error_detail(
@@ -82,6 +94,15 @@ def generate_answer(
     try:
         response = service.generate(request)
     except LLMProviderError as exc:
+        logger.warning(
+            "reliability.degraded",
+            extra={
+                "route": "answers.generate",
+                "reliability_status": "degraded",
+                "reliability_code": exc.code,
+                "reliability_retryable": exc.retryable,
+            },
+        )
         response = AnswerGenerationResponse(
             decision="clarify",
             clarification_message=(

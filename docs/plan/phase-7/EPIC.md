@@ -19,5 +19,5 @@ This Epic maps to Phase 7 in `docs/plan/PHASES.md` and tracks local sub-issue st
 | P7-T04 | Implement graceful degradation paths | Completed | 2026-05-27 | Added deterministic degraded responses for answer and embedding provider failures with tests |
 | P7-T05 | Normalize internal-to-user error responses | Completed | 2026-05-27 | Added normalized reliability response fields and shared error-detail contract across routes |
 | P7-T06 | Add failure injection tests | Completed | 2026-05-27 | Added deterministic failure injection coverage for degraded and idempotent replay paths |
-| P7-T07 | Add failure observability fields | In progress | 2026-05-27 | Next active task |
-| P7-T08 | Document resilience and runbook guidance | Not started | - | Pending |
+| P7-T07 | Add failure observability fields | Completed | 2026-05-27 | Added structured reliability observability logs and assertions for degraded/conflict paths |
+| P7-T08 | Document resilience and runbook guidance | In progress | 2026-05-27 | Next active task |

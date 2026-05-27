@@ -318,3 +318,102 @@ def test_answer_generation_route_idempotent_replay_for_degraded_response(monkeyp
     assert first.json() == second.json()
     assert first.json()["reliability_code"] == "LLM_PROVIDER_TIMEOUT"
     assert service.calls == 1
+
+
+def test_answer_generation_route_logs_degraded_observability(monkeypatch, caplog) -> None:
+    reset_idempotency_store()
+    caplog.set_level("WARNING")
+    from farmer_helper.api.routes import answers as answers_route
+
+    monkeypatch.setattr(
+        answers_route,
+        "build_answer_generation_service",
+        lambda _db: FakeFailService(),
+    )
+
+    client = TestClient(app)
+    response = client.post(
+        "/answers/generate",
+        json={
+            "question": "How can I improve soil moisture retention?",
+            "retrieved_chunks": [
+                {
+                    "citation": {
+                        "document_id": 1,
+                        "chunk_index": 0,
+                        "content_hash": "h-1-0",
+                    },
+                    "text": "Mulching helps reduce evaporation.",
+                    "score": 0.9,
+                }
+            ],
+        },
+    )
+
+    assert response.status_code == 200
+    assert any(
+        record.message == "reliability.degraded"
+        and getattr(record, "route", None) == "answers.generate"
+        and getattr(record, "reliability_status", None) == "degraded"
+        and getattr(record, "reliability_code", None) == "LLM_PROVIDER_UNAVAILABLE"
+        for record in caplog.records
+    )
+
+
+def test_answer_generation_route_logs_conflict_observability(monkeypatch, caplog) -> None:
+    reset_idempotency_store()
+    caplog.set_level("WARNING")
+    from farmer_helper.api.routes import answers as answers_route
+
+    monkeypatch.setattr(
+        answers_route,
+        "build_answer_generation_service",
+        lambda _db: FakeSuccessService(),
+    )
+
+    client = TestClient(app)
+    first = client.post(
+        "/answers/generate",
+        json={
+            "question": "How can I improve soil moisture retention?",
+            "idempotency_key": "answer-conflict-observe-1",
+            "retrieved_chunks": [
+                {
+                    "citation": {
+                        "document_id": 1,
+                        "chunk_index": 0,
+                        "content_hash": "h-1-0",
+                    },
+                    "text": "Mulching helps reduce evaporation.",
+                    "score": 0.9,
+                }
+            ],
+        },
+    )
+    second = client.post(
+        "/answers/generate",
+        json={
+            "question": "How can I improve irrigation timing?",
+            "idempotency_key": "answer-conflict-observe-1",
+            "retrieved_chunks": [
+                {
+                    "citation": {
+                        "document_id": 1,
+                        "chunk_index": 0,
+                        "content_hash": "h-1-0",
+                    },
+                    "text": "Mulching helps reduce evaporation.",
+                    "score": 0.9,
+                }
+            ],
+        },
+    )
+
+    assert first.status_code == 200
+    assert second.status_code == 409
+    assert any(
+        record.message == "reliability.conflict"
+        and getattr(record, "route", None) == "answers.generate"
+        and getattr(record, "reliability_code", None) == "IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST"
+        for record in caplog.records
+    )

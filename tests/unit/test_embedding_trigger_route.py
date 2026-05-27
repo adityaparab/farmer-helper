@@ -214,3 +214,75 @@ def test_embedding_trigger_route_idempotent_replay_for_degraded_response(monkeyp
     assert first.json() == second.json()
     assert first.json()["reliability_code"] == "EMBEDDING_PROVIDER_TIMEOUT"
     assert service.calls == 1
+
+
+def test_embedding_trigger_route_logs_degraded_observability(monkeypatch, caplog) -> None:
+    reset_idempotency_store()
+    caplog.set_level("WARNING")
+    from farmer_helper.api.routes import embeddings as embeddings_route
+
+    monkeypatch.setattr(
+        embeddings_route,
+        "build_orchestration_service",
+        lambda **_: FakeFailService(),
+    )
+
+    client = TestClient(app)
+    response = client.post(
+        "/embeddings/trigger",
+        json={
+            "document_id": 43,
+            "model": "test-model",
+            "chunks": [{"chunk_index": 0, "text": "soil", "content_hash": "h0"}],
+        },
+    )
+
+    assert response.status_code == 200
+    assert any(
+        record.message == "reliability.degraded"
+        and getattr(record, "route", None) == "embeddings.trigger"
+        and getattr(record, "reliability_status", None) == "degraded"
+        and getattr(record, "reliability_code", None) == "EMBEDDING_PROVIDER_UNAVAILABLE"
+        for record in caplog.records
+    )
+
+
+def test_embedding_trigger_route_logs_conflict_observability(monkeypatch, caplog) -> None:
+    reset_idempotency_store()
+    caplog.set_level("WARNING")
+    from farmer_helper.api.routes import embeddings as embeddings_route
+
+    monkeypatch.setattr(
+        embeddings_route,
+        "build_orchestration_service",
+        lambda **_: FakeSuccessService(),
+    )
+
+    client = TestClient(app)
+    first = client.post(
+        "/embeddings/trigger",
+        json={
+            "document_id": 53,
+            "model": "test-model",
+            "idempotency_key": "embed-conflict-observe-1",
+            "chunks": [{"chunk_index": 0, "text": "soil", "content_hash": "h0"}],
+        },
+    )
+    second = client.post(
+        "/embeddings/trigger",
+        json={
+            "document_id": 54,
+            "model": "test-model",
+            "idempotency_key": "embed-conflict-observe-1",
+            "chunks": [{"chunk_index": 0, "text": "soil", "content_hash": "h0"}],
+        },
+    )
+
+    assert first.status_code == 200
+    assert second.status_code == 409
+    assert any(
+        record.message == "reliability.conflict"
+        and getattr(record, "route", None) == "embeddings.trigger"
+        and getattr(record, "reliability_code", None) == "IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST"
+        for record in caplog.records
+    )
