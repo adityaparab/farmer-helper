@@ -1,9 +1,14 @@
+from pathlib import Path
+
+import pytest
 from fastapi.testclient import TestClient
 
 from farmer_helper.core.config import get_settings
 from farmer_helper.db.base import get_engine
 from farmer_helper.db.models.base import Base
 from farmer_helper.main import app
+
+PDF_BYTES = b"%PDF-1.4\n1 0 obj\n<<>>\nendobj\n%%EOF\n"
 
 
 def _reset_db() -> None:
@@ -21,6 +26,12 @@ def _admin_headers(client: TestClient, actor_id: str) -> dict[str, str]:
     if api_key is not None:
         headers["x-api-key"] = api_key
     return headers
+
+
+def _configure_upload_dir(monkeypatch: pytest.MonkeyPatch, upload_dir: Path) -> None:
+    monkeypatch.setenv("ADMIN_UPLOAD_DIR", str(upload_dir))
+    monkeypatch.setenv("ADMIN_UPLOAD_MAX_SIZE_BYTES", "1024")
+    get_settings.cache_clear()
 
 
 def test_admin_ingestion_reindex_and_status_workflow() -> None:
@@ -123,6 +134,76 @@ def test_admin_dashboard_metrics_contract() -> None:
     assert payload["qa_review_items_by_status"] == {"pending": 1}
     assert payload["chat_sessions_by_status"] == {}
     assert payload["embedding_jobs_by_status"] == {}
+
+
+def test_admin_pdf_upload_stores_file_starts_job_and_audits(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _reset_db()
+    _configure_upload_dir(monkeypatch, tmp_path / "uploads")
+    client = TestClient(app)
+    headers = _admin_headers(client, "upload-admin")
+
+    upload = client.post(
+        "/admin/documents/upload",
+        headers=headers,
+        data={"content_version": "content-v2"},
+        files={"file": ("soil-guide.pdf", PDF_BYTES, "application/pdf")},
+    )
+    assert upload.status_code == 201
+
+    payload = upload.json()
+    assert payload["status"] == "pending"
+    assert payload["document_created"] is True
+    assert payload["size_bytes"] == len(PDF_BYTES)
+    assert len(payload["content_hash"]) == 64
+    assert Path(payload["source_path"]).exists()
+
+    duplicate = client.post(
+        "/admin/documents/upload",
+        headers=headers,
+        data={"content_version": "content-v2"},
+        files={"file": ("soil-guide.pdf", PDF_BYTES, "application/pdf")},
+    )
+    assert duplicate.status_code == 201
+    assert duplicate.json()["document_id"] == payload["document_id"]
+    assert duplicate.json()["document_created"] is False
+    assert duplicate.json()["job_id"] != payload["job_id"]
+
+    logs = client.get("/admin/access-audit", headers=headers)
+    assert logs.status_code == 200
+    assert any(item["action"] == "admin.document.upload" for item in logs.json())
+
+    get_settings.cache_clear()
+
+
+def test_admin_pdf_upload_rejects_invalid_type_and_size(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _reset_db()
+    _configure_upload_dir(monkeypatch, tmp_path / "uploads")
+    client = TestClient(app)
+    headers = _admin_headers(client, "upload-admin")
+
+    invalid_type = client.post(
+        "/admin/documents/upload",
+        headers=headers,
+        files={"file": ("notes.txt", PDF_BYTES, "application/pdf")},
+    )
+    assert invalid_type.status_code == 400
+
+    monkeypatch.setenv("ADMIN_UPLOAD_MAX_SIZE_BYTES", "8")
+    get_settings.cache_clear()
+    too_large = client.post(
+        "/admin/documents/upload",
+        headers=headers,
+        files={"file": ("large.pdf", PDF_BYTES, "application/pdf")},
+    )
+    assert too_large.status_code == 413
+
+    get_settings.cache_clear()
 
 
 def test_admin_version_gold_answer_review_queue_and_audit() -> None:

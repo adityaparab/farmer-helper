@@ -27,6 +27,16 @@ class AdminJobResponse(BaseModel):
     status: AdminJobStatus
 
 
+class AdminPdfUploadResponse(BaseModel):
+    job_id: int
+    document_id: int
+    status: AdminJobStatus
+    source_path: str
+    content_hash: str
+    size_bytes: int
+    document_created: bool
+
+
 class AdminJobStatusUpdateRequest(BaseModel):
     status: AdminJobStatus
     error_code: str | None = None

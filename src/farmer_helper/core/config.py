@@ -73,6 +73,11 @@ class Settings(BaseSettings):
     embedding_job_queue_max_size: int = Field(default=100, alias="EMBEDDING_JOB_QUEUE_MAX_SIZE")
     frontend_dist_dir: str = Field(default="frontend/dist", alias="FRONTEND_DIST_DIR")
     frontend_serve_enabled: bool = Field(default=True, alias="FRONTEND_SERVE_ENABLED")
+    admin_upload_dir: str = Field(default="data/uploads/admin", alias="ADMIN_UPLOAD_DIR")
+    admin_upload_max_size_bytes: int = Field(
+        default=25 * 1024 * 1024,
+        alias="ADMIN_UPLOAD_MAX_SIZE_BYTES",
+    )
     auth_jwt_secret: str = Field(
         default="development-only-change-me",
         alias="AUTH_JWT_SECRET",

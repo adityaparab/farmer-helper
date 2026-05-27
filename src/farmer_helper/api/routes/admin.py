@@ -1,9 +1,12 @@
+import hashlib
+from pathlib import Path
 from typing import cast
 
-from fastapi import APIRouter, Depends, Header, HTTPException, Request
+from fastapi import APIRouter, Depends, File, Form, Header, HTTPException, Request, UploadFile
 from sqlalchemy import func, select
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import InstrumentedAttribute, Session
 
+from farmer_helper.core.config import get_settings
 from farmer_helper.db.base import get_db_session
 from farmer_helper.db.models.foundation import (
     AccessAuditLog,
@@ -33,6 +36,7 @@ from farmer_helper.schemas.admin import (
     AdminJobResponse,
     AdminJobStatus,
     AdminJobStatusUpdateRequest,
+    AdminPdfUploadResponse,
     AdminReindexJobCreateRequest,
     GoldAnswerCreateRequest,
     GoldAnswerResponse,
@@ -46,10 +50,12 @@ from farmer_helper.schemas.admin import (
     VersionTrackingResponse,
 )
 from farmer_helper.services.auth.dependencies import require_admin_user
+from farmer_helper.services.ingestion.idempotency_service import IngestionIdempotencyService
 from farmer_helper.services.ingestion.status_service import IngestionStatusService
 from farmer_helper.services.ingestion.trace_logger import IngestionTraceLogger
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin_user)])
+PDF_CONTENT_TYPES = {"application/pdf", "application/x-pdf"}
 
 
 def _actor_id(x_actor_id: str | None) -> str:
@@ -92,9 +98,41 @@ def _count_rows(db: Session, model: type[object]) -> int:
     return int(db.scalar(select(func.count()).select_from(model)) or 0)
 
 
-def _count_by_field(db: Session, field: object, model: type[object]) -> dict[str, int]:
+def _count_by_field(
+    db: Session,
+    field: InstrumentedAttribute[str],
+    model: type[object],
+) -> dict[str, int]:
     rows = db.execute(select(field, func.count()).select_from(model).group_by(field)).all()
     return {str(key): int(value) for key, value in rows}
+
+
+def _safe_path_segment(value: str) -> str:
+    allowed = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_.")
+    segment = "".join(character if character in allowed else "-" for character in value.strip())
+    return segment.strip(".-")[:64] or "v1"
+
+
+async def _read_pdf_upload(file: UploadFile, max_size_bytes: int) -> bytes:
+    filename = Path(file.filename or "").name
+    if not filename.lower().endswith(".pdf"):
+        raise HTTPException(status_code=400, detail="Only .pdf uploads are supported")
+
+    if file.content_type and file.content_type not in PDF_CONTENT_TYPES:
+        raise HTTPException(status_code=400, detail="Uploaded file must use a PDF content type")
+
+    content = await file.read(max_size_bytes + 1)
+    if not content:
+        raise HTTPException(status_code=400, detail="Uploaded PDF cannot be empty")
+    if len(content) > max_size_bytes:
+        raise HTTPException(
+            status_code=413,
+            detail="Uploaded PDF exceeds the configured size limit",
+        )
+    if not content.startswith(b"%PDF-"):
+        raise HTTPException(status_code=400, detail="Uploaded file does not look like a PDF")
+
+    return content
 
 
 @router.get("/dashboard/metrics", response_model=AdminDashboardMetricsResponse)
@@ -133,6 +171,81 @@ def get_dashboard_metrics(
             EmbeddingAsyncJobRecord.status,
             EmbeddingAsyncJobRecord,
         ),
+    )
+
+
+@router.post("/documents/upload", response_model=AdminPdfUploadResponse, status_code=201)
+async def upload_pdf_document(
+    request: Request,
+    file: UploadFile = File(...),
+    content_version: str = Form(default="v1"),
+    db: Session = Depends(get_db_session),
+    x_actor_id: str | None = Header(default=None),
+) -> AdminPdfUploadResponse:  # noqa: B008
+    """Store an admin-uploaded PDF and start a pending ingestion job.
+
+    The endpoint enforces PDF-only uploads, configured size limits, deterministic storage
+    paths, document idempotency by content hash and version, and an audit entry for each
+    accepted upload. The created ingestion job remains pending for downstream processing.
+
+    Returns:
+        AdminPdfUploadResponse with document identity, pending job ID, and stored source path.
+    """
+    settings = get_settings()
+    content = await _read_pdf_upload(file, settings.admin_upload_max_size_bytes)
+    content_hash = hashlib.sha256(content).hexdigest()
+    safe_version = _safe_path_segment(content_version)
+    upload_dir = Path(settings.admin_upload_dir) / safe_version
+    upload_dir.mkdir(parents=True, exist_ok=True)
+    stored_path = upload_dir / f"{content_hash}.pdf"
+    stored_path.write_bytes(content)
+    source_path = str(stored_path.resolve())
+
+    document_result = IngestionIdempotencyService(DocumentRepository(db)).ensure_document(
+        source_path=source_path,
+        content_hash=content_hash,
+        version=content_version,
+    )
+    status_service = IngestionStatusService(
+        repository=IngestionJobRepository(db),
+        trace_logger=IngestionTraceLogger(),
+    )
+    job_id = status_service.start_job(
+        document_id=document_result.document_id,
+        metadata={
+            "workflow": "admin_pdf_upload",
+            "source_path": source_path,
+            "original_filename": Path(file.filename or "upload.pdf").name,
+            "content_hash": content_hash,
+            "content_version": content_version,
+            "size_bytes": str(len(content)),
+            "document_created": str(document_result.created).lower(),
+        },
+    )
+
+    actor = _actor_id(x_actor_id)
+    _audit(
+        db=db,
+        request=request,
+        actor_id=actor,
+        action="admin.document.upload",
+        target_type="ingestion_job",
+        target_id=str(job_id),
+        details={
+            "document_id": str(document_result.document_id),
+            "content_hash": content_hash,
+            "size_bytes": str(len(content)),
+        },
+    )
+
+    return AdminPdfUploadResponse(
+        job_id=job_id,
+        document_id=document_result.document_id,
+        status="pending",
+        source_path=source_path,
+        content_hash=content_hash,
+        size_bytes=len(content),
+        document_created=document_result.created,
     )
 
 

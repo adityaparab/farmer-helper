@@ -12,6 +12,14 @@ This guide documents the current Phase 2 ingestion pipeline behavior, module flo
 6. Enforce idempotent document persistence (`IngestionIdempotencyService`) using `content_hash + version`.
 7. Persist job state transitions (`IngestionStatusService`) and emit trace events (`IngestionTraceLogger`).
 
+## Admin PDF uploads
+- Admin users can create pending ingestion jobs through `POST /admin/documents/upload`.
+- The endpoint accepts multipart form data with a PDF `file` and optional `content_version`.
+- Uploads are stored under `ADMIN_UPLOAD_DIR/<safe-content-version>/<sha256>.pdf`; the default root is `data/uploads/admin`.
+- The upload size cap is controlled by `ADMIN_UPLOAD_MAX_SIZE_BYTES`, defaulting to 25 MiB.
+- Accepted uploads must have a `.pdf` filename, PDF content type, non-empty body, stay within the configured size cap, and start with the `%PDF-` signature.
+- The endpoint computes the SHA-256 content hash, reuses existing documents by `content_hash + content_version`, starts a new pending ingestion job, and records an `admin.document.upload` audit event.
+
 ## Primary modules
 - Input validation: `src/farmer_helper/services/ingestion/file_validator.py`
 - PDF extraction: `src/farmer_helper/services/ingestion/pdf_extractor.py`
