@@ -7,8 +7,9 @@ Retrieve top-K relevant chunks via vector and keyword search with optional reran
 This Epic maps to Phase 4 in `docs/plan/PHASES.md` and tracks local sub-issue status.
 
 ## Epic status
-- Status: In progress
+- Status: Completed
 - Started on: 2026-05-27
+- Completed on: 2026-05-27
 
 ## Sub-issues
 | ID | Title | Status | Last updated | Notes |
@@ -19,5 +20,5 @@ This Epic maps to Phase 4 in `docs/plan/PHASES.md` and tracks local sub-issue st
 | P4-T04 | Add pluggable reranker interface | Completed | 2026-05-27 | Added reranker contracts and baseline implementations with tests |
 | P4-T05 | Add retrieval API endpoint with score and citation metadata | Completed | 2026-05-27 | Added retrieval query route, orchestration service, and route/service tests |
 | P4-T06 | Add end-to-end retrieval tests and metrics | Completed | 2026-05-27 | Added retrieval response metrics plus integration and smoke tests |
-| P4-T07 | Log retrieval diagnostics and timings | In progress | 2026-05-27 | Next active task |
-| P4-T08 | Document fusion and reranking behavior | Not started | - | Pending |
+| P4-T07 | Log retrieval diagnostics and timings | Completed | 2026-05-27 | Added structured retrieval diagnostics logs with per-stage timings |
+| P4-T08 | Document fusion and reranking behavior | Completed | 2026-05-27 | Added retrieval pipeline documentation with fusion, reranking, metrics, and API behavior |

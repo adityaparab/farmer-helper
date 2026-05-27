@@ -5,14 +5,14 @@
 Add structured diagnostics and timing logs for retrieval pipeline stages to improve observability and debugging.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Capture per-stage retrieval timings (vector, keyword, fusion, rerank, total).
-2. Emit structured retrieval diagnostics logs with request identifiers.
-3. Add unit tests for deterministic diagnostics payload fields.
+## What was done
+1. Added `RetrievalDiagnosticsLogger` in `src/farmer_helper/services/retrieval/diagnostics_logger.py`.
+2. Added per-stage timing capture and structured diagnostics logging in `src/farmer_helper/services/retrieval/query_service.py`.
+3. Added diagnostics log payload tests in `tests/unit/test_retrieval_diagnostics_logging.py`.
 
 ## Decisions made
 - Logging should remain structured and avoid high-cardinality payload fields.

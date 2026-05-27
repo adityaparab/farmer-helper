@@ -177,3 +177,6 @@ Retrieval API and tests:
 - `tests/unit/test_retrieval_route.py`
 - `tests/integration/test_retrieval_query_integration.py`
 - `tests/smoke/test_retrieval_query.py`
+
+Retrieval behavior documentation:
+- `docs/development/RETRIEVAL_PIPELINE.md`
