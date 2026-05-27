@@ -15,7 +15,7 @@ This phase turns the Phase 16 frontend scaffold into an authenticated applicatio
 ## Sub-issues
 | ID | Title | Status | Remote issue | Last updated | Notes |
 |---|---|---|---|---|---|
-| P18-T01 | Implement frontend API client foundation | Not Started | https://github.com/adityaparab/farmer-helper/issues/185 | 2026-05-27 | Typed request helpers, API errors, token plumbing |
+| P18-T01 | Implement frontend API client foundation | Completed | https://github.com/adityaparab/farmer-helper/issues/185 | 2026-05-27 | Typed request helpers, API errors, token plumbing delivered |
 | P18-T02 | Connect auth session and role routing | Not Started | https://github.com/adityaparab/farmer-helper/issues/186 | 2026-05-27 | Replace mock role routing with backend auth |
 | P18-T03 | Connect admin metrics and PDF upload UI | Not Started | https://github.com/adityaparab/farmer-helper/issues/187 | 2026-05-27 | Metrics query and multipart upload integration |
 | P18-T04 | Connect user chat and history UI | Not Started | https://github.com/adityaparab/farmer-helper/issues/188 | 2026-05-27 | Answer/session API integration with TanStack AI-ready boundaries |
