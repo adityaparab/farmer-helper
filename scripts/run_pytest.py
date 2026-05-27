@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -17,11 +19,13 @@ def main() -> int:
         return 2
 
     src_path = Path(__file__).resolve().parents[1] / "src"
-    sys.path.insert(0, str(src_path))
-
-    import pytest
-
-    return pytest.main(args)
+    env = os.environ.copy()
+    existing_pythonpath = env.get("PYTHONPATH", "")
+    env["PYTHONPATH"] = (
+        f"{src_path}{os.pathsep}{existing_pythonpath}" if existing_pythonpath else str(src_path)
+    )
+    result = subprocess.run([sys.executable, "-m", "pytest", *args], env=env, check=False)
+    return result.returncode
 
 
 if __name__ == "__main__":
