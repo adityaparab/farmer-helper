@@ -1,8 +1,10 @@
 import logging
+from pathlib import Path
 
-from fastapi import FastAPI, Request
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.routing import APIRoute
+from fastapi.staticfiles import StaticFiles
 
 from farmer_helper.api.middleware.request_id import request_id_middleware
 from farmer_helper.api.routes.admin import router as admin_router
@@ -136,10 +138,60 @@ def create_app() -> FastAPI:
     app.include_router(embeddings_router)
     app.include_router(retrieval_router)
     app.include_router(answers_router)
+    _register_frontend_routes(app, settings)
 
     app.add_exception_handler(Exception, global_exception_handler)
 
     return app
+
+
+def _register_frontend_routes(app: FastAPI, settings: object) -> None:
+    """Register static and fallback routes for the built web frontend when available."""
+    frontend_serve_enabled = bool(getattr(settings, "frontend_serve_enabled", False))
+    if not frontend_serve_enabled:
+        return
+
+    dist_dir = Path(getattr(settings, "frontend_dist_dir", "frontend/dist")).resolve()
+    index_file = dist_dir / "index.html"
+    assets_dir = dist_dir / "assets"
+
+    if not index_file.exists() or not dist_dir.exists():
+        logging.getLogger(__name__).info(
+            "frontend.static.disabled",
+            extra={"frontend_dist_dir": str(dist_dir), "reason": "missing_dist_or_index"},
+        )
+        return
+
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="frontend-assets")
+
+    app.mount("/frontend-static", StaticFiles(directory=str(dist_dir)), name="frontend-static")
+
+    api_prefixes = (
+        "health",
+        "admin",
+        "embeddings",
+        "retrieval",
+        "answers",
+        "auth",
+        "docs",
+        "redoc",
+        "openapi.json",
+    )
+
+    @app.get("/", include_in_schema=False)
+    def frontend_index() -> FileResponse:  # pyright: ignore[reportUnusedFunction]
+        return FileResponse(index_file)
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    def frontend_fallback(full_path: str) -> FileResponse:  # pyright: ignore[reportUnusedFunction]
+        if any(full_path == prefix or full_path.startswith(f"{prefix}/") for prefix in api_prefixes):
+            raise HTTPException(status_code=404, detail="Not Found")
+
+        candidate = dist_dir / full_path
+        if candidate.exists() and candidate.is_file():
+            return FileResponse(candidate)
+        return FileResponse(index_file)
 
 
 app = create_app()

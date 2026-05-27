@@ -71,6 +71,8 @@ class Settings(BaseSettings):
     )
     embedding_worker_count: int = Field(default=2, alias="EMBEDDING_WORKER_COUNT")
     embedding_job_queue_max_size: int = Field(default=100, alias="EMBEDDING_JOB_QUEUE_MAX_SIZE")
+    frontend_dist_dir: str = Field(default="frontend/dist", alias="FRONTEND_DIST_DIR")
+    frontend_serve_enabled: bool = Field(default=True, alias="FRONTEND_SERVE_ENABLED")
 
 
 @lru_cache(maxsize=1)

@@ -133,7 +133,16 @@ def evaluate_request_security(request: Request) -> JSONResponse | None:
     The docstring is intentionally explicit so future MCP tooling can infer purpose, inputs,
     outputs, and orchestration boundaries from the source code.
     """
-    if request.url.path.startswith("/health"):
+    request_path = request.url.path
+    if request_path.startswith("/health"):
+        return None
+    if request_path == "/" or request_path.startswith("/assets"):
+        return None
+    if request_path.startswith("/frontend-static"):
+        return None
+    if request_path.startswith("/auth"):
+        return None
+    if request_path in {"/favicon.ico", "/manifest.webmanifest"}:
         return None
 
     settings = get_settings()
