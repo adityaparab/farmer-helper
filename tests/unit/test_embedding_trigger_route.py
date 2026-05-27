@@ -1,25 +1,40 @@
+from typing import Any
+
+import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
 from farmer_helper.main import app
-from farmer_helper.schemas.embedding import EmbeddingOrchestrationResult
+from farmer_helper.schemas.embedding import EmbeddingOrchestrationResult, EmbeddingSourceChunk
 from farmer_helper.services.embedding.provider import EmbeddingProviderError
 from farmer_helper.services.reliability.idempotency import reset_idempotency_store
 
 
 class FakeSuccessService:
-    async def embed_and_persist(self, **kwargs) -> EmbeddingOrchestrationResult:  # type: ignore[no-untyped-def]
+    async def embed_and_persist(
+        self,
+        document_id: int,
+        model: str,
+        chunks: list[EmbeddingSourceChunk],
+    ) -> EmbeddingOrchestrationResult:
         return EmbeddingOrchestrationResult(
-            document_id=kwargs["document_id"],
-            model=kwargs["model"],
+            document_id=document_id,
+            model=model,
             provider="mock-provider",
             version="v1",
             dimensions=8,
-            persisted_count=len(kwargs["chunks"]),
+            persisted_count=len(chunks),
         )
 
 
 class FakeFailService:
-    async def embed_and_persist(self, **kwargs) -> EmbeddingOrchestrationResult:  # type: ignore[no-untyped-def]
+    async def embed_and_persist(
+        self,
+        document_id: int,
+        model: str,
+        chunks: list[EmbeddingSourceChunk],
+    ) -> EmbeddingOrchestrationResult:
+        del document_id, model, chunks
         raise EmbeddingProviderError(
             code="EMBEDDING_PROVIDER_UNAVAILABLE",
             message="provider unavailable",
@@ -32,7 +47,13 @@ class CountingFailService:
         self.code = code
         self.calls = 0
 
-    async def embed_and_persist(self, **kwargs) -> EmbeddingOrchestrationResult:  # type: ignore[no-untyped-def]
+    async def embed_and_persist(
+        self,
+        document_id: int,
+        model: str,
+        chunks: list[EmbeddingSourceChunk],
+    ) -> EmbeddingOrchestrationResult:
+        del document_id, model, chunks
         self.calls += 1
         raise EmbeddingProviderError(
             code=self.code,
@@ -41,14 +62,36 @@ class CountingFailService:
         )
 
 
-def test_embedding_trigger_route_success(monkeypatch) -> None:
+def _build_fake_success_service(
+    db: Session,
+    provider_name: str,
+    version: str,
+    batch_size: int,
+    dimensions: int,
+) -> FakeSuccessService:
+    del db, provider_name, version, batch_size, dimensions
+    return FakeSuccessService()
+
+
+def _build_fake_fail_service(
+    db: Session,
+    provider_name: str,
+    version: str,
+    batch_size: int,
+    dimensions: int,
+) -> FakeFailService:
+    del db, provider_name, version, batch_size, dimensions
+    return FakeFailService()
+
+
+def test_embedding_trigger_route_success(monkeypatch: pytest.MonkeyPatch) -> None:
     reset_idempotency_store()
     from farmer_helper.api.routes import embeddings as embeddings_route
 
     monkeypatch.setattr(
         embeddings_route,
         "build_orchestration_service",
-        lambda **_: FakeSuccessService(),
+        _build_fake_success_service,
     )
 
     client = TestClient(app)
@@ -70,14 +113,14 @@ def test_embedding_trigger_route_success(monkeypatch) -> None:
     assert payload["persisted_count"] == 2
 
 
-def test_embedding_trigger_route_provider_failure(monkeypatch) -> None:
+def test_embedding_trigger_route_provider_failure(monkeypatch: pytest.MonkeyPatch) -> None:
     reset_idempotency_store()
     from farmer_helper.api.routes import embeddings as embeddings_route
 
     monkeypatch.setattr(
         embeddings_route,
         "build_orchestration_service",
-        lambda **_: FakeFailService(),
+        _build_fake_fail_service,
     )
 
     client = TestClient(app)
@@ -100,7 +143,7 @@ def test_embedding_trigger_route_provider_failure(monkeypatch) -> None:
     assert payload["degradation_code"] == "EMBEDDING_PROVIDER_UNAVAILABLE"
 
 
-def test_embedding_trigger_route_idempotent_replay(monkeypatch) -> None:
+def test_embedding_trigger_route_idempotent_replay(monkeypatch: pytest.MonkeyPatch) -> None:
     reset_idempotency_store()
     from farmer_helper.api.routes import embeddings as embeddings_route
 
@@ -108,26 +151,42 @@ def test_embedding_trigger_route_idempotent_replay(monkeypatch) -> None:
         def __init__(self) -> None:
             self.calls = 0
 
-        async def embed_and_persist(self, **kwargs) -> EmbeddingOrchestrationResult:  # type: ignore[no-untyped-def]
+        async def embed_and_persist(
+            self,
+            document_id: int,
+            model: str,
+            chunks: list[EmbeddingSourceChunk],
+        ) -> EmbeddingOrchestrationResult:
             self.calls += 1
             return EmbeddingOrchestrationResult(
-                document_id=kwargs["document_id"],
-                model=kwargs["model"],
+                document_id=document_id,
+                model=model,
                 provider="mock-provider",
                 version="v1",
                 dimensions=8,
-                persisted_count=len(kwargs["chunks"]),
+                persisted_count=len(chunks),
             )
 
     service = CountingService()
+
+    def _build_service(
+        db: Session,
+        provider_name: str,
+        version: str,
+        batch_size: int,
+        dimensions: int,
+    ) -> CountingService:
+        del db, provider_name, version, batch_size, dimensions
+        return service
+
     monkeypatch.setattr(
         embeddings_route,
         "build_orchestration_service",
-        lambda **_: service,
+        _build_service,
     )
 
     client = TestClient(app)
-    request_payload = {
+    request_payload: dict[str, Any] = {
         "document_id": 52,
         "model": "test-model",
         "idempotency_key": "embed-1",
@@ -146,14 +205,16 @@ def test_embedding_trigger_route_idempotent_replay(monkeypatch) -> None:
     assert service.calls == 1
 
 
-def test_embedding_trigger_route_idempotency_conflict(monkeypatch) -> None:
+def test_embedding_trigger_route_idempotency_conflict(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     reset_idempotency_store()
     from farmer_helper.api.routes import embeddings as embeddings_route
 
     monkeypatch.setattr(
         embeddings_route,
         "build_orchestration_service",
-        lambda **_: FakeSuccessService(),
+        _build_fake_success_service,
     )
 
     client = TestClient(app)
@@ -184,18 +245,27 @@ def test_embedding_trigger_route_idempotency_conflict(monkeypatch) -> None:
     assert payload["error_code"] == "IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST"
 
 
-def test_embedding_trigger_route_idempotent_replay_for_degraded_response(monkeypatch) -> None:
+def test_embedding_trigger_route_idempotent_replay_for_degraded_response(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     reset_idempotency_store()
     from farmer_helper.api.routes import embeddings as embeddings_route
 
     service = CountingFailService(code="EMBEDDING_PROVIDER_TIMEOUT")
-    monkeypatch.setattr(
-        embeddings_route,
-        "build_orchestration_service",
-        lambda **_: service,
-    )
 
-    request_payload = {
+    def _build_service(
+        db: Session,
+        provider_name: str,
+        version: str,
+        batch_size: int,
+        dimensions: int,
+    ) -> CountingFailService:
+        del db, provider_name, version, batch_size, dimensions
+        return service
+
+    monkeypatch.setattr(embeddings_route, "build_orchestration_service", _build_service)
+
+    request_payload: dict[str, Any] = {
         "document_id": 60,
         "model": "test-model",
         "idempotency_key": "embed-degraded-1",
@@ -216,7 +286,10 @@ def test_embedding_trigger_route_idempotent_replay_for_degraded_response(monkeyp
     assert service.calls == 1
 
 
-def test_embedding_trigger_route_logs_degraded_observability(monkeypatch, caplog) -> None:
+def test_embedding_trigger_route_logs_degraded_observability(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     reset_idempotency_store()
     caplog.set_level("WARNING")
     from farmer_helper.api.routes import embeddings as embeddings_route
@@ -224,7 +297,7 @@ def test_embedding_trigger_route_logs_degraded_observability(monkeypatch, caplog
     monkeypatch.setattr(
         embeddings_route,
         "build_orchestration_service",
-        lambda **_: FakeFailService(),
+        _build_fake_fail_service,
     )
 
     client = TestClient(app)
@@ -247,7 +320,10 @@ def test_embedding_trigger_route_logs_degraded_observability(monkeypatch, caplog
     )
 
 
-def test_embedding_trigger_route_logs_conflict_observability(monkeypatch, caplog) -> None:
+def test_embedding_trigger_route_logs_conflict_observability(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     reset_idempotency_store()
     caplog.set_level("WARNING")
     from farmer_helper.api.routes import embeddings as embeddings_route
@@ -255,7 +331,7 @@ def test_embedding_trigger_route_logs_conflict_observability(monkeypatch, caplog
     monkeypatch.setattr(
         embeddings_route,
         "build_orchestration_service",
-        lambda **_: FakeSuccessService(),
+        _build_fake_success_service,
     )
 
     client = TestClient(app)

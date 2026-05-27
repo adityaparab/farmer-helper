@@ -1,23 +1,26 @@
+from typing import Any
+
+import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy.orm import Session
 
 from farmer_helper.main import app
-from farmer_helper.schemas.answering import AnswerGenerationResponse
+from farmer_helper.schemas.answering import (
+    AnswerGenerationRequest,
+    AnswerGenerationResponse,
+    Citation,
+)
 from farmer_helper.services.answering.provider import LLMProviderError
 from farmer_helper.services.reliability.idempotency import reset_idempotency_store
 
 
 class FakeSuccessService:
-    def generate(self, request):  # type: ignore[no-untyped-def]
+    def generate(self, request: AnswerGenerationRequest) -> AnswerGenerationResponse:
+        del request
         return AnswerGenerationResponse(
             decision="answer",
             answer="Use mulch and compost.",
-            citations=[
-                {
-                    "document_id": 1,
-                    "chunk_index": 0,
-                    "content_hash": "h-1-0",
-                }
-            ],
+            citations=[Citation(document_id=1, chunk_index=0, content_hash="h-1-0")],
             model="mock-chat-v1",
             finish_reason="stop",
             input_tokens=8,
@@ -26,7 +29,8 @@ class FakeSuccessService:
 
 
 class FakeFailService:
-    def generate(self, request):  # type: ignore[no-untyped-def]
+    def generate(self, request: AnswerGenerationRequest) -> AnswerGenerationResponse:
+        del request
         raise LLMProviderError(
             code="LLM_PROVIDER_UNAVAILABLE",
             message="provider unavailable",
@@ -39,7 +43,8 @@ class CountingFailService:
         self.code = code
         self.calls = 0
 
-    def generate(self, request):  # type: ignore[no-untyped-def]
+    def generate(self, request: AnswerGenerationRequest) -> AnswerGenerationResponse:
+        del request
         self.calls += 1
         raise LLMProviderError(
             code=self.code,
@@ -49,7 +54,8 @@ class CountingFailService:
 
 
 class FakeClarifyService:
-    def generate(self, request):  # type: ignore[no-untyped-def]
+    def generate(self, request: AnswerGenerationRequest) -> AnswerGenerationResponse:
+        del request
         return AnswerGenerationResponse(
             decision="clarify",
             clarification_message="Please provide more detail.",
@@ -57,15 +63,26 @@ class FakeClarifyService:
         )
 
 
-def test_answer_generation_route_success(monkeypatch) -> None:
+def _build_fake_success(_db: Session) -> FakeSuccessService:
+    del _db
+    return FakeSuccessService()
+
+
+def _build_fake_fail(_db: Session) -> FakeFailService:
+    del _db
+    return FakeFailService()
+
+
+def _build_fake_clarify(_db: Session) -> FakeClarifyService:
+    del _db
+    return FakeClarifyService()
+
+
+def test_answer_generation_route_success(monkeypatch: pytest.MonkeyPatch) -> None:
     reset_idempotency_store()
     from farmer_helper.api.routes import answers as answers_route
 
-    monkeypatch.setattr(
-        answers_route,
-        "build_answer_generation_service",
-        lambda _db: FakeSuccessService(),
-    )
+    monkeypatch.setattr(answers_route, "build_answer_generation_service", _build_fake_success)
 
     client = TestClient(app)
     response = client.post(
@@ -92,15 +109,11 @@ def test_answer_generation_route_success(monkeypatch) -> None:
     assert payload["citations"][0]["document_id"] == 1
 
 
-def test_answer_generation_route_provider_failure(monkeypatch) -> None:
+def test_answer_generation_route_provider_failure(monkeypatch: pytest.MonkeyPatch) -> None:
     reset_idempotency_store()
     from farmer_helper.api.routes import answers as answers_route
 
-    monkeypatch.setattr(
-        answers_route,
-        "build_answer_generation_service",
-        lambda _db: FakeFailService(),
-    )
+    monkeypatch.setattr(answers_route, "build_answer_generation_service", _build_fake_fail)
 
     client = TestClient(app)
     response = client.post(
@@ -132,15 +145,13 @@ def test_answer_generation_route_provider_failure(monkeypatch) -> None:
     assert payload["degradation_code"] == "LLM_PROVIDER_UNAVAILABLE"
 
 
-def test_answer_generation_route_clarification_payload(monkeypatch) -> None:
+def test_answer_generation_route_clarification_payload(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     reset_idempotency_store()
     from farmer_helper.api.routes import answers as answers_route
 
-    monkeypatch.setattr(
-        answers_route,
-        "build_answer_generation_service",
-        lambda _db: FakeClarifyService(),
-    )
+    monkeypatch.setattr(answers_route, "build_answer_generation_service", _build_fake_clarify)
 
     client = TestClient(app)
     response = client.post(
@@ -167,7 +178,7 @@ def test_answer_generation_route_clarification_payload(monkeypatch) -> None:
     assert payload["clarification_code"] == "CLARIFY_NEED_DETAIL"
 
 
-def test_answer_generation_route_idempotent_replay(monkeypatch) -> None:
+def test_answer_generation_route_idempotent_replay(monkeypatch: pytest.MonkeyPatch) -> None:
     reset_idempotency_store()
     from farmer_helper.api.routes import answers as answers_route
 
@@ -175,18 +186,13 @@ def test_answer_generation_route_idempotent_replay(monkeypatch) -> None:
         def __init__(self) -> None:
             self.calls = 0
 
-        def generate(self, request):  # type: ignore[no-untyped-def]
+        def generate(self, request: AnswerGenerationRequest) -> AnswerGenerationResponse:
+            del request
             self.calls += 1
             return AnswerGenerationResponse(
                 decision="answer",
                 answer=f"Use mulch and compost ({self.calls}).",
-                citations=[
-                    {
-                        "document_id": 1,
-                        "chunk_index": 0,
-                        "content_hash": "h-1-0",
-                    }
-                ],
+                citations=[Citation(document_id=1, chunk_index=0, content_hash="h-1-0")],
                 model="mock-chat-v1",
                 finish_reason="stop",
                 input_tokens=8,
@@ -194,13 +200,14 @@ def test_answer_generation_route_idempotent_replay(monkeypatch) -> None:
             )
 
     service = CountingService()
-    monkeypatch.setattr(
-        answers_route,
-        "build_answer_generation_service",
-        lambda _db: service,
-    )
 
-    request_payload = {
+    def _build_service(_db: Session) -> CountingService:
+        del _db
+        return service
+
+    monkeypatch.setattr(answers_route, "build_answer_generation_service", _build_service)
+
+    request_payload: dict[str, Any] = {
         "question": "How can I improve soil moisture retention?",
         "idempotency_key": "answer-1",
         "retrieved_chunks": [
@@ -226,15 +233,13 @@ def test_answer_generation_route_idempotent_replay(monkeypatch) -> None:
     assert service.calls == 1
 
 
-def test_answer_generation_route_idempotency_conflict(monkeypatch) -> None:
+def test_answer_generation_route_idempotency_conflict(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     reset_idempotency_store()
     from farmer_helper.api.routes import answers as answers_route
 
-    monkeypatch.setattr(
-        answers_route,
-        "build_answer_generation_service",
-        lambda _db: FakeSuccessService(),
-    )
+    monkeypatch.setattr(answers_route, "build_answer_generation_service", _build_fake_success)
 
     client = TestClient(app)
     first = client.post(
@@ -282,18 +287,21 @@ def test_answer_generation_route_idempotency_conflict(monkeypatch) -> None:
     assert payload["error_code"] == "IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST"
 
 
-def test_answer_generation_route_idempotent_replay_for_degraded_response(monkeypatch) -> None:
+def test_answer_generation_route_idempotent_replay_for_degraded_response(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     reset_idempotency_store()
     from farmer_helper.api.routes import answers as answers_route
 
     service = CountingFailService(code="LLM_PROVIDER_TIMEOUT")
-    monkeypatch.setattr(
-        answers_route,
-        "build_answer_generation_service",
-        lambda _db: service,
-    )
 
-    request_payload = {
+    def _build_service(_db: Session) -> CountingFailService:
+        del _db
+        return service
+
+    monkeypatch.setattr(answers_route, "build_answer_generation_service", _build_service)
+
+    request_payload: dict[str, Any] = {
         "question": "How can I improve soil moisture retention?",
         "idempotency_key": "answer-degraded-1",
         "retrieved_chunks": [
@@ -320,16 +328,15 @@ def test_answer_generation_route_idempotent_replay_for_degraded_response(monkeyp
     assert service.calls == 1
 
 
-def test_answer_generation_route_logs_degraded_observability(monkeypatch, caplog) -> None:
+def test_answer_generation_route_logs_degraded_observability(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     reset_idempotency_store()
     caplog.set_level("WARNING")
     from farmer_helper.api.routes import answers as answers_route
 
-    monkeypatch.setattr(
-        answers_route,
-        "build_answer_generation_service",
-        lambda _db: FakeFailService(),
-    )
+    monkeypatch.setattr(answers_route, "build_answer_generation_service", _build_fake_fail)
 
     client = TestClient(app)
     response = client.post(
@@ -360,16 +367,15 @@ def test_answer_generation_route_logs_degraded_observability(monkeypatch, caplog
     )
 
 
-def test_answer_generation_route_logs_conflict_observability(monkeypatch, caplog) -> None:
+def test_answer_generation_route_logs_conflict_observability(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
     reset_idempotency_store()
     caplog.set_level("WARNING")
     from farmer_helper.api.routes import answers as answers_route
 
-    monkeypatch.setattr(
-        answers_route,
-        "build_answer_generation_service",
-        lambda _db: FakeSuccessService(),
-    )
+    monkeypatch.setattr(answers_route, "build_answer_generation_service", _build_fake_success)
 
     client = TestClient(app)
     first = client.post(
