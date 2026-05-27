@@ -34,6 +34,8 @@ class PromptBuildResult(BaseModel):
 
 
 Role = Literal["system", "user", "assistant"]
+FeedbackSentiment = Literal["helpful", "not_helpful"]
+FeedbackReason = Literal["incorrect", "unsafe", "unclear", "other"]
 
 
 class LLMMessage(BaseModel):
@@ -93,3 +95,19 @@ class AnswerGenerationResponse(BaseModel):
     reliability_code: str | None = None
     degraded: bool = False
     degradation_code: str | None = None
+
+
+class AnswerFeedbackRequest(BaseModel):
+    session_key: str | None = Field(default=None, min_length=1, max_length=64)
+    question: str = Field(min_length=1, max_length=500)
+    decision: Decision
+    sentiment: FeedbackSentiment
+    reliability_status: Literal["normal", "degraded"] = "normal"
+    had_citations: bool = False
+    degraded: bool = False
+    reason: FeedbackReason | None = None
+    model: str | None = Field(default=None, min_length=1, max_length=128)
+
+
+class AnswerFeedbackResponse(BaseModel):
+    status: Literal["accepted"] = "accepted"

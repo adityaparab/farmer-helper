@@ -5,15 +5,15 @@
 Add structured online feedback signal capture to track user-perceived answer quality and identify degradation trends over time.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Define feedback signal schema and logging event names.
-2. Add deterministic logging hooks for feedback capture.
-3. Add tests for signal payload shape and field stability.
-4. Ensure signal fields align with future eval expansion workflows.
+## What was done
+1. Added typed feedback schema contracts in `src/farmer_helper/schemas/answering.py`.
+2. Added structured logging signal service in `src/farmer_helper/services/evaluation/feedback_signals.py`.
+3. Added `POST /answers/feedback` route for online feedback capture.
+4. Added tests for route acceptance and structured logging payload fields.
 
 ## Decisions made
 - Signals should remain low-cardinality and privacy-conscious.

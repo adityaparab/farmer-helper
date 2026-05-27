@@ -276,9 +276,12 @@ Eval dataset foundation:
 - `src/farmer_helper/services/evaluation/runner.py`
 - `src/farmer_helper/services/evaluation/reporting.py`
 - `src/farmer_helper/services/evaluation/ci_gate.py`
+- `src/farmer_helper/services/evaluation/feedback_signals.py`
 - `scripts/run-evals.py`
 - `docs/evaluation/EVAL_DATASET_SEED.jsonl`
 - `tests/unit/test_eval_dataset_loader.py`
 - `tests/unit/test_eval_runner.py`
 - `tests/unit/test_eval_reporting.py`
 - `tests/unit/test_eval_ci_gate.py`
+- `tests/unit/test_feedback_signals.py`
+- `tests/unit/test_answer_feedback_route.py`

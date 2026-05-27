@@ -6,7 +6,12 @@ from sqlalchemy.orm import Session
 from farmer_helper.core.config import get_settings
 from farmer_helper.db.base import get_db_session
 from farmer_helper.repositories.chat_session_repository import ChatSessionRepository
-from farmer_helper.schemas.answering import AnswerGenerationRequest, AnswerGenerationResponse
+from farmer_helper.schemas.answering import (
+    AnswerFeedbackRequest,
+    AnswerFeedbackResponse,
+    AnswerGenerationRequest,
+    AnswerGenerationResponse,
+)
 from farmer_helper.services.answering.circuit_breaker_provider import (
     CircuitBreakerLLMProvider,
     LLMCircuitBreakerPolicy,
@@ -17,6 +22,7 @@ from farmer_helper.services.answering.prompt_builder import PromptBuilder
 from farmer_helper.services.answering.provider import LLMProviderError
 from farmer_helper.services.answering.retrying_provider import LLMRetryPolicy, RetryingLLMProvider
 from farmer_helper.services.answering.timeout_provider import LLMTimeoutPolicy, TimeoutLLMProvider
+from farmer_helper.services.evaluation.feedback_signals import OnlineFeedbackSignalLogger
 from farmer_helper.services.reliability.idempotency import (
     IdempotencyConflictError,
     compute_request_hash,
@@ -27,6 +33,7 @@ from farmer_helper.services.session.context_resolver import FollowUpContextResol
 
 router = APIRouter(prefix="/answers", tags=["answers"])
 logger = logging.getLogger(__name__)
+feedback_signal_logger = OnlineFeedbackSignalLogger(logger)
 
 
 def build_answer_generation_service(db: Session) -> AnswerGenerationService:
@@ -125,3 +132,9 @@ def generate_answer(
             response_payload=response.model_dump(mode="json"),
         )
     return response
+
+
+@router.post("/feedback", response_model=AnswerFeedbackResponse, status_code=202)
+def submit_answer_feedback(request: AnswerFeedbackRequest) -> AnswerFeedbackResponse:
+    feedback_signal_logger.log_answer_feedback(request)
+    return AnswerFeedbackResponse()

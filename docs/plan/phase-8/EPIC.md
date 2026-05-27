@@ -17,6 +17,6 @@ This Epic maps to Phase 8 in `docs/plan/PHASES.md` and tracks local sub-issue st
 | P8-T02 | Build eval runner | Completed | 2026-05-27 | Added deterministic eval runner with typed per-item scores and aggregate summary output |
 | P8-T03 | Build offline eval reporting | Completed | 2026-05-27 | Added deterministic offline report builder and typed report schema |
 | P8-T04 | Integrate evals into CI | Completed | 2026-05-27 | Added CI eval gate with threshold check and report artifact upload |
-| P8-T05 | Log online feedback signals | In progress | 2026-05-27 | Next active task |
-| P8-T06 | Expand eval set incrementally | Not started | - | Pending |
+| P8-T05 | Log online feedback signals | Completed | 2026-05-27 | Added typed feedback schema, /answers/feedback route, structured logging hooks, and tests |
+| P8-T06 | Expand eval set incrementally | In progress | 2026-05-27 | Next active task |
 | P8-T07 | Document eval maintenance and interpretation | Not started | - | Pending |

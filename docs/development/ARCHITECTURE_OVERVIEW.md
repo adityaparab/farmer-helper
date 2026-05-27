@@ -36,6 +36,7 @@
 25. Deterministic eval runner foundation with typed per-item scoring and aggregate pass/fail metrics.
 26. Deterministic offline eval reporting foundation with stable JSON serialization output.
 27. CI-integrated eval regression gate with deterministic threshold checks and report artifact generation.
+28. Typed online feedback signal capture endpoint with structured low-cardinality observability logs.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`
