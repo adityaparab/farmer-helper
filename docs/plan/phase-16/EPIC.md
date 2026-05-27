@@ -7,8 +7,9 @@ Deliver a production-ready web experience for Farmer Helper using React + TypeSc
 This Epic extends the roadmap after Phase 15 and establishes the execution baseline for frontend and auth/RBAC delivery.
 
 ## Epic status
-- Status: In Progress
+- Status: Completed
 - Started on: 2026-05-27
+- Completed on: 2026-05-27
 - Remote GitHub Epic: https://github.com/adityaparab/farmer-helper/issues/168
 - Local/remote sync: Synced on 2026-05-27
 
@@ -21,7 +22,7 @@ This Epic extends the roadmap after Phase 15 and establishes the execution basel
 | P16-T04 | Define auth and RBAC schema changes and migration plan | Completed | https://github.com/adityaparab/farmer-helper/issues/173 | 2026-05-27 | Reconciled to completed Phase 17 auth/RBAC implementation |
 | P16-T05 | Define admin dashboard metrics contracts | Completed | https://github.com/adityaparab/farmer-helper/issues/174 | 2026-05-27 | Metrics endpoint and typed response contract delivered |
 | P16-T06 | Define admin PDF upload architecture and controls | Completed | https://github.com/adityaparab/farmer-helper/issues/175 | 2026-05-27 | Secure upload endpoint, audit, and ingestion job integration delivered |
-| P16-T07 | Define UX information architecture for landing/admin/user views | Not Started | https://github.com/adityaparab/farmer-helper/issues/176 | 2026-05-27 | Professional UI quality criteria |
+| P16-T07 | Define UX information architecture for landing/admin/user views | Completed | https://github.com/adityaparab/farmer-helper/issues/176 | 2026-05-27 | Responsive role-based IA documented and mapped to frontend components |
 | P16-T08 | Define local and remote Epic/issue synchronization workflow | Completed | https://github.com/adityaparab/farmer-helper/issues/177 | 2026-05-27 | Canonical GitHub Epics/tasks created and local docs linked |
 
 ## Frontend implementation standards
