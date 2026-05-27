@@ -5,14 +5,14 @@
 Add deterministic regression tests that validate grounding, citation presence, and policy behavior across representative answer-generation scenarios.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add table-driven regression scenarios for answer, clarify, and refuse outcomes.
-2. Validate citation output shape and policy codes across scenarios.
-3. Add focused integration coverage for `/answers/generate` grounding behavior.
+## What was done
+1. Added table-driven integration regression scenarios in `tests/integration/test_answer_generation_regression.py`.
+2. Validated answer, clarify, and refuse decisions with deterministic policy code expectations.
+3. Added citation shape assertions for grounded answer responses.
 
 ## Decisions made
 - Regression tests should avoid external dependencies and use deterministic provider behavior.
