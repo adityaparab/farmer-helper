@@ -192,8 +192,7 @@ def _register_frontend_routes(app: FastAPI, settings: object) -> None:
     @app.get("/{full_path:path}", include_in_schema=False)
     def frontend_fallback(full_path: str) -> FileResponse:  # pyright: ignore[reportUnusedFunction]
         if any(
-            full_path == prefix or full_path.startswith(f"{prefix}/")
-            for prefix in api_prefixes
+            full_path == prefix or full_path.startswith(f"{prefix}/") for prefix in api_prefixes
         ):
             raise HTTPException(status_code=404, detail="Not Found")
 
