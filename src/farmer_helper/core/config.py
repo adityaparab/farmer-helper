@@ -16,6 +16,19 @@ class Settings(BaseSettings):
 
     database_url: str = Field(default="sqlite:///./farmer_helper.db", alias="DATABASE_URL")
 
+    external_call_timeout_seconds: float = Field(
+        default=2.0,
+        alias="EXTERNAL_CALL_TIMEOUT_SECONDS",
+    )
+    embedding_retry_max_attempts: int = Field(
+        default=3,
+        alias="EMBEDDING_RETRY_MAX_ATTEMPTS",
+    )
+    llm_retry_max_attempts: int = Field(
+        default=3,
+        alias="LLM_RETRY_MAX_ATTEMPTS",
+    )
+
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:

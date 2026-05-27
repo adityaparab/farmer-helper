@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from farmer_helper.core.config import get_settings
 from farmer_helper.db.base import get_db_session
 from farmer_helper.repositories.chunk_embedding_repository import ChunkEmbeddingRepository
 from farmer_helper.schemas.embedding import EmbeddingOrchestrationResult, EmbeddingTriggerRequest
@@ -11,6 +12,10 @@ from farmer_helper.services.embedding.provider import EmbeddingProviderError
 from farmer_helper.services.embedding.retrying_provider import (
     EmbeddingRetryPolicy,
     RetryingEmbeddingProvider,
+)
+from farmer_helper.services.embedding.timeout_provider import (
+    EmbeddingTimeoutPolicy,
+    TimeoutEmbeddingProvider,
 )
 
 router = APIRouter(prefix="/embeddings", tags=["embeddings"])
@@ -23,9 +28,15 @@ def build_orchestration_service(
     batch_size: int,
     dimensions: int,
 ) -> EmbeddingOrchestrationService:
+    settings = get_settings()
     provider = RetryingEmbeddingProvider(
-        provider=MockEmbeddingProvider(dimensions=dimensions),
-        policy=EmbeddingRetryPolicy(max_attempts=3),
+        provider=TimeoutEmbeddingProvider(
+            provider=MockEmbeddingProvider(dimensions=dimensions),
+            policy=EmbeddingTimeoutPolicy(
+                timeout_seconds=settings.external_call_timeout_seconds,
+            ),
+        ),
+        policy=EmbeddingRetryPolicy(max_attempts=settings.embedding_retry_max_attempts),
     )
     batch_service = EmbeddingBatchService(provider=provider, batch_size=batch_size)
     return EmbeddingOrchestrationService(
