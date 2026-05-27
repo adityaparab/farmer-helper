@@ -48,6 +48,8 @@
 37. LLM model tier routing (`auto`) with configurable low-cost/high-quality thresholds.
 38. Session context compaction with per-message trimming and duplicate elimination.
 39. Async embedding trigger/job-status flow for heavy work off the synchronous request path.
+40. Admin API surface for ingestion/reindex workflow control and status transitions.
+41. Persistent version tracking, gold-answer workflow records, QA review queue, and access audit logs.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`
@@ -60,6 +62,7 @@
 8. Observability runbook: `docs/development/OBSERVABILITY_RUNBOOK.md`
 9. Security runbook: `docs/development/SECURITY_RUNBOOK.md`
 10. Performance and cost runbook: `docs/development/PERFORMANCE_COST_RUNBOOK.md`
+11. Admin operations runbook: `docs/development/ADMIN_OPERATIONS_RUNBOOK.md`
 
 ## Next phases
 1. Hybrid retrieval and reranking pipeline.

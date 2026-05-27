@@ -71,6 +71,10 @@ Active implementation tracking for Phase 11 lives in:
 - `docs/plan/phase-11/EPIC.md`
 - `docs/plan/phase-11/tasks/`
 
+Active implementation tracking for Phase 12 lives in:
+- `docs/plan/phase-12/EPIC.md`
+- `docs/plan/phase-12/tasks/`
+
 GitHub issue status comment standard:
 - `docs/plan/ISSUE_COMMENT_TEMPLATE.md`
 - `scripts/post-issue-status-comment.ps1`
@@ -347,3 +351,15 @@ Performance/cost controls implementation:
 
 Performance/cost documentation:
 - `docs/development/PERFORMANCE_COST_RUNBOOK.md`
+
+## Phase 12 admin operations progress
+Admin and maintainability implementation:
+- `src/farmer_helper/api/routes/admin.py`
+- `src/farmer_helper/repositories/admin_repository.py`
+- `src/farmer_helper/schemas/admin.py`
+- `src/farmer_helper/db/models/foundation.py`
+- `alembic/versions/20260527_0005_admin_maintainability_schema.py`
+- `tests/unit/test_admin_routes.py`
+
+Admin operations documentation:
+- `docs/development/ADMIN_OPERATIONS_RUNBOOK.md`
