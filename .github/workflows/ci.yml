@@ -33,6 +33,15 @@ jobs:
       - name: Pytest
         run: pytest -q
 
+      - name: Coverage
+        run: pytest -q --cov=src/farmer_helper --cov-report=term-missing --cov-report=xml:artifacts/coverage.xml
+
+      - name: Upload coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: artifacts/coverage.xml
+
       - name: Eval regression gate
         run: python scripts/run-evals.py --min-average-score 6.0 --report-out artifacts/eval-report.json
 

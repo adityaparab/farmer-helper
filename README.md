@@ -1,5 +1,8 @@
 # farmer-helper
 
+![CI](https://github.com/adityaparab/farmer-helper/actions/workflows/ci.yml/badge.svg)
+![Coverage](https://img.shields.io/badge/coverage-CI%20artifact-blue)
+
 Backend-first AI system for grounded, citation-rich agricultural question answering based on a curated document set.
 
 ## Quickstart
@@ -82,6 +85,10 @@ Active implementation tracking for Phase 13 lives in:
 Active implementation tracking for Phase 14 lives in:
 - `docs/plan/phase-14/EPIC.md`
 - `docs/plan/phase-14/tasks/`
+
+Active implementation tracking for Phase 15 lives in:
+- `docs/plan/phase-15/EPIC.md`
+- `docs/plan/phase-15/tasks/`
 
 GitHub issue status comment standard:
 - `docs/plan/ISSUE_COMMENT_TEMPLATE.md`
@@ -405,3 +412,11 @@ Response compatibility validation:
 
 Response compatibility documentation:
 - `docs/development/RESPONSE_COMPATIBILITY_GUIDE.md`
+
+## Phase 15 production readiness progress
+Final readiness and deployment artifacts:
+- `docs/deployment/STAGING_DRY_RUN_REPORT.md`
+- `docs/deployment/RELEASE_RUNBOOK.md`
+- `docs/deployment/ROLLBACK_RUNBOOK.md`
+- `docs/deployment/INCIDENT_RESPONSE_RUNBOOK.md`
+- `docs/deployment/FINAL_PRODUCTION_SIGNOFF.md`

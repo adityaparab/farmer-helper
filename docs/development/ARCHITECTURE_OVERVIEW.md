@@ -56,6 +56,7 @@
 45. Accessibility-ready API contracts with response-mode and language hooks.
 46. Standardized structured error payloads across retrieval/health/embedding asynchronous flows.
 47. Answer streaming prototype endpoint with NDJSON event contracts.
+48. Final production readiness controls with release/rollback/incident runbooks and staging dry-run evidence.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`
@@ -71,6 +72,10 @@
 11. Admin operations runbook: `docs/development/ADMIN_OPERATIONS_RUNBOOK.md`
 12. Scalability and concurrency runbook: `docs/development/SCALABILITY_RUNBOOK.md`
 13. Response compatibility guide: `docs/development/RESPONSE_COMPATIBILITY_GUIDE.md`
+14. Release runbook: `docs/deployment/RELEASE_RUNBOOK.md`
+15. Rollback runbook: `docs/deployment/ROLLBACK_RUNBOOK.md`
+16. Incident response runbook: `docs/deployment/INCIDENT_RESPONSE_RUNBOOK.md`
+17. Final production sign-off: `docs/deployment/FINAL_PRODUCTION_SIGNOFF.md`
 
 ## Next phases
 1. Hybrid retrieval and reranking pipeline.

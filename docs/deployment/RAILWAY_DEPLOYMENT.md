@@ -24,6 +24,11 @@ At minimum set:
 15. `LLM_MODEL_HIGH_QUALITY=<optional>`
 16. `LLM_MODEL_ROUTER_QUESTION_LENGTH_THRESHOLD=<optional, default 120>`
 17. `SESSION_CONTEXT_MAX_CHARS_PER_MESSAGE=<optional, default 300>`
+18. `DATABASE_POOL_MIN=<optional, default 2>`
+19. `DATABASE_POOL_MAX=<optional, default 10>`
+20. `DATABASE_POOL_TIMEOUT_SECONDS=<optional, default 30>`
+21. `EMBEDDING_WORKER_COUNT=<optional, default 2>`
+22. `EMBEDDING_JOB_QUEUE_MAX_SIZE=<optional, default 100>`
 
 ## Health checks
 1. Liveness: `/health/live`
