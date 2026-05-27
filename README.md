@@ -189,4 +189,6 @@ Retrieval behavior documentation:
 Prompting foundation:
 - `src/farmer_helper/schemas/answering.py`
 - `src/farmer_helper/services/answering/prompt_builder.py`
+- `src/farmer_helper/services/answering/provider.py`
 - `tests/unit/test_prompt_builder.py`
+- `tests/unit/test_llm_provider_abstraction.py`

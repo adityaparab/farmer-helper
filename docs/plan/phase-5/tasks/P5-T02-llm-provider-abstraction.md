@@ -5,14 +5,14 @@
 Add a provider-agnostic LLM interface and error contract to support safe answer generation and future provider switching.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Define provider request/response schemas for answer generation.
-2. Implement abstract LLM provider interface and provider error type.
-3. Add deterministic unit tests for provider contract semantics.
+## What was done
+1. Added LLM provider request/response schemas in `src/farmer_helper/schemas/answering.py`.
+2. Added `LLMProvider` abstraction and `LLMProviderError` in `src/farmer_helper/services/answering/provider.py`.
+3. Added deterministic contract tests in `tests/unit/test_llm_provider_abstraction.py`.
 
 ## Decisions made
 - Provider contract should separate prompt preparation from model invocation.
