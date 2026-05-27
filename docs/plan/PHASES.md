@@ -34,6 +34,9 @@ This document provides a Copilot-friendly, phase-wise engineering plan for build
 13. Scalability and concurrency hardening
 14. Accessibility-ready API design
 15. Final production readiness review
+16. Web interface, auth RBAC, and production integration program
+17. Auth and RBAC foundation
+18. Frontend backend integration and authenticated workflows
 
 ---
 
