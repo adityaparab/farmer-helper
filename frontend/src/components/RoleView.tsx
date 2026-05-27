@@ -8,6 +8,8 @@ type RoleViewProps = {
   role: Role
   username: string
   password: string
+  authIsSubmitting: boolean
+  authErrorMessage: string | null
   question: string
   canSubmitQuestion: boolean
   chatHistory: ChatItem[]
@@ -23,6 +25,8 @@ export function RoleView({
   role,
   username,
   password,
+  authIsSubmitting,
+  authErrorMessage,
   question,
   canSubmitQuestion,
   chatHistory,
@@ -38,6 +42,8 @@ export function RoleView({
       <GuestExperience
         username={username}
         password={password}
+        isSubmitting={authIsSubmitting}
+        errorMessage={authErrorMessage}
         onUsernameChange={onUsernameChange}
         onPasswordChange={onPasswordChange}
         onSubmit={onLogin}

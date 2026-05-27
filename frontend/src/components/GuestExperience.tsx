@@ -5,6 +5,8 @@ import { LandingHero } from './LandingHero'
 type GuestExperienceProps = {
   username: string
   password: string
+  isSubmitting: boolean
+  errorMessage: string | null
   onUsernameChange: (value: string) => void
   onPasswordChange: (value: string) => void
   onSubmit: (event: FormEvent<HTMLFormElement>) => void
@@ -13,6 +15,8 @@ type GuestExperienceProps = {
 export function GuestExperience({
   username,
   password,
+  isSubmitting,
+  errorMessage,
   onUsernameChange,
   onPasswordChange,
   onSubmit,
@@ -23,6 +27,8 @@ export function GuestExperience({
       <AuthPanel
         username={username}
         password={password}
+        isSubmitting={isSubmitting}
+        errorMessage={errorMessage}
         onUsernameChange={onUsernameChange}
         onPasswordChange={onPasswordChange}
         onSubmit={onSubmit}

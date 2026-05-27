@@ -257,3 +257,5 @@ export function createApiClient(config: ApiClientConfig = {}) {
     },
   }
 }
+
+export type ApiClient = ReturnType<typeof createApiClient>

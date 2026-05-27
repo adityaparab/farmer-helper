@@ -1,23 +1,77 @@
 import { useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
+import { ApiError, createApiClient } from './api/client'
+import type { ApiClient, AuthUserResponse } from './api/client'
 import { AppHeader } from './components/AppHeader'
 import { RoleView } from './components/RoleView'
 import { dashboardMetrics, draftAnswer, initialChatHistory } from './data/dashboard'
 import type { ChatItem, Role } from './types'
 
-function App() {
-  const [role, setRole] = useState<Role>('guest')
+type AppProps = {
+  apiClient?: ApiClient
+}
+
+type AuthSession = {
+  accessToken: string
+  refreshToken: string
+  user: AuthUserResponse
+}
+
+function authErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    return error.message
+  }
+
+  return 'Unable to sign in. Please try again.'
+}
+
+function App({ apiClient: injectedApiClient }: AppProps) {
+  const [session, setSession] = useState<AuthSession | null>(null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
+  const [authIsSubmitting, setAuthIsSubmitting] = useState(false)
+  const [authError, setAuthError] = useState<string | null>(null)
   const [question, setQuestion] = useState('')
   const [chatHistory, setChatHistory] = useState<ChatItem[]>(initialChatHistory)
 
   const canSubmitQuestion = useMemo(() => question.trim().length > 0, [question])
+  const role: Role = session?.user.role ?? 'guest'
+  const apiClient = useMemo(
+    () =>
+      injectedApiClient ??
+      createApiClient({
+        baseUrl: import.meta.env.VITE_API_BASE_URL,
+        getAccessToken: () => session?.accessToken ?? null,
+      }),
+    [injectedApiClient, session?.accessToken],
+  )
 
-  const handleLogin = (event: FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    const normalizedUser = username.trim().toLowerCase()
-    setRole(normalizedUser === 'admin' ? 'admin' : 'user')
+    setAuthIsSubmitting(true)
+    setAuthError(null)
+
+    try {
+      const tokens = await apiClient.auth.login(username.trim(), password)
+      const authenticatedClient =
+        injectedApiClient ??
+        createApiClient({
+          baseUrl: import.meta.env.VITE_API_BASE_URL,
+          getAccessToken: () => tokens.access_token,
+        })
+      const user = await authenticatedClient.auth.me()
+      setSession({
+        accessToken: tokens.access_token,
+        refreshToken: tokens.refresh_token,
+        user,
+      })
+      setPassword('')
+    } catch (error) {
+      setSession(null)
+      setAuthError(authErrorMessage(error))
+    } finally {
+      setAuthIsSubmitting(false)
+    }
   }
 
   const handleAsk = (event: FormEvent<HTMLFormElement>) => {
@@ -37,10 +91,20 @@ function App() {
     setQuestion('')
   }
 
-  const signOut = () => {
-    setRole('guest')
+  const signOut = async () => {
+    const refreshToken = session?.refreshToken
+    if (refreshToken) {
+      try {
+        await apiClient.auth.logout(refreshToken)
+      } catch {
+        // The local session still needs to be cleared if server logout fails.
+      }
+    }
+
+    setSession(null)
     setUsername('')
     setPassword('')
+    setAuthError(null)
   }
 
   return (
@@ -50,6 +114,8 @@ function App() {
         role={role}
         username={username}
         password={password}
+        authIsSubmitting={authIsSubmitting}
+        authErrorMessage={authError}
         question={question}
         canSubmitQuestion={canSubmitQuestion}
         chatHistory={chatHistory}

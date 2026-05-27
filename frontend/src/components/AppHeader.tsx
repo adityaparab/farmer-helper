@@ -2,7 +2,7 @@ import type { Role } from '../types'
 
 type AppHeaderProps = {
   role: Role
-  onSignOut: () => void
+  onSignOut: () => void | Promise<void>
 }
 
 export function AppHeader({ role, onSignOut }: AppHeaderProps) {
@@ -20,7 +20,7 @@ export function AppHeader({ role, onSignOut }: AppHeaderProps) {
 }
 
 type SignOutButtonProps = {
-  onSignOut: () => void
+  onSignOut: () => void | Promise<void>
 }
 
 function SignOutButton({ onSignOut }: SignOutButtonProps) {
