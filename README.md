@@ -43,6 +43,10 @@ Active implementation tracking for Phase 4 lives in:
 - `docs/plan/phase-4/EPIC.md`
 - `docs/plan/phase-4/tasks/`
 
+Active implementation tracking for Phase 5 lives in:
+- `docs/plan/phase-5/EPIC.md`
+- `docs/plan/phase-5/tasks/`
+
 GitHub issue status comment standard:
 - `docs/plan/ISSUE_COMMENT_TEMPLATE.md`
 - `scripts/post-issue-status-comment.ps1`
@@ -180,3 +184,9 @@ Retrieval API and tests:
 
 Retrieval behavior documentation:
 - `docs/development/RETRIEVAL_PIPELINE.md`
+
+## Phase 5 answer-generation progress
+Prompting foundation:
+- `src/farmer_helper/schemas/answering.py`
+- `src/farmer_helper/services/answering/prompt_builder.py`
+- `tests/unit/test_prompt_builder.py`
