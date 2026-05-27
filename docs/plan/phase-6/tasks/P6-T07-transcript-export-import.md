@@ -5,14 +5,14 @@
 Provide deterministic transcript export and import utilities for session portability and debugging workflows.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add transcript DTO/schema for exported session + messages.
-2. Add repository/service methods for exporting and importing transcripts.
-3. Add tests for round-trip integrity and deterministic ordering.
+## What was done
+1. Added transcript schemas in `src/farmer_helper/schemas/session.py`.
+2. Added transcript service in `src/farmer_helper/services/session/transcript_service.py`.
+3. Added round-trip tests in `tests/unit/test_session_transcript_service.py`.
 
 ## Decisions made
 - Export/import format should remain stable and versionable.

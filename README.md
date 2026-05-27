@@ -218,6 +218,7 @@ Session and message foundations:
 - `src/farmer_helper/services/session/context_resolver.py`
 - `src/farmer_helper/services/session/summarizer.py`
 - `src/farmer_helper/services/session/lifecycle_service.py`
+- `src/farmer_helper/services/session/transcript_service.py`
 - `src/farmer_helper/api/routes/retrieval.py`
 - `src/farmer_helper/api/routes/answers.py`
 - `src/farmer_helper/db/models/foundation.py`
@@ -227,5 +228,6 @@ Session and message foundations:
 - `tests/unit/test_follow_up_context_resolver.py`
 - `tests/unit/test_session_summarizer.py`
 - `tests/unit/test_session_lifecycle_service.py`
+- `tests/unit/test_session_transcript_service.py`
 - `tests/unit/test_retrieval_route.py`
 - `tests/unit/test_answer_generation_service.py`

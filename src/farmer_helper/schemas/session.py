@@ -86,3 +86,23 @@ class SessionSummaryResponse(BaseModel):
     applied: bool
     message_count: int = Field(ge=0)
     summary: str | None = None
+
+
+class TranscriptMessage(BaseModel):
+    turn_index: int = Field(ge=0)
+    role: MessageRole
+    content: str = Field(min_length=1)
+    metadata: dict[str, str] | None = None
+
+
+class SessionTranscript(BaseModel):
+    session_key: str = Field(min_length=1)
+    user_id: str | None = None
+    title: str | None = None
+    status: SessionStatus = "active"
+    messages: list[TranscriptMessage] = Field(default_factory=list)
+
+
+class TranscriptImportRequest(BaseModel):
+    transcript: SessionTranscript
+    session_key_override: str | None = Field(default=None, min_length=1, max_length=64)

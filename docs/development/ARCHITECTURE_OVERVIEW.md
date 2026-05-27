@@ -24,6 +24,7 @@
 13. Optional long-session summarization with threshold-based activation.
 14. Bounded session-context propagation into retrieval and answer-generation request flows.
 15. Session lifecycle management with deterministic archival and expiry transitions.
+16. Session transcript export/import with deterministic round-trip behavior.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`

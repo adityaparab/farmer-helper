@@ -15,12 +15,13 @@ class ChatSessionRepository:
         session_key: str,
         user_id: str | None = None,
         title: str | None = None,
+        status: str = "active",
     ) -> ChatSession:
         record = ChatSession(
             session_key=session_key,
             user_id=user_id,
             title=title,
-            status="active",
+            status=status,
         )
         self._session.add(record)
         self._session.commit()
