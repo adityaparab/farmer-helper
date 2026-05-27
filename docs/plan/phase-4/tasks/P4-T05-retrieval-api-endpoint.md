@@ -5,14 +5,15 @@
 Expose a retrieval API endpoint that returns fused and optionally reranked results with explicit score and citation metadata.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add retrieval API request/response contracts.
-2. Compose vector retrieval, keyword retrieval, fusion, and reranking in route/service wiring.
-3. Add endpoint tests for success and validation behavior.
+## What was done
+1. Added retrieval API request/response contracts with score and citation metadata in `src/farmer_helper/schemas/retrieval.py`.
+2. Added retrieval orchestration service in `src/farmer_helper/services/retrieval/query_service.py`.
+3. Added retrieval API route in `src/farmer_helper/api/routes/retrieval.py` and registered it in `src/farmer_helper/main.py`.
+4. Added endpoint and orchestration unit tests in `tests/unit/test_retrieval_route.py` and `tests/unit/test_retrieval_query_service.py`.
 
 ## Decisions made
 - Retrieval endpoint output must include deterministic score fields and citation identity.

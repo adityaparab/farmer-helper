@@ -157,3 +157,21 @@ Trigger surfaces and end-to-end tests:
 
 Provider versioning and extension documentation:
 - `docs/development/EMBEDDING_PROVIDERS.md`
+
+## Phase 4 retrieval progress
+Retrieval services and contracts:
+- `src/farmer_helper/schemas/retrieval.py`
+- `src/farmer_helper/services/retrieval/vector_retrieval_service.py`
+- `src/farmer_helper/services/retrieval/keyword_retrieval_service.py`
+- `src/farmer_helper/services/retrieval/fusion_service.py`
+- `src/farmer_helper/services/retrieval/reranker.py`
+- `src/farmer_helper/services/retrieval/query_service.py`
+
+Retrieval API and tests:
+- `src/farmer_helper/api/routes/retrieval.py`
+- `tests/unit/test_vector_retrieval_service.py`
+- `tests/unit/test_keyword_retrieval_service.py`
+- `tests/unit/test_retrieval_fusion_service.py`
+- `tests/unit/test_reranker.py`
+- `tests/unit/test_retrieval_query_service.py`
+- `tests/unit/test_retrieval_route.py`

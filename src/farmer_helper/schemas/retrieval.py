@@ -58,3 +58,36 @@ class RerankRequest(BaseModel):
 
 class RerankResponse(BaseModel):
     items: list[FusedRetrievalItem]
+
+
+class RetrievalRequest(BaseModel):
+    query_text: str = Field(min_length=1)
+    query_vector: list[float] = Field(min_length=1)
+    top_k: int = Field(ge=1, le=100, default=5)
+    provider: str = Field(min_length=1)
+    model: str = Field(min_length=1)
+    version: str = Field(min_length=1, default="v1")
+    vector_weight: float = Field(ge=0.0, le=1.0, default=0.7)
+    keyword_weight: float = Field(ge=0.0, le=1.0, default=0.3)
+    reranker: str = Field(min_length=1, default="none")
+
+
+class RetrievalCitation(BaseModel):
+    document_id: int = Field(ge=1)
+    chunk_index: int = Field(ge=0)
+    content_hash: str = Field(min_length=1)
+
+
+class RetrievalItem(BaseModel):
+    document_id: int = Field(ge=1)
+    chunk_index: int = Field(ge=0)
+    content_hash: str = Field(min_length=1)
+    score: float
+    vector_score: float
+    keyword_score: float
+    fused_score: float
+    citation: RetrievalCitation
+
+
+class RetrievalResponse(BaseModel):
+    items: list[RetrievalItem]

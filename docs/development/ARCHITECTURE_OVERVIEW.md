@@ -15,6 +15,7 @@
 4. Foundational schema and migration path via Alembic.
 5. Deterministic ingestion pipeline with status persistence and trace logging.
 6. Embedding pipeline foundation with provider abstraction, batching, retries, orchestration, and API/CLI triggers.
+7. Hybrid retrieval foundation with vector retrieval, keyword retrieval, fusion, optional reranking, and retrieval API.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`
