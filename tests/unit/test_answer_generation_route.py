@@ -34,6 +34,20 @@ class FakeFailService:
         )
 
 
+class CountingFailService:
+    def __init__(self, code: str) -> None:
+        self.code = code
+        self.calls = 0
+
+    def generate(self, request):  # type: ignore[no-untyped-def]
+        self.calls += 1
+        raise LLMProviderError(
+            code=self.code,
+            message="provider unavailable",
+            retryable=True,
+        )
+
+
 class FakeClarifyService:
     def generate(self, request):  # type: ignore[no-untyped-def]
         return AnswerGenerationResponse(
@@ -266,3 +280,41 @@ def test_answer_generation_route_idempotency_conflict(monkeypatch) -> None:
     payload = second.json()["detail"]
     assert payload["status"] == "error"
     assert payload["error_code"] == "IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST"
+
+
+def test_answer_generation_route_idempotent_replay_for_degraded_response(monkeypatch) -> None:
+    reset_idempotency_store()
+    from farmer_helper.api.routes import answers as answers_route
+
+    service = CountingFailService(code="LLM_PROVIDER_TIMEOUT")
+    monkeypatch.setattr(
+        answers_route,
+        "build_answer_generation_service",
+        lambda _db: service,
+    )
+
+    request_payload = {
+        "question": "How can I improve soil moisture retention?",
+        "idempotency_key": "answer-degraded-1",
+        "retrieved_chunks": [
+            {
+                "citation": {
+                    "document_id": 1,
+                    "chunk_index": 0,
+                    "content_hash": "h-1-0",
+                },
+                "text": "Mulching helps reduce evaporation.",
+                "score": 0.9,
+            }
+        ],
+    }
+
+    client = TestClient(app)
+    first = client.post("/answers/generate", json=request_payload)
+    second = client.post("/answers/generate", json=request_payload)
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert first.json() == second.json()
+    assert first.json()["reliability_code"] == "LLM_PROVIDER_TIMEOUT"
+    assert service.calls == 1

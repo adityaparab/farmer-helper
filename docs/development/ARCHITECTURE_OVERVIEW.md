@@ -30,6 +30,7 @@
 19. Deterministic idempotency key replay/conflict handling for reliability-sensitive API operations.
 20. Deterministic graceful degradation responses for provider failures in embedding and answer-generation APIs.
 21. Normalized internal-to-user reliability contracts for degraded outcomes and conflict errors.
+22. Deterministic failure-injection test coverage for degraded flows and idempotent replay under provider faults.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`

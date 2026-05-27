@@ -27,6 +27,20 @@ class FakeFailService:
         )
 
 
+class CountingFailService:
+    def __init__(self, code: str) -> None:
+        self.code = code
+        self.calls = 0
+
+    async def embed_and_persist(self, **kwargs) -> EmbeddingOrchestrationResult:  # type: ignore[no-untyped-def]
+        self.calls += 1
+        raise EmbeddingProviderError(
+            code=self.code,
+            message="provider unavailable",
+            retryable=True,
+        )
+
+
 def test_embedding_trigger_route_success(monkeypatch) -> None:
     reset_idempotency_store()
     from farmer_helper.api.routes import embeddings as embeddings_route
@@ -168,3 +182,35 @@ def test_embedding_trigger_route_idempotency_conflict(monkeypatch) -> None:
     payload = second.json()["detail"]
     assert payload["status"] == "error"
     assert payload["error_code"] == "IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST"
+
+
+def test_embedding_trigger_route_idempotent_replay_for_degraded_response(monkeypatch) -> None:
+    reset_idempotency_store()
+    from farmer_helper.api.routes import embeddings as embeddings_route
+
+    service = CountingFailService(code="EMBEDDING_PROVIDER_TIMEOUT")
+    monkeypatch.setattr(
+        embeddings_route,
+        "build_orchestration_service",
+        lambda **_: service,
+    )
+
+    request_payload = {
+        "document_id": 60,
+        "model": "test-model",
+        "idempotency_key": "embed-degraded-1",
+        "chunks": [
+            {"chunk_index": 0, "text": "soil", "content_hash": "h0"},
+            {"chunk_index": 1, "text": "water", "content_hash": "h1"},
+        ],
+    }
+
+    client = TestClient(app)
+    first = client.post("/embeddings/trigger", json=request_payload)
+    second = client.post("/embeddings/trigger", json=request_payload)
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert first.json() == second.json()
+    assert first.json()["reliability_code"] == "EMBEDDING_PROVIDER_TIMEOUT"
+    assert service.calls == 1
