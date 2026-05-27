@@ -1,7 +1,7 @@
 import sys
 from functools import lru_cache
 
-from pydantic import Field, model_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -109,6 +109,14 @@ class Settings(BaseSettings):
     )
     auth_access_token_ttl_minutes: int = Field(default=30, alias="AUTH_ACCESS_TOKEN_TTL_MINUTES")
     auth_refresh_token_ttl_days: int = Field(default=14, alias="AUTH_REFRESH_TOKEN_TTL_DAYS")
+
+    @field_validator("security_api_key", mode="before")
+    @classmethod
+    def normalize_security_api_key(cls, value: object) -> object:
+        """Treat blank SECURITY_API_KEY values as unset."""
+        if isinstance(value, str) and not value.strip():
+            return None
+        return value
 
     @model_validator(mode="after")
     def validate_openai_configuration(self) -> "Settings":
