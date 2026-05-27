@@ -54,6 +54,7 @@ function mockAuthSuccess(role: 'admin' | 'user') {
 describe('App', () => {
   afterEach(() => {
     vi.restoreAllMocks()
+    window.localStorage.clear()
     document.documentElement.classList.remove('dark')
   })
 
@@ -67,15 +68,16 @@ describe('App', () => {
     expect(screen.getByRole('button', { name: 'Continue' })).toBeInTheDocument()
   })
 
-  it('toggles between light and dark themes', async () => {
+  it('defaults to dark theme and toggles to light mode', async () => {
     const user = userEvent.setup()
     render(<App />)
 
-    await user.click(screen.getByRole('button', { name: 'Switch to dark theme' }))
     expect(document.documentElement).toHaveClass('dark')
+    expect(screen.getByRole('button', { name: 'Switch to light theme' })).toBeInTheDocument()
 
     await user.click(screen.getByRole('button', { name: 'Switch to light theme' }))
     expect(document.documentElement).not.toHaveClass('dark')
+    expect(screen.getByRole('button', { name: 'Switch to dark theme' })).toBeInTheDocument()
   })
 
   it('routes backend admin users to the admin dashboard', async () => {
@@ -127,6 +129,41 @@ describe('App', () => {
 
     expect(await screen.findByText('Upload accepted. Ingestion job 42 is pending.')).toBeInTheDocument()
     expect(fetchSpy).toHaveBeenCalledWith('/admin/documents/upload', expect.any(Object))
+  })
+
+  it('allows admins to start and view RAG streamed output', async () => {
+    const fetchSpy = mockAuthSuccess('admin')
+    fetchSpy.mockResolvedValueOnce(
+      new Response(
+        [
+          JSON.stringify({ event: 'metadata', response_mode: 'concise', language: 'en', decision: 'answer' }),
+          JSON.stringify({ event: 'chunk', text: 'Streamed chunk from pipeline' }),
+          JSON.stringify({ event: 'final', response: { answer: 'Final streamed answer from RAG.' } }),
+          '',
+        ].join('\n'),
+        {
+          status: 200,
+          headers: { 'Content-Type': 'application/x-ndjson' },
+        },
+      ),
+    )
+    const user = userEvent.setup()
+    render(<App />)
+
+    await user.type(screen.getByLabelText('Username'), 'admin')
+    await user.type(screen.getByLabelText('Password'), 'P@ssw0rd')
+    await user.click(screen.getByRole('button', { name: 'Continue' }))
+    await screen.findByRole('region', { name: 'Admin dashboard' })
+
+    await user.type(
+      screen.getByPlaceholderText('Run a live RAG answer stream for admin validation...'),
+      'Give me an irrigation recommendation.',
+    )
+    await user.click(screen.getByRole('button', { name: 'Start RAG stream' }))
+
+    expect(await screen.findByText('Final streamed answer from RAG.')).toBeInTheDocument()
+    expect(screen.getByText(/chunk: .*Streamed chunk from pipeline/)).toBeInTheDocument()
+    expect(fetchSpy).toHaveBeenCalledWith('/answers/generate-stream', expect.any(Object))
   })
 
   it('routes backend user-role users to chat and history in the same view', async () => {
@@ -240,5 +277,33 @@ describe('App', () => {
     expect(await screen.findByRole('form', { name: 'Login or register' })).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: 'User workspace' })).not.toBeInTheDocument()
     expect(fetchSpy).toHaveBeenCalledWith('/auth/logout', expect.any(Object))
+  })
+
+  it('restores login session from local storage after refresh', async () => {
+    const fetchSpy = mockAuthSuccess('user')
+      .mockResolvedValueOnce(
+        jsonResponse({
+          access_token: 'restored-access-token',
+          refresh_token: 'restored-refresh-token',
+          token_type: 'bearer',
+          expires_in_seconds: 1800,
+          user: { id: 2, username: 'user', role: 'user' },
+        }),
+      )
+      .mockResolvedValueOnce(jsonResponse({ id: 2, username: 'user', role: 'user' }))
+    const user = userEvent.setup()
+    const initialRender = render(<App />)
+
+    await user.type(screen.getByLabelText('Username'), 'field-user')
+    await user.click(screen.getByRole('button', { name: 'Continue' }))
+    await screen.findByRole('region', { name: 'User workspace' })
+    initialRender.unmount()
+
+    render(<App />)
+
+    expect(await screen.findByRole('region', { name: 'User workspace' })).toBeInTheDocument()
+    expect(screen.queryByRole('form', { name: 'Login or register' })).not.toBeInTheDocument()
+    expect(fetchSpy).toHaveBeenCalledWith('/auth/refresh', expect.any(Object))
+    expect(fetchSpy).toHaveBeenCalledWith('/auth/me', expect.any(Object))
   })
 })

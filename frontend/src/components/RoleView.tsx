@@ -49,7 +49,14 @@ export function RoleView({
   }
 
   if (role === 'admin') {
-    return <AdminDashboard apiClient={apiClient} />
+    return (
+      <AdminDashboard
+        apiClient={apiClient}
+        answerBaseUrl={answerBaseUrl}
+        accessToken={accessToken}
+        sessionKey={sessionKey}
+      />
+    )
   }
 
   return (

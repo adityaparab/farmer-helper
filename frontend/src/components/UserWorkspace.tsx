@@ -1,10 +1,36 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { createAnswerChatTransport } from '../ai/answerTransport'
-import { initialChatMessages } from '../data/dashboard'
 import { ChatComposer } from './ChatComposer'
 import { QuestionHistory } from './QuestionHistory'
+
+const QUERY_HISTORY_STORAGE_PREFIX = 'farmer-helper.query-history'
+
+function queryHistoryStorageKey(sessionKey?: string): string {
+  return `${QUERY_HISTORY_STORAGE_PREFIX}:${sessionKey ?? 'guest'}`
+}
+
+function loadStoredQuestions(sessionKey?: string): string[] {
+  if (typeof window === 'undefined') {
+    return []
+  }
+
+  const serialized = window.localStorage.getItem(queryHistoryStorageKey(sessionKey))
+  if (!serialized) {
+    return []
+  }
+
+  try {
+    const parsed = JSON.parse(serialized) as unknown
+    if (!Array.isArray(parsed)) {
+      return []
+    }
+    return parsed.filter((item): item is string => typeof item === 'string').slice(0, 50)
+  } catch {
+    return []
+  }
+}
 
 type UserWorkspaceProps = {
   answerBaseUrl?: string
@@ -18,6 +44,7 @@ export function UserWorkspace({
   sessionKey,
 }: UserWorkspaceProps) {
   const [question, setQuestion] = useState('')
+  const [storedQuestions, setStoredQuestions] = useState<string[]>(() => loadStoredQuestions(sessionKey))
   const transport = useMemo(
     () =>
       createAnswerChatTransport({
@@ -28,9 +55,21 @@ export function UserWorkspace({
     [accessToken, answerBaseUrl, sessionKey],
   )
   const { messages, sendMessage, status, error, clearError } = useChat({
-    messages: initialChatMessages,
+    messages: [],
     transport,
   })
+
+  useEffect(() => {
+    setStoredQuestions(loadStoredQuestions(sessionKey))
+  }, [sessionKey])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return
+    }
+
+    window.localStorage.setItem(queryHistoryStorageKey(sessionKey), JSON.stringify(storedQuestions))
+  }, [sessionKey, storedQuestions])
   const isSubmitting = status === 'submitted' || status === 'streaming'
   const canSubmit = question.trim().length > 0 && !isSubmitting
 
@@ -42,8 +81,16 @@ export function UserWorkspace({
     }
 
     clearError()
+    setStoredQuestions((current) => {
+      const next = [submittedQuestion, ...current.filter((item) => item !== submittedQuestion)]
+      return next.slice(0, 50)
+    })
     void sendMessage({ text: submittedQuestion })
     setQuestion('')
+  }
+
+  const recallQuestion = (value: string) => {
+    setQuestion(value)
   }
 
   return (
@@ -56,7 +103,11 @@ export function UserWorkspace({
         onQuestionChange={setQuestion}
         onSubmit={submitQuestion}
       />
-      <QuestionHistory messages={messages} />
+      <QuestionHistory
+        messages={messages}
+        storedQuestions={storedQuestions}
+        onRecallQuestion={recallQuestion}
+      />
     </section>
   )
 }
