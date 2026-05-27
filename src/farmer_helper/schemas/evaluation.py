@@ -33,3 +33,44 @@ class EvalDatasetItem(BaseModel):
 class EvalDataset(BaseModel):
     version: str = Field(min_length=1, default="v1")
     items: list[EvalDatasetItem] = Field(min_length=1)
+
+
+class EvalScoreBreakdown(BaseModel):
+    retrieval_relevance: int = Field(ge=0, le=2)
+    groundedness: int = Field(ge=0, le=2)
+    citation_correctness: int = Field(ge=0, le=2)
+    safety_refusal: int = Field(ge=0, le=2)
+    clarity_actionability: int = Field(ge=0, le=2)
+
+    def total(self) -> int:
+        return (
+            self.retrieval_relevance
+            + self.groundedness
+            + self.citation_correctness
+            + self.safety_refusal
+            + self.clarity_actionability
+        )
+
+
+class EvalRunConfig(BaseModel):
+    pass_threshold: int = Field(ge=0, le=10, default=6)
+
+
+class EvalItemRunResult(BaseModel):
+    id: str = Field(min_length=1)
+    question: str = Field(min_length=1)
+    difficulty: Difficulty
+    must_cite_source: bool
+    score_breakdown: EvalScoreBreakdown
+    total_score: int = Field(ge=0, le=10)
+    max_score: int = Field(ge=1, default=10)
+    passed: bool
+
+
+class EvalRunResult(BaseModel):
+    dataset_version: str = Field(min_length=1)
+    total_items: int = Field(ge=1)
+    passed_items: int = Field(ge=0)
+    failed_items: int = Field(ge=0)
+    average_score: float = Field(ge=0.0, le=10.0)
+    item_results: list[EvalItemRunResult] = Field(min_length=1)

@@ -5,15 +5,15 @@
 Implement an offline deterministic eval runner that executes retrieval/answer checks against dataset items and produces typed result records for reporting.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Define eval runner request/result schemas.
-2. Build deterministic runner service over loaded dataset items.
-3. Add tests for aggregation and stable ordering.
-4. Keep output contract suitable for reporting and CI integration.
+## What was done
+1. Extended evaluation schemas with score breakdown, run config, per-item result, and run summary contracts.
+2. Added deterministic eval runner service in `src/farmer_helper/services/evaluation/runner.py`.
+3. Added unit tests for stable ordering, pass/fail aggregation, and default scorer behavior.
+4. Kept output contract typed and suitable for reporting/CI integration in later steps.
 
 ## Decisions made
 - Runner should consume typed dataset loader outputs from P8-T01.
