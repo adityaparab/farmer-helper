@@ -29,6 +29,7 @@
 18. Circuit-breaker and fallback-provider strategy for external embedding and LLM call boundaries.
 19. Deterministic idempotency key replay/conflict handling for reliability-sensitive API operations.
 20. Deterministic graceful degradation responses for provider failures in embedding and answer-generation APIs.
+21. Normalized internal-to-user reliability contracts for degraded outcomes and conflict errors.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`

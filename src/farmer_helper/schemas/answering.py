@@ -88,5 +88,8 @@ class AnswerGenerationResponse(BaseModel):
     finish_reason: Literal["stop", "length", "content_filter"] | None = None
     input_tokens: int = Field(ge=0, default=0)
     output_tokens: int = Field(ge=0, default=0)
+    reliability_status: Literal["normal", "degraded"] = "normal"
+    reliability_retryable: bool | None = None
+    reliability_code: str | None = None
     degraded: bool = False
     degradation_code: str | None = None

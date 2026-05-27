@@ -20,6 +20,7 @@ from farmer_helper.services.reliability.idempotency import (
     compute_request_hash,
     get_idempotency_store,
 )
+from farmer_helper.services.reliability.response_contracts import build_error_detail
 from farmer_helper.services.session.context_resolver import FollowUpContextResolver
 
 router = APIRouter(prefix="/answers", tags=["answers"])
@@ -67,11 +68,11 @@ def generate_answer(
         except IdempotencyConflictError as exc:
             raise HTTPException(
                 status_code=409,
-                detail={
-                    "error_code": "IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST",
-                    "message": str(exc),
-                    "retryable": False,
-                },
+                detail=build_error_detail(
+                    code="IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST",
+                    message=str(exc),
+                    retryable=False,
+                ),
             ) from exc
 
         if replay_payload is not None:
@@ -87,6 +88,9 @@ def generate_answer(
                 "Answer generation is temporarily degraded. " "Please retry this request shortly."
             ),
             clarification_code="CLARIFY_SERVICE_DEGRADED",
+            reliability_status="degraded",
+            reliability_retryable=exc.retryable,
+            reliability_code=exc.code,
             degraded=True,
             degradation_code=exc.code,
         )

@@ -26,6 +26,7 @@ from farmer_helper.services.reliability.idempotency import (
     compute_request_hash,
     get_idempotency_store,
 )
+from farmer_helper.services.reliability.response_contracts import build_error_detail
 
 router = APIRouter(prefix="/embeddings", tags=["embeddings"])
 
@@ -81,11 +82,11 @@ async def trigger_embeddings(
         except IdempotencyConflictError as exc:
             raise HTTPException(
                 status_code=409,
-                detail={
-                    "error_code": "IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST",
-                    "message": str(exc),
-                    "retryable": False,
-                },
+                detail=build_error_detail(
+                    code="IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST",
+                    message=str(exc),
+                    retryable=False,
+                ),
             ) from exc
 
         if replay_payload is not None:
@@ -113,6 +114,9 @@ async def trigger_embeddings(
             version=request.version,
             dimensions=request.dimensions,
             persisted_count=0,
+            reliability_status="degraded",
+            reliability_retryable=exc.retryable,
+            reliability_code=exc.code,
             degraded=True,
             degradation_code=exc.code,
         )

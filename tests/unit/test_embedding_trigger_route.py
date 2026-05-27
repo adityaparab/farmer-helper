@@ -79,6 +79,9 @@ def test_embedding_trigger_route_provider_failure(monkeypatch) -> None:
     assert response.status_code == 200
     payload = response.json()
     assert payload["persisted_count"] == 0
+    assert payload["reliability_status"] == "degraded"
+    assert payload["reliability_retryable"] is True
+    assert payload["reliability_code"] == "EMBEDDING_PROVIDER_UNAVAILABLE"
     assert payload["degraded"] is True
     assert payload["degradation_code"] == "EMBEDDING_PROVIDER_UNAVAILABLE"
 
@@ -163,4 +166,5 @@ def test_embedding_trigger_route_idempotency_conflict(monkeypatch) -> None:
     assert first.status_code == 200
     assert second.status_code == 409
     payload = second.json()["detail"]
+    assert payload["status"] == "error"
     assert payload["error_code"] == "IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST"

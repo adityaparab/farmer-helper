@@ -1,3 +1,5 @@
+from typing import Literal
+
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
@@ -46,6 +48,9 @@ class EmbeddingOrchestrationResult(BaseModel):
     version: str = Field(min_length=1)
     dimensions: int = Field(ge=1)
     persisted_count: int = Field(ge=0)
+    reliability_status: Literal["normal", "degraded"] = "normal"
+    reliability_retryable: bool | None = None
+    reliability_code: str | None = None
     degraded: bool = False
     degradation_code: str | None = None
 

@@ -111,6 +111,9 @@ def test_answer_generation_route_provider_failure(monkeypatch) -> None:
     payload = response.json()
     assert payload["decision"] == "clarify"
     assert payload["clarification_code"] == "CLARIFY_SERVICE_DEGRADED"
+    assert payload["reliability_status"] == "degraded"
+    assert payload["reliability_retryable"] is True
+    assert payload["reliability_code"] == "LLM_PROVIDER_UNAVAILABLE"
     assert payload["degraded"] is True
     assert payload["degradation_code"] == "LLM_PROVIDER_UNAVAILABLE"
 
@@ -261,4 +264,5 @@ def test_answer_generation_route_idempotency_conflict(monkeypatch) -> None:
     assert first.status_code == 200
     assert second.status_code == 409
     payload = second.json()["detail"]
+    assert payload["status"] == "error"
     assert payload["error_code"] == "IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST"
