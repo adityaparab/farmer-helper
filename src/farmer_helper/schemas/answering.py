@@ -59,3 +59,24 @@ class LLMGenerateResponse(BaseModel):
     finish_reason: Literal["stop", "length", "content_filter"]
     input_tokens: int = Field(ge=0)
     output_tokens: int = Field(ge=0)
+
+
+class AnswerGenerationRequest(BaseModel):
+    question: str = Field(min_length=1)
+    retrieved_chunks: list[RetrievedChunk] = Field(default_factory=list)
+    model: str = Field(min_length=1, default="mock-chat-v1")
+    max_chunks: int = Field(ge=1, le=20, default=5)
+    max_answer_tokens: int = Field(ge=1, le=4096, default=512)
+    temperature: float = Field(ge=0.0, le=1.0, default=0.0)
+
+
+class AnswerGenerationResponse(BaseModel):
+    decision: Decision
+    answer: str | None = None
+    citations: list[Citation] = Field(default_factory=list)
+    clarification_message: str | None = None
+    refusal_reason: str | None = None
+    model: str | None = None
+    finish_reason: Literal["stop", "length", "content_filter"] | None = None
+    input_tokens: int = Field(ge=0, default=0)
+    output_tokens: int = Field(ge=0, default=0)

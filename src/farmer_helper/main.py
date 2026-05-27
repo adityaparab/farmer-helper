@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 
 from farmer_helper.api.middleware.request_id import request_id_middleware
+from farmer_helper.api.routes.answers import router as answers_router
 from farmer_helper.api.routes.embeddings import router as embeddings_router
 from farmer_helper.api.routes.health import router as health_router
 from farmer_helper.api.routes.retrieval import router as retrieval_router
@@ -22,6 +23,7 @@ def create_app() -> FastAPI:
     app.include_router(health_router)
     app.include_router(embeddings_router)
     app.include_router(retrieval_router)
+    app.include_router(answers_router)
 
     @app.exception_handler(Exception)
     async def global_exception_handler(_: Request, exc: Exception) -> JSONResponse:
