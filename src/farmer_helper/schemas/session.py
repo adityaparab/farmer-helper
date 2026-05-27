@@ -72,3 +72,17 @@ class FollowUpContextResponse(BaseModel):
     session_key: str = Field(min_length=1)
     messages: list[FollowUpContextMessage]
     context_text: str
+
+
+class SessionSummaryRequest(BaseModel):
+    session_key: str = Field(min_length=1, max_length=64)
+    min_messages: int = Field(ge=1, le=200, default=12)
+    max_messages_in_summary: int = Field(ge=1, le=100, default=16)
+    max_points: int = Field(ge=1, le=20, default=6)
+
+
+class SessionSummaryResponse(BaseModel):
+    session_key: str = Field(min_length=1)
+    applied: bool
+    message_count: int = Field(ge=0)
+    summary: str | None = None

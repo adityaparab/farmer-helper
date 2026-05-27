@@ -5,14 +5,14 @@
 Provide optional summarization of long sessions to keep downstream context bounded while preserving key conversational facts.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add deterministic session summarization service over bounded recent messages.
-2. Define summary trigger rules (message threshold and summary length bounds).
-3. Add unit tests for summary activation and no-op behavior.
+## What was done
+1. Added session summarization schemas in `src/farmer_helper/schemas/session.py`.
+2. Added optional deterministic summarizer in `src/farmer_helper/services/session/summarizer.py`.
+3. Added threshold/no-op behavior tests in `tests/unit/test_session_summarizer.py`.
 
 ## Decisions made
 - Summarization is optional and deterministic for reproducible tests.

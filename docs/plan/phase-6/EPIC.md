@@ -15,8 +15,8 @@ This Epic maps to Phase 6 in `docs/plan/PHASES.md` and tracks local sub-issue st
 |---|---|---|---|---|
 | P6-T01 | Add session and message schemas | Completed | 2026-05-27 | Added session/message DB models, schemas, repository, and tests |
 | P6-T02 | Add follow-up context resolution | Completed | 2026-05-27 | Added bounded follow-up context resolver with deterministic ordering tests |
-| P6-T03 | Add optional summarization for long sessions | In progress | 2026-05-27 | Next active task |
-| P6-T04 | Pass bounded context through retrieval and answering | Not started | - | Pending |
+| P6-T03 | Add optional summarization for long sessions | Completed | 2026-05-27 | Added deterministic optional session summarizer and threshold-based tests |
+| P6-T04 | Pass bounded context through retrieval and answering | In progress | 2026-05-27 | Next active task |
 | P6-T05 | Add expiry or archival rules | Not started | - | Pending |
 | P6-T06 | Add multi-turn integration tests | Not started | - | Pending |
 | P6-T07 | Add transcript export/import | Not started | - | Pending |
