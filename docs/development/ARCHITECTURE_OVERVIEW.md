@@ -24,6 +24,7 @@
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`
 2. Embedding provider guide: `docs/development/EMBEDDING_PROVIDERS.md`
 3. Retrieval pipeline guide: `docs/development/RETRIEVAL_PIPELINE.md`
+4. Answering pipeline guide: `docs/development/ANSWERING_PIPELINE.md`
 
 ## Next phases
 1. Hybrid retrieval and reranking pipeline.

@@ -5,14 +5,15 @@
 Document prompt construction rules, decision policy behavior, and how to switch or extend answer-generation providers safely.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add developer-facing prompt and policy documentation.
-2. Document provider abstraction contracts and extension workflow.
-3. Add operational notes for diagnostics interpretation and safe rollouts.
+## What was done
+1. Added `docs/development/ANSWERING_PIPELINE.md` with prompt construction and policy behavior.
+2. Documented provider abstraction contracts and provider-switching workflow.
+3. Documented deterministic citation mapping and answer diagnostics logging fields.
+4. Added references in `README.md` and `docs/development/ARCHITECTURE_OVERVIEW.md`.
 
 ## Decisions made
 - Documentation should map directly to current service and schema contracts.

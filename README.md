@@ -202,3 +202,6 @@ Prompting foundation:
 - `tests/unit/test_citation_mapper.py`
 - `tests/integration/test_answer_generation_regression.py`
 - `tests/unit/test_answer_diagnostics_logging.py`
+
+Answer-generation documentation:
+- `docs/development/ANSWERING_PIPELINE.md`
