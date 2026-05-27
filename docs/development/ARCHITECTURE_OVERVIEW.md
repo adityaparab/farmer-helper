@@ -41,6 +41,9 @@
 30. Evaluation maintenance runbook for CI triage, metric interpretation, and dataset expansion policy.
 31. Observability baseline with request lifecycle logs, route-level timings, and optional Sentry initialization.
 32. Centralized log privacy redaction filter for sensitive top-level and nested fields.
+33. Security guard baseline with configurable API-key auth and in-memory rate limiting for non-health routes.
+34. Prompt-injection refusal path with deterministic refusal code and structured security audit events.
+35. Security schema hardening with bounded lengths and strict non-blank validators.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`
@@ -51,6 +54,7 @@
 6. Reliability runbook: `docs/development/RELIABILITY_RUNBOOK.md`
 7. Evaluation runbook: `docs/development/EVALUATION_RUNBOOK.md`
 8. Observability runbook: `docs/development/OBSERVABILITY_RUNBOOK.md`
+9. Security runbook: `docs/development/SECURITY_RUNBOOK.md`
 
 ## Next phases
 1. Hybrid retrieval and reranking pipeline.

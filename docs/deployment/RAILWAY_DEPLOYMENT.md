@@ -14,6 +14,9 @@ At minimum set:
 5. `SENTRY_TRACES_SAMPLE_RATE=<optional, default 0.0>`
 6. `SENTRY_ENVIRONMENT=<optional, default APP_ENV>`
 7. Provider configuration values (`LLM_PROVIDER`, `LLM_MODEL`, `EMBEDDING_PROVIDER`, `EMBEDDING_MODEL`)
+8. `SECURITY_API_KEY=<recommended in production>`
+9. `SECURITY_RATE_LIMIT_REQUESTS=<optional, default 0 (disabled)>`
+10. `SECURITY_RATE_LIMIT_WINDOW_SECONDS=<optional, default 60>`
 
 ## Health checks
 1. Liveness: `/health/live`

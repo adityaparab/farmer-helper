@@ -63,6 +63,10 @@ Active implementation tracking for Phase 9 lives in:
 - `docs/plan/phase-9/EPIC.md`
 - `docs/plan/phase-9/tasks/`
 
+Active implementation tracking for Phase 10 lives in:
+- `docs/plan/phase-10/EPIC.md`
+- `docs/plan/phase-10/tasks/`
+
 GitHub issue status comment standard:
 - `docs/plan/ISSUE_COMMENT_TEMPLATE.md`
 - `scripts/post-issue-status-comment.ps1`
@@ -307,3 +311,17 @@ Observability and alerting implementation:
 
 Observability documentation:
 - `docs/development/OBSERVABILITY_RUNBOOK.md`
+
+## Phase 10 security progress
+Security and abuse-resistance implementation:
+- `src/farmer_helper/services/security/guard.py`
+- `src/farmer_helper/api/middleware/request_id.py`
+- `src/farmer_helper/services/answering/prompt_builder.py`
+- `src/farmer_helper/schemas/answering.py`
+- `src/farmer_helper/schemas/retrieval.py`
+- `src/farmer_helper/core/config.py`
+- `tests/unit/test_security_guards.py`
+- `tests/unit/test_security_exploit_regressions.py`
+
+Security documentation:
+- `docs/development/SECURITY_RUNBOOK.md`

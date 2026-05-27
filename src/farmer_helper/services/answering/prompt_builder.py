@@ -1,3 +1,4 @@
+import logging
 import re
 from collections.abc import Sequence
 
@@ -8,6 +9,8 @@ from farmer_helper.schemas.answering import (
 
 
 class PromptBuilder:
+    _logger = logging.getLogger(__name__)
+
     _REFUSAL_TERMS = {
         "bomb",
         "explosive",
@@ -29,9 +32,36 @@ class PromptBuilder:
         "those",
     }
 
+    _PROMPT_INJECTION_PATTERNS = (
+        "ignore previous instructions",
+        "ignore all previous",
+        "reveal system prompt",
+        "show system prompt",
+        "developer message",
+        "jailbreak",
+        "bypass safety",
+    )
+
     def build(self, request: PromptBuildRequest) -> PromptBuildResult:
         normalized_question = request.question.strip()
         lowered_question = normalized_question.lower()
+
+        if self._is_prompt_injection_attempt(lowered_question):
+            self._logger.warning(
+                "security.audit",
+                extra={
+                    "security_event": "prompt_injection",
+                    "security_outcome": "rejected",
+                    "security_route": "answers.generate",
+                },
+            )
+            return PromptBuildResult(
+                decision="refuse",
+                system_prompt=self._system_prompt(),
+                user_prompt=normalized_question,
+                refusal_reason="Potential prompt-injection attempt detected.",
+                refusal_code="REFUSAL_PROMPT_INJECTION",
+            )
 
         if self._should_refuse(lowered_question):
             return PromptBuildResult(
@@ -90,6 +120,9 @@ class PromptBuilder:
     def _should_refuse(self, question: str) -> bool:
         terms = self._tokenize(question)
         return any(term in self._REFUSAL_TERMS for term in terms)
+
+    def _is_prompt_injection_attempt(self, question: str) -> bool:
+        return any(pattern in question for pattern in self._PROMPT_INJECTION_PATTERNS)
 
     def _clarification_code(self, question: str, chunks: Sequence[object]) -> str | None:
         terms = self._tokenize(question)

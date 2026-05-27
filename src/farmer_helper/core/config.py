@@ -47,6 +47,12 @@ class Settings(BaseSettings):
     sentry_dsn: str | None = Field(default=None, alias="SENTRY_DSN")
     sentry_traces_sample_rate: float = Field(default=0.0, alias="SENTRY_TRACES_SAMPLE_RATE")
     sentry_environment: str | None = Field(default=None, alias="SENTRY_ENVIRONMENT")
+    security_api_key: str | None = Field(default=None, alias="SECURITY_API_KEY")
+    security_rate_limit_requests: int = Field(default=0, alias="SECURITY_RATE_LIMIT_REQUESTS")
+    security_rate_limit_window_seconds: int = Field(
+        default=60,
+        alias="SECURITY_RATE_LIMIT_WINDOW_SECONDS",
+    )
 
 
 @lru_cache(maxsize=1)

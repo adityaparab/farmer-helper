@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 
 class VectorRetrievalRequest(BaseModel):
@@ -61,18 +61,26 @@ class RerankResponse(BaseModel):
 
 
 class RetrievalRequest(BaseModel):
-    query_text: str = Field(min_length=1)
+    query_text: str = Field(min_length=1, max_length=500)
     query_vector: list[float] = Field(min_length=1)
     session_key: str | None = Field(default=None, min_length=1, max_length=64)
     context_max_messages: int = Field(ge=1, le=50, default=8)
     context_max_turns: int = Field(ge=1, le=50, default=8)
     top_k: int = Field(ge=1, le=100, default=5)
-    provider: str = Field(min_length=1)
-    model: str = Field(min_length=1)
-    version: str = Field(min_length=1, default="v1")
+    provider: str = Field(min_length=1, max_length=128)
+    model: str = Field(min_length=1, max_length=128)
+    version: str = Field(min_length=1, max_length=64, default="v1")
     vector_weight: float = Field(ge=0.0, le=1.0, default=0.7)
     keyword_weight: float = Field(ge=0.0, le=1.0, default=0.3)
-    reranker: str = Field(min_length=1, default="none")
+    reranker: str = Field(min_length=1, max_length=64, default="none")
+
+    @field_validator("query_text", "provider", "model", "version", "reranker")
+    @classmethod
+    def validate_non_blank(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("value must not be blank")
+        return normalized
 
 
 class RetrievalCitation(BaseModel):

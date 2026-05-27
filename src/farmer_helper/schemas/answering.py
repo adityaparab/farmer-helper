@@ -18,9 +18,17 @@ class RetrievedChunk(BaseModel):
 
 
 class PromptBuildRequest(BaseModel):
-    question: str = Field(min_length=1)
+    question: str = Field(min_length=1, max_length=500)
     retrieved_chunks: list[RetrievedChunk] = Field(default_factory=list)
     max_chunks: int = Field(ge=1, le=20, default=5)
+
+    @field_validator("question")
+    @classmethod
+    def validate_question(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("question must not be blank")
+        return normalized
 
 
 class PromptBuildResult(BaseModel):
@@ -66,7 +74,7 @@ class LLMGenerateResponse(BaseModel):
 
 
 class AnswerGenerationRequest(BaseModel):
-    question: str = Field(min_length=1)
+    question: str = Field(min_length=1, max_length=500)
     retrieved_chunks: list[RetrievedChunk] = Field(default_factory=list)
     idempotency_key: str | None = Field(default=None, min_length=1, max_length=128)
     session_key: str | None = Field(default=None, min_length=1, max_length=64)
@@ -76,6 +84,14 @@ class AnswerGenerationRequest(BaseModel):
     max_chunks: int = Field(ge=1, le=20, default=5)
     max_answer_tokens: int = Field(ge=1, le=4096, default=512)
     temperature: float = Field(ge=0.0, le=1.0, default=0.0)
+
+    @field_validator("question")
+    @classmethod
+    def validate_question(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("question must not be blank")
+        return normalized
 
 
 class AnswerGenerationResponse(BaseModel):
@@ -107,6 +123,14 @@ class AnswerFeedbackRequest(BaseModel):
     degraded: bool = False
     reason: FeedbackReason | None = None
     model: str | None = Field(default=None, min_length=1, max_length=128)
+
+    @field_validator("question")
+    @classmethod
+    def validate_question(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("question must not be blank")
+        return normalized
 
 
 class AnswerFeedbackResponse(BaseModel):
