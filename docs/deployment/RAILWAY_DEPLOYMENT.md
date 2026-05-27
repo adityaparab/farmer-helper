@@ -1,9 +1,10 @@
 # Railway Deployment
 
 ## Deployment artifacts
-1. `railway.json` defines startup and healthcheck path.
+1. `railway.json` selects the Dockerfile builder and defines startup and healthcheck path.
 2. `Procfile` provides compatible web process command.
 3. `config/examples/.env.production.example` defines required environment keys.
+4. `Dockerfile` builds the Vite frontend in a Node stage and copies `frontend/dist` into the FastAPI runtime image.
 
 ## Required environment variables
 At minimum set:
@@ -29,6 +30,13 @@ At minimum set:
 20. `DATABASE_POOL_TIMEOUT_SECONDS=<optional, default 30>`
 21. `EMBEDDING_WORKER_COUNT=<optional, default 2>`
 22. `EMBEDDING_JOB_QUEUE_MAX_SIZE=<optional, default 100>`
+23. `FRONTEND_SERVE_ENABLED=true`
+24. `FRONTEND_DIST_DIR=/app/frontend/dist`
+
+## Frontend serving
+The Railway Docker image builds the React/Vite app during `docker build` and copies the generated assets to `/app/frontend/dist`. FastAPI serves `/`, `/assets/*`, and SPA fallback routes from that directory when `FRONTEND_SERVE_ENABLED=true`.
+
+Keep `FRONTEND_DIST_DIR=/app/frontend/dist` in Railway unless the Dockerfile layout changes. API routes such as `/auth`, `/admin`, `/answers`, `/retrieval`, `/embeddings`, `/health`, `/docs`, and `/openapi.json` remain backend routes and are excluded from the SPA fallback.
 
 ## Health checks
 1. Liveness: `/health/live`
@@ -39,6 +47,7 @@ At minimum set:
 2. Add required environment variables.
 3. Deploy `main` branch.
 4. Validate `/health/live` and `/health/ready` after migration.
+5. Validate `/` returns the frontend `index.html` and `/assets/*` returns built frontend assets.
 
 ## Notes
 Actual secret values must be managed only in Railway variables and never committed.

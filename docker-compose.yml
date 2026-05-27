@@ -28,5 +28,7 @@ services:
       DATABASE_URL: postgresql+psycopg://farmer:farmer@db:5432/farmer_helper
       API_HOST: 0.0.0.0
       API_PORT: 8000
+      FRONTEND_SERVE_ENABLED: "true"
+      FRONTEND_DIST_DIR: /app/frontend/dist
     ports:
       - "8000:8000"
