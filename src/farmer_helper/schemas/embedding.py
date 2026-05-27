@@ -45,7 +45,9 @@ class EmbeddingOrchestrationResult(BaseModel):
     provider: str = Field(min_length=1)
     version: str = Field(min_length=1)
     dimensions: int = Field(ge=1)
-    persisted_count: int = Field(ge=1)
+    persisted_count: int = Field(ge=0)
+    degraded: bool = False
+    degradation_code: str | None = None
 
 
 class EmbeddingTriggerRequest(BaseModel):

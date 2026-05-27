@@ -106,14 +106,16 @@ async def trigger_embeddings(
             chunks=request.chunks,
         )
     except EmbeddingProviderError as exc:
-        raise HTTPException(
-            status_code=502,
-            detail={
-                "error_code": exc.code,
-                "message": exc.message,
-                "retryable": exc.retryable,
-            },
-        ) from exc
+        response = EmbeddingOrchestrationResult(
+            document_id=request.document_id,
+            model=request.model,
+            provider=request.provider,
+            version=request.version,
+            dimensions=request.dimensions,
+            persisted_count=0,
+            degraded=True,
+            degradation_code=exc.code,
+        )
 
     if request.idempotency_key is not None:
         store = get_idempotency_store()

@@ -5,15 +5,15 @@
 Implement explicit degraded-response behavior for reliability failures so user-facing APIs remain deterministic and useful when upstream dependencies fail.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Define deterministic degraded behaviors for answer generation and embedding trigger routes.
-2. Map circuit-open/timeout/retry-exhausted failures to stable degraded outcomes.
-3. Add route-level tests covering degradation paths.
-4. Keep existing error contracts and diagnostics compatibility.
+## What was done
+1. Added explicit degraded markers to answer and embedding response schemas.
+2. Implemented deterministic degraded response behavior in answers route for provider failures.
+3. Implemented deterministic degraded response behavior in embeddings route for provider failures.
+4. Updated route unit tests to validate degraded behavior.
 
 ## Decisions made
 - Graceful degradation should build on existing timeout/retry/circuit-breaker/idempotency controls.

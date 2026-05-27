@@ -81,14 +81,15 @@ def generate_answer(
     try:
         response = service.generate(request)
     except LLMProviderError as exc:
-        raise HTTPException(
-            status_code=502,
-            detail={
-                "error_code": exc.code,
-                "message": exc.message,
-                "retryable": exc.retryable,
-            },
-        ) from exc
+        response = AnswerGenerationResponse(
+            decision="clarify",
+            clarification_message=(
+                "Answer generation is temporarily degraded. " "Please retry this request shortly."
+            ),
+            clarification_code="CLARIFY_SERVICE_DEGRADED",
+            degraded=True,
+            degradation_code=exc.code,
+        )
 
     if request.idempotency_key is not None:
         store = get_idempotency_store()

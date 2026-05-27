@@ -28,6 +28,7 @@
 17. External call resilience baseline with timeout policies and deterministic retries for embedding and LLM providers.
 18. Circuit-breaker and fallback-provider strategy for external embedding and LLM call boundaries.
 19. Deterministic idempotency key replay/conflict handling for reliability-sensitive API operations.
+20. Deterministic graceful degradation responses for provider failures in embedding and answer-generation APIs.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`

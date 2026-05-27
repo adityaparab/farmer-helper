@@ -107,10 +107,12 @@ def test_answer_generation_route_provider_failure(monkeypatch) -> None:
         },
     )
 
-    assert response.status_code == 502
-    payload = response.json()["detail"]
-    assert payload["error_code"] == "LLM_PROVIDER_UNAVAILABLE"
-    assert payload["retryable"] is True
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["decision"] == "clarify"
+    assert payload["clarification_code"] == "CLARIFY_SERVICE_DEGRADED"
+    assert payload["degraded"] is True
+    assert payload["degradation_code"] == "LLM_PROVIDER_UNAVAILABLE"
 
 
 def test_answer_generation_route_clarification_payload(monkeypatch) -> None:

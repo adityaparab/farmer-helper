@@ -258,3 +258,5 @@ Timeout and retry policy foundations:
 - `tests/unit/test_timeout_llm_provider.py`
 - `tests/unit/test_circuit_breaker_llm_provider.py`
 - `tests/unit/test_idempotency_store.py`
+- `tests/unit/test_embedding_trigger_route.py`
+- `tests/unit/test_answer_generation_route.py`
