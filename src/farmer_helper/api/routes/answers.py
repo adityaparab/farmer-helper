@@ -24,6 +24,7 @@ from farmer_helper.services.answering.provider import LLMProviderError
 from farmer_helper.services.answering.retrying_provider import LLMRetryPolicy, RetryingLLMProvider
 from farmer_helper.services.answering.timeout_provider import LLMTimeoutPolicy, TimeoutLLMProvider
 from farmer_helper.services.evaluation.feedback_signals import OnlineFeedbackSignalLogger
+from farmer_helper.services.performance.cache import TTLCache
 from farmer_helper.services.reliability.idempotency import (
     IdempotencyConflictError,
     compute_request_hash,
@@ -35,6 +36,7 @@ from farmer_helper.services.session.context_resolver import FollowUpContextResol
 router = APIRouter(prefix="/answers", tags=["answers"])
 logger = logging.getLogger(__name__)
 feedback_signal_logger = OnlineFeedbackSignalLogger(logger)
+_answer_cache: TTLCache[str, AnswerGenerationResponse] = TTLCache(max_entries=512)
 
 
 def build_answer_generation_service(db: Session) -> AnswerGenerationService:
@@ -80,6 +82,17 @@ def generate_answer(
                 "answer_route_total_ms": round(route_ms, 4),
             },
         )
+
+    settings = get_settings()
+    answer_cache_ttl = settings.answer_cache_ttl_seconds
+    cache_key: str | None = None
+    if answer_cache_ttl > 0 and request.idempotency_key is None and request.session_key is None:
+        cache_key = compute_request_hash(request.model_dump(mode="json"))
+        cached = _answer_cache.get(cache_key)
+        if cached is not None:
+            logger.info("answers.cache.hit", extra={"route": "answers.generate"})
+            _log_route_completed(cached)
+            return cached
 
     if request.idempotency_key is not None:
         store = get_idempotency_store()
@@ -148,6 +161,9 @@ def generate_answer(
             request_hash=compute_request_hash(request.model_dump(mode="json")),
             response_payload=response.model_dump(mode="json"),
         )
+    if cache_key is not None:
+        _answer_cache.set(cache_key, response, ttl_seconds=answer_cache_ttl)
+        logger.info("answers.cache.miss", extra={"route": "answers.generate"})
     _log_route_completed(response)
     return response
 

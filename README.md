@@ -67,6 +67,10 @@ Active implementation tracking for Phase 10 lives in:
 - `docs/plan/phase-10/EPIC.md`
 - `docs/plan/phase-10/tasks/`
 
+Active implementation tracking for Phase 11 lives in:
+- `docs/plan/phase-11/EPIC.md`
+- `docs/plan/phase-11/tasks/`
+
 GitHub issue status comment standard:
 - `docs/plan/ISSUE_COMMENT_TEMPLATE.md`
 - `scripts/post-issue-status-comment.ps1`
@@ -325,3 +329,21 @@ Security and abuse-resistance implementation:
 
 Security documentation:
 - `docs/development/SECURITY_RUNBOOK.md`
+
+## Phase 11 performance and cost progress
+Performance/cost controls implementation:
+- `src/farmer_helper/services/performance/cache.py`
+- `src/farmer_helper/services/performance/model_router.py`
+- `src/farmer_helper/services/session/context_resolver.py`
+- `src/farmer_helper/api/routes/retrieval.py`
+- `src/farmer_helper/api/routes/answers.py`
+- `src/farmer_helper/api/routes/embeddings.py`
+- `src/farmer_helper/services/embedding/async_jobs.py`
+- `tests/unit/test_retrieval_route.py`
+- `tests/unit/test_answer_generation_route.py`
+- `tests/unit/test_answer_generation_service.py`
+- `tests/unit/test_follow_up_context_resolver.py`
+- `tests/unit/test_embedding_trigger_route.py`
+
+Performance/cost documentation:
+- `docs/development/PERFORMANCE_COST_RUNBOOK.md`

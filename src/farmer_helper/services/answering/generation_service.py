@@ -12,6 +12,7 @@ from farmer_helper.services.answering.citation_mapper import CitationMapper
 from farmer_helper.services.answering.diagnostics_logger import AnswerDiagnosticsLogger
 from farmer_helper.services.answering.prompt_builder import PromptBuilder
 from farmer_helper.services.answering.provider import LLMProvider
+from farmer_helper.services.performance.model_router import LLMModelRouter
 from farmer_helper.services.session.context_resolver import FollowUpContextResolver
 
 
@@ -23,12 +24,14 @@ class AnswerGenerationService:
         citation_mapper: CitationMapper | None = None,
         diagnostics_logger: AnswerDiagnosticsLogger | None = None,
         context_resolver: FollowUpContextResolver | None = None,
+        model_router: LLMModelRouter | None = None,
     ) -> None:
         self._prompt_builder = prompt_builder
         self._provider = provider
         self._citation_mapper = citation_mapper or CitationMapper()
         self._diagnostics_logger = diagnostics_logger or AnswerDiagnosticsLogger()
         self._context_resolver = context_resolver
+        self._model_router = model_router or LLMModelRouter()
 
     def generate(self, request: AnswerGenerationRequest) -> AnswerGenerationResponse:
         start = time.perf_counter()
@@ -96,7 +99,10 @@ class AnswerGenerationService:
 
         llm_response = self._provider.generate(
             LLMGenerateRequest(
-                model=request.model,
+                model=self._model_router.route(
+                    request_model=request.model,
+                    question=request.question,
+                ),
                 messages=[
                     LLMMessage(role="system", content=prompt_result.system_prompt),
                     LLMMessage(role="user", content=prompt_result.user_prompt),

@@ -44,6 +44,10 @@
 33. Security guard baseline with configurable API-key auth and in-memory rate limiting for non-health routes.
 34. Prompt-injection refusal path with deterministic refusal code and structured security audit events.
 35. Security schema hardening with bounded lengths and strict non-blank validators.
+36. Performance cache layer for retrieval and answer routes with configurable TTL and bounded capacity.
+37. LLM model tier routing (`auto`) with configurable low-cost/high-quality thresholds.
+38. Session context compaction with per-message trimming and duplicate elimination.
+39. Async embedding trigger/job-status flow for heavy work off the synchronous request path.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`
@@ -55,6 +59,7 @@
 7. Evaluation runbook: `docs/development/EVALUATION_RUNBOOK.md`
 8. Observability runbook: `docs/development/OBSERVABILITY_RUNBOOK.md`
 9. Security runbook: `docs/development/SECURITY_RUNBOOK.md`
+10. Performance and cost runbook: `docs/development/PERFORMANCE_COST_RUNBOOK.md`
 
 ## Next phases
 1. Hybrid retrieval and reranking pipeline.

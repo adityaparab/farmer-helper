@@ -362,3 +362,32 @@ def test_embedding_trigger_route_logs_conflict_observability(
         and getattr(record, "reliability_code", None) == "IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST"
         for record in caplog.records
     )
+
+
+def test_embedding_trigger_async_route_queues_job(monkeypatch: pytest.MonkeyPatch) -> None:
+    reset_idempotency_store()
+    from farmer_helper.api.routes import embeddings as embeddings_route
+
+    monkeypatch.setattr(
+        embeddings_route,
+        "build_orchestration_service",
+        _build_fake_success_service,
+    )
+
+    client = TestClient(app)
+    queued = client.post(
+        "/embeddings/trigger-async",
+        json={
+            "document_id": 77,
+            "model": "test-model",
+            "chunks": [{"chunk_index": 0, "text": "soil", "content_hash": "h0"}],
+        },
+    )
+
+    assert queued.status_code == 202
+    payload = queued.json()
+    assert payload["status"] == "queued"
+    status = client.get(f"/embeddings/jobs/{payload['job_id']}")
+    assert status.status_code == 200
+    status_payload = status.json()
+    assert status_payload["status"] in {"queued", "running", "completed"}

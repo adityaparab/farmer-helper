@@ -1,3 +1,6 @@
+from typing import Any
+
+import pytest
 from fastapi.testclient import TestClient
 
 from farmer_helper.main import app
@@ -10,7 +13,11 @@ from farmer_helper.schemas.retrieval import (
 
 
 class FakeRetrievalService:
+    calls = 0
+
     def retrieve(self, request):  # type: ignore[no-untyped-def]
+        del request
+        FakeRetrievalService.calls += 1
         return RetrievalResponse(
             items=[
                 RetrievalItem(
@@ -37,13 +44,13 @@ class FakeRetrievalService:
         )
 
 
-def test_retrieval_query_route_success(monkeypatch) -> None:
+def test_retrieval_query_route_success(monkeypatch: pytest.MonkeyPatch) -> None:
     from farmer_helper.api.routes import retrieval as retrieval_route
 
     monkeypatch.setattr(
         retrieval_route,
         "build_retrieval_service",
-        lambda **_: FakeRetrievalService(),
+        lambda **_kwargs: FakeRetrievalService(),
     )
 
     client = TestClient(app)
@@ -123,3 +130,35 @@ def test_retrieval_query_route_rejects_missing_session_context() -> None:
 
     assert response.status_code == 400
     assert "Session not found" in response.json()["detail"]
+
+
+def test_retrieval_query_route_uses_cache_when_enabled(monkeypatch: pytest.MonkeyPatch) -> None:
+    from farmer_helper.api.routes import retrieval as retrieval_route
+
+    class FakeSettings:
+        retrieval_cache_ttl_seconds = 60
+
+    FakeRetrievalService.calls = 0
+    monkeypatch.setattr(retrieval_route, "get_settings", lambda: FakeSettings())
+    monkeypatch.setattr(
+        retrieval_route,
+        "build_retrieval_service",
+        lambda **_kwargs: FakeRetrievalService(),
+    )
+
+    client = TestClient(app)
+    payload: dict[str, Any] = {
+        "query_text": "soil moisture",
+        "query_vector": [0.1, 0.2, 0.3],
+        "top_k": 3,
+        "provider": "mock-provider",
+        "model": "mock-embedding-v1",
+        "version": "v1",
+        "reranker": "none",
+    }
+    first = client.post("/retrieval/query", json=payload)
+    second = client.post("/retrieval/query", json=payload)
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert FakeRetrievalService.calls == 1

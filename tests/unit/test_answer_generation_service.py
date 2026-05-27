@@ -1,3 +1,7 @@
+from typing import cast
+
+import pytest
+
 from farmer_helper.schemas.answering import (
     AnswerGenerationRequest,
     Citation,
@@ -5,10 +9,15 @@ from farmer_helper.schemas.answering import (
     LLMGenerateResponse,
     RetrievedChunk,
 )
-from farmer_helper.schemas.session import FollowUpContextMessage, FollowUpContextResponse
+from farmer_helper.schemas.session import (
+    FollowUpContextMessage,
+    FollowUpContextRequest,
+    FollowUpContextResponse,
+)
 from farmer_helper.services.answering.generation_service import AnswerGenerationService
 from farmer_helper.services.answering.prompt_builder import PromptBuilder
 from farmer_helper.services.answering.provider import LLMProvider
+from farmer_helper.services.session.context_resolver import FollowUpContextResolver
 
 
 class FakeSuccessProvider(LLMProvider):
@@ -40,12 +49,14 @@ class CountingProvider(LLMProvider):
 class CapturingProvider(LLMProvider):
     def __init__(self) -> None:
         self.last_user_message: str | None = None
+        self.last_model: str | None = None
 
     def generate(self, request: LLMGenerateRequest) -> LLMGenerateResponse:
         self.last_user_message = next(
             (message.content for message in request.messages if message.role == "user"),
             None,
         )
+        self.last_model = request.model
         return LLMGenerateResponse(
             model=request.model,
             text="Generated with context",
@@ -56,7 +67,7 @@ class CapturingProvider(LLMProvider):
 
 
 class FakeContextResolver:
-    def resolve(self, request):  # type: ignore[no-untyped-def]
+    def resolve(self, request: FollowUpContextRequest) -> FollowUpContextResponse:
         return FollowUpContextResponse(
             session_key=request.session_key,
             messages=[
@@ -169,7 +180,7 @@ def test_answer_generation_service_injects_follow_up_context_when_session_key_pr
     service = AnswerGenerationService(
         prompt_builder=PromptBuilder(),
         provider=provider,
-        context_resolver=FakeContextResolver(),
+        context_resolver=cast(FollowUpContextResolver, FakeContextResolver()),
     )
 
     response = service.generate(
@@ -184,3 +195,38 @@ def test_answer_generation_service_injects_follow_up_context_when_session_key_pr
     assert provider.last_user_message is not None
     assert "Follow-up context" in provider.last_user_message
     assert "Current question" in provider.last_user_message
+
+
+def test_answer_generation_service_routes_auto_model(monkeypatch: pytest.MonkeyPatch) -> None:
+    from farmer_helper.services.performance import model_router as model_router_module
+
+    class FakeSettings:
+        llm_model_router_question_length_threshold = 20
+        llm_model_low_cost = "mock-cheap-v1"
+        llm_model_high_quality = "mock-quality-v1"
+
+    monkeypatch.setattr(model_router_module, "get_settings", lambda: FakeSettings())
+
+    provider = CapturingProvider()
+    service = AnswerGenerationService(
+        prompt_builder=PromptBuilder(),
+        provider=provider,
+    )
+
+    _ = service.generate(
+        AnswerGenerationRequest(
+            model="auto",
+            question="Give irrigation advice for a field.",
+            retrieved_chunks=[_chunk(1, 0, "Use moisture sensors.", 0.9)],
+        )
+    )
+    assert provider.last_model == "mock-quality-v1"
+
+    _ = service.generate(
+        AnswerGenerationRequest(
+            model="auto",
+            question="Apply mulch now",
+            retrieved_chunks=[_chunk(1, 0, "Mulch reduces evaporation.", 0.9)],
+        )
+    )
+    assert provider.last_model == "mock-cheap-v1"

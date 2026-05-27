@@ -64,3 +64,15 @@ class EmbeddingTriggerRequest(BaseModel):
     batch_size: int = Field(ge=1, le=256, default=32)
     dimensions: int = Field(ge=1, le=4096, default=8)
     chunks: list[EmbeddingSourceChunk] = Field(min_length=1)
+
+
+class EmbeddingAsyncTriggerResponse(BaseModel):
+    job_id: str = Field(min_length=1)
+    status: Literal["queued"] = "queued"
+
+
+class EmbeddingAsyncJobStatusResponse(BaseModel):
+    job_id: str = Field(min_length=1)
+    status: Literal["queued", "running", "completed", "failed"]
+    result: EmbeddingOrchestrationResult | None = None
+    error: str | None = None

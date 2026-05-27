@@ -17,6 +17,13 @@ At minimum set:
 8. `SECURITY_API_KEY=<recommended in production>`
 9. `SECURITY_RATE_LIMIT_REQUESTS=<optional, default 0 (disabled)>`
 10. `SECURITY_RATE_LIMIT_WINDOW_SECONDS=<optional, default 60>`
+11. `PERFORMANCE_CACHE_MAX_ENTRIES=<optional, default 512>`
+12. `RETRIEVAL_CACHE_TTL_SECONDS=<optional, default 0 (disabled)>`
+13. `ANSWER_CACHE_TTL_SECONDS=<optional, default 0 (disabled)>`
+14. `LLM_MODEL_LOW_COST=<optional>`
+15. `LLM_MODEL_HIGH_QUALITY=<optional>`
+16. `LLM_MODEL_ROUTER_QUESTION_LENGTH_THRESHOLD=<optional, default 120>`
+17. `SESSION_CONTEXT_MAX_CHARS_PER_MESSAGE=<optional, default 300>`
 
 ## Health checks
 1. Liveness: `/health/live`

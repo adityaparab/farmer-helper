@@ -66,3 +66,39 @@ def test_follow_up_context_resolver_raises_when_session_missing() -> None:
         raise AssertionError("Expected ValueError")
     except ValueError as exc:
         assert "Session not found" in str(exc)
+
+
+def test_follow_up_context_resolver_dedupes_and_trims(monkeypatch) -> None:  # type: ignore[no-untyped-def]
+    from farmer_helper.services.session import context_resolver as context_resolver_module
+
+    class FakeSettings:
+        session_context_max_chars_per_message = 20
+
+    monkeypatch.setattr(context_resolver_module, "get_settings", lambda: FakeSettings())
+
+    session = _session()
+    repository = ChatSessionRepository(session)
+    created = repository.create_session(session_key="ctx-dedupe")
+    repository.append_message(
+        session_id=created.id,
+        role="user",
+        content="This message will be very long and should be trimmed.",
+    )
+    repository.append_message(
+        session_id=created.id,
+        role="user",
+        content="This message will be very long and should be trimmed.",
+    )
+
+    resolver = FollowUpContextResolver(repository)
+    response = resolver.resolve(
+        FollowUpContextRequest(
+            session_key="ctx-dedupe",
+            question="next",
+            max_messages=10,
+            max_turns=10,
+        )
+    )
+
+    assert len(response.messages) == 1
+    assert response.messages[0].content.endswith("...")

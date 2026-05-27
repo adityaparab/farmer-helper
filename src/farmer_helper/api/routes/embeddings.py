@@ -1,13 +1,19 @@
 import logging
 import time
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.orm import Session
 
 from farmer_helper.core.config import get_settings
 from farmer_helper.db.base import get_db_session
 from farmer_helper.repositories.chunk_embedding_repository import ChunkEmbeddingRepository
-from farmer_helper.schemas.embedding import EmbeddingOrchestrationResult, EmbeddingTriggerRequest
+from farmer_helper.schemas.embedding import (
+    EmbeddingAsyncJobStatusResponse,
+    EmbeddingAsyncTriggerResponse,
+    EmbeddingOrchestrationResult,
+    EmbeddingTriggerRequest,
+)
+from farmer_helper.services.embedding.async_jobs import get_embedding_async_job_store
 from farmer_helper.services.embedding.batch_service import EmbeddingBatchService
 from farmer_helper.services.embedding.circuit_breaker_provider import (
     CircuitBreakerEmbeddingProvider,
@@ -169,3 +175,63 @@ async def trigger_embeddings(
         )
     _log_route_completed(response)
     return response
+
+
+async def _run_async_embedding_job(
+    *,
+    job_id: str,
+    service: EmbeddingOrchestrationService,
+    request: EmbeddingTriggerRequest,
+) -> None:
+    store = get_embedding_async_job_store()
+    store.mark_running(job_id)
+    try:
+        result = await service.embed_and_persist(
+            document_id=request.document_id,
+            model=request.model,
+            chunks=request.chunks,
+        )
+    except Exception as exc:  # pragma: no cover - exercised in tests with status assertions
+        store.mark_failed(job_id, str(exc))
+        return
+
+    store.mark_completed(job_id, result)
+
+
+@router.post("/trigger-async", response_model=EmbeddingAsyncTriggerResponse, status_code=202)
+async def trigger_embeddings_async(
+    request: EmbeddingTriggerRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db_session),
+) -> EmbeddingAsyncTriggerResponse:  # noqa: B008
+    service = build_orchestration_service(
+        db=db,
+        provider_name=request.provider,
+        version=request.version,
+        batch_size=request.batch_size,
+        dimensions=request.dimensions,
+    )
+    store = get_embedding_async_job_store()
+    job = store.create()
+    background_tasks.add_task(
+        _run_async_embedding_job,
+        job_id=job.job_id,
+        service=service,
+        request=request,
+    )
+    return EmbeddingAsyncTriggerResponse(job_id=job.job_id)
+
+
+@router.get("/jobs/{job_id}", response_model=EmbeddingAsyncJobStatusResponse)
+def get_async_embedding_job(job_id: str) -> EmbeddingAsyncJobStatusResponse:
+    store = get_embedding_async_job_store()
+    job = store.get(job_id)
+    if job is None:
+        raise HTTPException(status_code=404, detail=f"Embedding job not found: {job_id}")
+
+    return EmbeddingAsyncJobStatusResponse(
+        job_id=job.job_id,
+        status=job.status,
+        result=job.result,
+        error=job.error,
+    )

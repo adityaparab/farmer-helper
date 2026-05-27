@@ -423,3 +423,61 @@ def test_answer_generation_route_logs_conflict_observability(
         and getattr(record, "reliability_code", None) == "IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST"
         for record in caplog.records
     )
+
+
+def test_answer_generation_route_uses_cache_when_enabled(monkeypatch: pytest.MonkeyPatch) -> None:
+    reset_idempotency_store()
+    from farmer_helper.api.routes import answers as answers_route
+
+    class FakeSettings:
+        answer_cache_ttl_seconds = 60
+
+    class CountingService:
+        def __init__(self) -> None:
+            self.calls = 0
+
+        def generate(self, request: AnswerGenerationRequest) -> AnswerGenerationResponse:
+            del request
+            self.calls += 1
+            return AnswerGenerationResponse(
+                decision="answer",
+                answer="cached answer",
+                citations=[Citation(document_id=1, chunk_index=0, content_hash="h-1-0")],
+                model="mock-chat-v1",
+                finish_reason="stop",
+                input_tokens=8,
+                output_tokens=4,
+            )
+
+    service = CountingService()
+
+    def _build_service(_db: Session) -> CountingService:
+        del _db
+        return service
+
+    monkeypatch.setattr(answers_route, "get_settings", lambda: FakeSettings())
+    monkeypatch.setattr(answers_route, "build_answer_generation_service", _build_service)
+
+    payload = {
+        "question": "How can I improve soil moisture retention?",
+        "retrieved_chunks": [
+            {
+                "citation": {
+                    "document_id": 1,
+                    "chunk_index": 0,
+                    "content_hash": "h-1-0",
+                },
+                "text": "Mulching helps reduce evaporation.",
+                "score": 0.9,
+            }
+        ],
+    }
+
+    client = TestClient(app)
+    first = client.post("/answers/generate", json=payload)
+    second = client.post("/answers/generate", json=payload)
+
+    assert first.status_code == 200
+    assert second.status_code == 200
+    assert first.json() == second.json()
+    assert service.calls == 1

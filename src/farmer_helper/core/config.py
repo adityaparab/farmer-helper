@@ -53,6 +53,19 @@ class Settings(BaseSettings):
         default=60,
         alias="SECURITY_RATE_LIMIT_WINDOW_SECONDS",
     )
+    performance_cache_max_entries: int = Field(default=512, alias="PERFORMANCE_CACHE_MAX_ENTRIES")
+    retrieval_cache_ttl_seconds: int = Field(default=0, alias="RETRIEVAL_CACHE_TTL_SECONDS")
+    answer_cache_ttl_seconds: int = Field(default=0, alias="ANSWER_CACHE_TTL_SECONDS")
+    llm_model_low_cost: str = Field(default="mock-chat-v1", alias="LLM_MODEL_LOW_COST")
+    llm_model_high_quality: str = Field(default="mock-chat-v1", alias="LLM_MODEL_HIGH_QUALITY")
+    llm_model_router_question_length_threshold: int = Field(
+        default=120,
+        alias="LLM_MODEL_ROUTER_QUESTION_LENGTH_THRESHOLD",
+    )
+    session_context_max_chars_per_message: int = Field(
+        default=300,
+        alias="SESSION_CONTEXT_MAX_CHARS_PER_MESSAGE",
+    )
 
 
 @lru_cache(maxsize=1)
