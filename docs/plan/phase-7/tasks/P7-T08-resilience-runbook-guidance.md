@@ -5,15 +5,15 @@
 Document Phase 7 resilience behavior, reliability response contracts, and runbook guidance for diagnosing degraded and conflict outcomes in production-like environments.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add resilience documentation covering timeout/retry/circuit-breaker/idempotency/degradation behavior.
-2. Document normalized reliability fields and observability events.
-3. Add runbook guidance for common reliability incidents.
-4. Link guidance from architecture and README references.
+## What was done
+1. Added `docs/development/RELIABILITY_RUNBOOK.md` documenting reliability controls and incident diagnosis workflow.
+2. Documented normalized reliability response fields and observability events.
+3. Added operational tuning lever and verification guidance.
+4. Linked runbook from architecture overview and README Phase 7 section.
 
 ## Decisions made
 - Runbook should align with implemented contracts and current tests.

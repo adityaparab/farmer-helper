@@ -261,3 +261,6 @@ Timeout and retry policy foundations:
 - `tests/unit/test_idempotency_store.py`
 - `tests/unit/test_embedding_trigger_route.py`
 - `tests/unit/test_answer_generation_route.py`
+
+Reliability documentation:
+- `docs/development/RELIABILITY_RUNBOOK.md`

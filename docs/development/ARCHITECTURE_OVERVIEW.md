@@ -39,6 +39,7 @@
 3. Retrieval pipeline guide: `docs/development/RETRIEVAL_PIPELINE.md`
 4. Answering pipeline guide: `docs/development/ANSWERING_PIPELINE.md`
 5. Session behavior guide: `docs/development/SESSION_BEHAVIOR.md`
+6. Reliability runbook: `docs/development/RELIABILITY_RUNBOOK.md`
 
 ## Next phases
 1. Hybrid retrieval and reranking pipeline.
