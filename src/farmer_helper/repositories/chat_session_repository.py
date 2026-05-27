@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -28,6 +30,36 @@ class ChatSessionRepository:
     def get_session_by_key(self, session_key: str) -> ChatSession | None:
         stmt = select(ChatSession).where(ChatSession.session_key == session_key)
         return self._session.scalar(stmt)
+
+    def update_session_status(self, session_id: int, status: str) -> ChatSession:
+        record = self._session.get(ChatSession, session_id)
+        if record is None:
+            raise ValueError(f"Chat session not found: {session_id}")
+
+        record.status = status
+        self._session.add(record)
+        self._session.commit()
+        self._session.refresh(record)
+        return record
+
+    def archive_session(self, session_key: str) -> ChatSession:
+        record = self.get_session_by_key(session_key)
+        if record is None:
+            raise ValueError(f"Chat session not found: {session_key}")
+        return self.update_session_status(session_id=record.id, status="archived")
+
+    def expire_active_sessions(self, updated_before: datetime) -> int:
+        stmt = select(ChatSession).where(
+            ChatSession.status == "active",
+            ChatSession.updated_at < updated_before,
+        )
+        candidates = list(self._session.scalars(stmt))
+        for record in candidates:
+            record.status = "expired"
+            self._session.add(record)
+
+        self._session.commit()
+        return len(candidates)
 
     def append_message(
         self,

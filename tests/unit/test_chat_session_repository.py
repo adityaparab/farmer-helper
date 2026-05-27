@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta
+
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
@@ -74,3 +76,32 @@ def test_chat_session_repository_message_metadata_persists() -> None:
     )
 
     assert message.metadata_json == {"source": "mobile"}
+
+
+def test_chat_session_repository_archives_session() -> None:
+    session = _session()
+    repository = ChatSessionRepository(session)
+
+    repository.create_session(session_key="session-archive")
+    archived = repository.archive_session("session-archive")
+
+    assert archived.status == "archived"
+
+
+def test_chat_session_repository_expires_only_active_sessions() -> None:
+    session = _session()
+    repository = ChatSessionRepository(session)
+
+    repository.create_session(session_key="session-active")
+    archived = repository.create_session(session_key="session-archived")
+    repository.update_session_status(session_id=archived.id, status="archived")
+
+    expired_count = repository.expire_active_sessions(
+        updated_before=datetime.now() + timedelta(days=1)
+    )
+
+    assert expired_count >= 1
+    refreshed_active = repository.get_session_by_key("session-active")
+    refreshed_archived = repository.get_session_by_key("session-archived")
+    assert refreshed_active is not None and refreshed_active.status == "expired"
+    assert refreshed_archived is not None and refreshed_archived.status == "archived"

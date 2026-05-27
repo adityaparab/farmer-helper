@@ -5,14 +5,14 @@
 Introduce deterministic session lifecycle rules for expiring or archiving stale sessions and preserving traceability.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add session status transition rules for archival and expiry.
-2. Add repository/service methods to mark sessions archived or expired by policy.
-3. Add unit tests for lifecycle transition behavior.
+## What was done
+1. Added repository lifecycle methods in `src/farmer_helper/repositories/chat_session_repository.py`.
+2. Added lifecycle service in `src/farmer_helper/services/session/lifecycle_service.py`.
+3. Added lifecycle tests in `tests/unit/test_chat_session_repository.py` and `tests/unit/test_session_lifecycle_service.py`.
 
 ## Decisions made
 - Lifecycle rules should be deterministic and auditable.
