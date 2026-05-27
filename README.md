@@ -47,6 +47,10 @@ Active implementation tracking for Phase 5 lives in:
 - `docs/plan/phase-5/EPIC.md`
 - `docs/plan/phase-5/tasks/`
 
+Active implementation tracking for Phase 6 lives in:
+- `docs/plan/phase-6/EPIC.md`
+- `docs/plan/phase-6/tasks/`
+
 GitHub issue status comment standard:
 - `docs/plan/ISSUE_COMMENT_TEMPLATE.md`
 - `scripts/post-issue-status-comment.ps1`
@@ -205,3 +209,12 @@ Prompting foundation:
 
 Answer-generation documentation:
 - `docs/development/ANSWERING_PIPELINE.md`
+
+## Phase 6 session-memory progress
+Session and message foundations:
+- `src/farmer_helper/schemas/session.py`
+- `src/farmer_helper/repositories/chat_session_repository.py`
+- `src/farmer_helper/db/models/foundation.py`
+- `alembic/versions/20260527_0004_session_memory_schema.py`
+- `tests/unit/test_session_schemas.py`
+- `tests/unit/test_chat_session_repository.py`

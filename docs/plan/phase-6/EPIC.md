@@ -1,0 +1,23 @@
+# Epic: Phase 6 - Session memory and multi-turn handling
+
+## Summary
+Support bounded, traceable conversation memory and follow-up questions.
+
+## Scope
+This Epic maps to Phase 6 in `docs/plan/PHASES.md` and tracks local sub-issue status.
+
+## Epic status
+- Status: In progress
+- Started on: 2026-05-27
+
+## Sub-issues
+| ID | Title | Status | Last updated | Notes |
+|---|---|---|---|---|
+| P6-T01 | Add session and message schemas | Completed | 2026-05-27 | Added session/message DB models, schemas, repository, and tests |
+| P6-T02 | Add follow-up context resolution | In progress | 2026-05-27 | Next active task |
+| P6-T03 | Add optional summarization for long sessions | Not started | - | Pending |
+| P6-T04 | Pass bounded context through retrieval and answering | Not started | - | Pending |
+| P6-T05 | Add expiry or archival rules | Not started | - | Pending |
+| P6-T06 | Add multi-turn integration tests | Not started | - | Pending |
+| P6-T07 | Add transcript export/import | Not started | - | Pending |
+| P6-T08 | Document session behavior and extension points | Not started | - | Pending |
