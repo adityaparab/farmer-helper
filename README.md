@@ -55,6 +55,10 @@ Active implementation tracking for Phase 7 lives in:
 - `docs/plan/phase-7/EPIC.md`
 - `docs/plan/phase-7/tasks/`
 
+Active implementation tracking for Phase 8 lives in:
+- `docs/plan/phase-8/EPIC.md`
+- `docs/plan/phase-8/tasks/`
+
 GitHub issue status comment standard:
 - `docs/plan/ISSUE_COMMENT_TEMPLATE.md`
 - `scripts/post-issue-status-comment.ps1`
@@ -264,3 +268,9 @@ Timeout and retry policy foundations:
 
 Reliability documentation:
 - `docs/development/RELIABILITY_RUNBOOK.md`
+
+## Phase 8 evaluation progress
+Eval dataset foundation:
+- `src/farmer_helper/schemas/evaluation.py`
+- `src/farmer_helper/services/evaluation/dataset_loader.py`
+- `tests/unit/test_eval_dataset_loader.py`

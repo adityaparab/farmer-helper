@@ -32,6 +32,7 @@
 21. Normalized internal-to-user reliability contracts for degraded outcomes and conflict errors.
 22. Deterministic failure-injection test coverage for degraded flows and idempotent replay under provider faults.
 23. Structured reliability observability fields for degraded and conflict paths with low-cardinality codes.
+24. Evaluation dataset loading foundation with strict typed validation for JSON/JSONL inputs.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`
