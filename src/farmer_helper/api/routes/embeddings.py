@@ -21,6 +21,11 @@ from farmer_helper.services.embedding.timeout_provider import (
     EmbeddingTimeoutPolicy,
     TimeoutEmbeddingProvider,
 )
+from farmer_helper.services.reliability.idempotency import (
+    IdempotencyConflictError,
+    compute_request_hash,
+    get_idempotency_store,
+)
 
 router = APIRouter(prefix="/embeddings", tags=["embeddings"])
 
@@ -64,6 +69,28 @@ async def trigger_embeddings(
     request: EmbeddingTriggerRequest,
     db: Session = Depends(get_db_session),
 ) -> EmbeddingOrchestrationResult:  # noqa: B008
+    if request.idempotency_key is not None:
+        store = get_idempotency_store()
+        request_hash = compute_request_hash(request.model_dump(mode="json"))
+        try:
+            replay_payload = store.replay_or_raise(
+                operation="embeddings.trigger",
+                key=request.idempotency_key,
+                request_hash=request_hash,
+            )
+        except IdempotencyConflictError as exc:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "error_code": "IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST",
+                    "message": str(exc),
+                    "retryable": False,
+                },
+            ) from exc
+
+        if replay_payload is not None:
+            return EmbeddingOrchestrationResult.model_validate(replay_payload)
+
     service = build_orchestration_service(
         db=db,
         provider_name=request.provider,
@@ -73,7 +100,7 @@ async def trigger_embeddings(
     )
 
     try:
-        return await service.embed_and_persist(
+        response = await service.embed_and_persist(
             document_id=request.document_id,
             model=request.model,
             chunks=request.chunks,
@@ -87,3 +114,13 @@ async def trigger_embeddings(
                 "retryable": exc.retryable,
             },
         ) from exc
+
+    if request.idempotency_key is not None:
+        store = get_idempotency_store()
+        store.save(
+            operation="embeddings.trigger",
+            key=request.idempotency_key,
+            request_hash=compute_request_hash(request.model_dump(mode="json")),
+            response_payload=response.model_dump(mode="json"),
+        )
+    return response

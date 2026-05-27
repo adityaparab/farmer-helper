@@ -5,15 +5,16 @@
 Introduce deterministic idempotency protections for reliability-sensitive operations to prevent duplicate side effects under retries and transient failures.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Identify operations requiring idempotency guards in current external-call workflows.
-2. Add idempotency key strategy and persistence/replay behavior.
-3. Add unit and integration tests for duplicate-request scenarios.
-4. Ensure compatibility with existing timeout/retry/circuit-breaker wrappers.
+## What was done
+1. Added deterministic in-memory idempotency store and request hashing utility in `src/farmer_helper/services/reliability/idempotency.py`.
+2. Added optional `idempotency_key` request fields to answer-generation and embedding-trigger schemas.
+3. Added route-level idempotency replay behavior for matching requests.
+4. Added route-level idempotency conflict handling (`409`) for key reuse with different payloads.
+5. Added unit tests for idempotency store behavior and route replay/conflict scenarios.
 
 ## Decisions made
 - Idempotency behavior must be deterministic and explicit across retries.

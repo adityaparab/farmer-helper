@@ -51,6 +51,7 @@ class EmbeddingOrchestrationResult(BaseModel):
 class EmbeddingTriggerRequest(BaseModel):
     document_id: int = Field(ge=1)
     model: str = Field(min_length=1)
+    idempotency_key: str | None = Field(default=None, min_length=1, max_length=128)
     provider: str = Field(min_length=1, default="mock-provider")
     version: str = Field(min_length=1, default="v1")
     batch_size: int = Field(ge=1, le=256, default=32)

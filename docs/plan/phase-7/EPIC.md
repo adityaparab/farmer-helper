@@ -15,8 +15,8 @@ This Epic maps to Phase 7 in `docs/plan/PHASES.md` and tracks local sub-issue st
 |---|---|---|---|---|
 | P7-T01 | Add timeout and retry policies to external calls | Completed | 2026-05-27 | Added timeout wrappers and retry policies for embedding and LLM provider boundaries with deterministic tests |
 | P7-T02 | Add circuit breaker and fallback strategy | Completed | 2026-05-27 | Added deterministic circuit-breaker wrappers with fallback-provider support and transition tests |
-| P7-T03 | Add idempotency protections | In progress | 2026-05-27 | Next active task |
-| P7-T04 | Implement graceful degradation paths | Not started | - | Pending |
+| P7-T03 | Add idempotency protections | Completed | 2026-05-27 | Added deterministic idempotency key replay/conflict handling for answers and embeddings routes with tests |
+| P7-T04 | Implement graceful degradation paths | In progress | 2026-05-27 | Next active task |
 | P7-T05 | Normalize internal-to-user error responses | Not started | - | Pending |
 | P7-T06 | Add failure injection tests | Not started | - | Pending |
 | P7-T07 | Add failure observability fields | Not started | - | Pending |

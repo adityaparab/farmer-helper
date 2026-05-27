@@ -66,6 +66,7 @@ class LLMGenerateResponse(BaseModel):
 class AnswerGenerationRequest(BaseModel):
     question: str = Field(min_length=1)
     retrieved_chunks: list[RetrievedChunk] = Field(default_factory=list)
+    idempotency_key: str | None = Field(default=None, min_length=1, max_length=128)
     session_key: str | None = Field(default=None, min_length=1, max_length=64)
     context_max_messages: int = Field(ge=1, le=50, default=8)
     context_max_turns: int = Field(ge=1, le=50, default=8)

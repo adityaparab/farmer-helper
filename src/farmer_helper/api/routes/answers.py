@@ -15,6 +15,11 @@ from farmer_helper.services.answering.prompt_builder import PromptBuilder
 from farmer_helper.services.answering.provider import LLMProviderError
 from farmer_helper.services.answering.retrying_provider import LLMRetryPolicy, RetryingLLMProvider
 from farmer_helper.services.answering.timeout_provider import LLMTimeoutPolicy, TimeoutLLMProvider
+from farmer_helper.services.reliability.idempotency import (
+    IdempotencyConflictError,
+    compute_request_hash,
+    get_idempotency_store,
+)
 from farmer_helper.services.session.context_resolver import FollowUpContextResolver
 
 router = APIRouter(prefix="/answers", tags=["answers"])
@@ -50,9 +55,31 @@ def generate_answer(
     request: AnswerGenerationRequest,
     db: Session = Depends(get_db_session),
 ) -> AnswerGenerationResponse:  # noqa: B008
+    if request.idempotency_key is not None:
+        store = get_idempotency_store()
+        request_hash = compute_request_hash(request.model_dump(mode="json"))
+        try:
+            replay_payload = store.replay_or_raise(
+                operation="answers.generate",
+                key=request.idempotency_key,
+                request_hash=request_hash,
+            )
+        except IdempotencyConflictError as exc:
+            raise HTTPException(
+                status_code=409,
+                detail={
+                    "error_code": "IDEMPOTENCY_KEY_REUSED_DIFFERENT_REQUEST",
+                    "message": str(exc),
+                    "retryable": False,
+                },
+            ) from exc
+
+        if replay_payload is not None:
+            return AnswerGenerationResponse.model_validate(replay_payload)
+
     service = build_answer_generation_service(db)
     try:
-        return service.generate(request)
+        response = service.generate(request)
     except LLMProviderError as exc:
         raise HTTPException(
             status_code=502,
@@ -62,3 +89,13 @@ def generate_answer(
                 "retryable": exc.retryable,
             },
         ) from exc
+
+    if request.idempotency_key is not None:
+        store = get_idempotency_store()
+        store.save(
+            operation="answers.generate",
+            key=request.idempotency_key,
+            request_hash=compute_request_hash(request.model_dump(mode="json")),
+            response_payload=response.model_dump(mode="json"),
+        )
+    return response
