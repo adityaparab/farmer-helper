@@ -1,7 +1,7 @@
 import sys
 from functools import lru_cache
 
-from pydantic import Field
+from pydantic import Field, model_validator
 from pydantic_settings import (
     BaseSettings,
     PydanticBaseSettingsSource,
@@ -81,6 +81,11 @@ class Settings(BaseSettings):
     answer_cache_ttl_seconds: int = Field(default=0, alias="ANSWER_CACHE_TTL_SECONDS")
     llm_model_low_cost: str = Field(default="mock-chat-v1", alias="LLM_MODEL_LOW_COST")
     llm_model_high_quality: str = Field(default="mock-chat-v1", alias="LLM_MODEL_HIGH_QUALITY")
+    llm_provider: str = Field(default="mock-provider", alias="LLM_PROVIDER")
+    llm_model: str = Field(default="mock-chat-v1", alias="LLM_MODEL")
+    embedding_provider: str = Field(default="mock-provider", alias="EMBEDDING_PROVIDER")
+    embedding_model: str = Field(default="mock-embedding-v1", alias="EMBEDDING_MODEL")
+    openai_api_key: str | None = Field(default=None, alias="OPENAI_API_KEY")
     llm_model_router_question_length_threshold: int = Field(
         default=120,
         alias="LLM_MODEL_ROUTER_QUESTION_LENGTH_THRESHOLD",
@@ -104,6 +109,19 @@ class Settings(BaseSettings):
     )
     auth_access_token_ttl_minutes: int = Field(default=30, alias="AUTH_ACCESS_TOKEN_TTL_MINUTES")
     auth_refresh_token_ttl_days: int = Field(default=14, alias="AUTH_REFRESH_TOKEN_TTL_DAYS")
+
+    @model_validator(mode="after")
+    def validate_openai_configuration(self) -> "Settings":
+        """Ensure OpenAI settings are complete when an OpenAI provider is selected."""
+        uses_openai = {
+            self.llm_provider.strip().lower(),
+            self.embedding_provider.strip().lower(),
+        } & {"openai"}
+        if uses_openai and (self.openai_api_key is None or not self.openai_api_key.strip()):
+            raise ValueError(
+                "OPENAI_API_KEY must be set when LLM_PROVIDER or EMBEDDING_PROVIDER is openai"
+            )
+        return self
 
 
 @lru_cache(maxsize=1)

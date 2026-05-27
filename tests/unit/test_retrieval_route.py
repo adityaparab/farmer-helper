@@ -44,6 +44,23 @@ class FakeRetrievalService:
         )
 
 
+class CapturingRetrievalService:
+    def __init__(self) -> None:
+        self.last_request = None
+
+    def retrieve(self, request):  # type: ignore[no-untyped-def]
+        self.last_request = request
+        return RetrievalResponse(
+            items=[],
+            metrics=RetrievalMetrics(
+                vector_count=0,
+                keyword_count=0,
+                fused_count=0,
+                returned_count=0,
+            ),
+        )
+
+
 def test_retrieval_query_route_success(monkeypatch: pytest.MonkeyPatch) -> None:
     from farmer_helper.api.routes import retrieval as retrieval_route
 
@@ -203,3 +220,41 @@ def test_retrieval_query_route_uses_cache_when_enabled(monkeypatch: pytest.Monke
     assert first.status_code == 200
     assert second.status_code == 200
     assert FakeRetrievalService.calls == 1
+
+
+def test_retrieval_query_route_uses_env_provider_and_model(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from farmer_helper.api.routes import retrieval as retrieval_route
+
+    class FakeSettings:
+        retrieval_cache_ttl_seconds = 0
+        embedding_provider = "env-provider"
+        embedding_model = "env-model"
+
+    service = CapturingRetrievalService()
+    monkeypatch.setattr(retrieval_route, "get_settings", lambda: FakeSettings())
+    monkeypatch.setattr(
+        retrieval_route,
+        "build_retrieval_service",
+        lambda **_kwargs: service,
+    )
+
+    client = TestClient(app)
+    response = client.post(
+        "/retrieval/query",
+        json={
+            "query_text": "soil moisture",
+            "query_vector": [0.1, 0.2, 0.3],
+            "top_k": 3,
+            "provider": "client-provider-ignored",
+            "model": "client-model-ignored",
+            "version": "v1",
+            "reranker": "none",
+        },
+    )
+
+    assert response.status_code == 200
+    assert service.last_request is not None
+    assert service.last_request.provider == "env-provider"
+    assert service.last_request.model == "env-model"

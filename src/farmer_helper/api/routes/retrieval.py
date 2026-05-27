@@ -90,6 +90,8 @@ def query_retrieval(
     """
     try:
         settings = get_settings()
+        configured_provider = getattr(settings, "embedding_provider", request.provider)
+        configured_model = getattr(settings, "embedding_model", request.model)
         effective_request = request
         if request.session_key:
             context = FollowUpContextResolver(ChatSessionRepository(db)).resolve(
@@ -108,9 +110,18 @@ def query_retrieval(
                             f"{context.context_text}\n\n"
                             "Current question:\n"
                             f"{request.query_text}"
-                        )
+                        ),
+                        "provider": configured_provider,
+                        "model": configured_model,
                     }
                 )
+        if effective_request is request:
+            effective_request = request.model_copy(
+                update={
+                    "provider": configured_provider,
+                    "model": configured_model,
+                }
+            )
 
         service = build_retrieval_service(db=db, reranker_name=request.reranker)
         cache_ttl = settings.retrieval_cache_ttl_seconds

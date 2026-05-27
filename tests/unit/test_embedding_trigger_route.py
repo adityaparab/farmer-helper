@@ -113,6 +113,65 @@ def test_embedding_trigger_route_success(monkeypatch: pytest.MonkeyPatch) -> Non
     assert payload["persisted_count"] == 2
 
 
+def test_embedding_trigger_route_uses_env_model_and_provider(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    reset_idempotency_store()
+    from farmer_helper.api.routes import embeddings as embeddings_route
+
+    class FakeSettings:
+        embedding_provider = "env-provider"
+        embedding_model = "env-embedding-model"
+
+    monkeypatch.setattr(embeddings_route, "get_settings", lambda: FakeSettings())
+    class CapturingService:
+        def __init__(self, provider_name: str) -> None:
+            self.provider_name = provider_name
+
+        async def embed_and_persist(
+            self,
+            document_id: int,
+            model: str,
+            chunks: list[EmbeddingSourceChunk],
+        ) -> EmbeddingOrchestrationResult:
+            return EmbeddingOrchestrationResult(
+                document_id=document_id,
+                model=model,
+                provider=self.provider_name,
+                version="v1",
+                dimensions=8,
+                persisted_count=len(chunks),
+            )
+
+    def _build_env_service(
+        db: Session,
+        provider_name: str,
+        version: str,
+        batch_size: int,
+        dimensions: int,
+    ) -> CapturingService:
+        del db, version, batch_size, dimensions
+        return CapturingService(provider_name)
+
+    monkeypatch.setattr(embeddings_route, "build_orchestration_service", _build_env_service)
+
+    client = TestClient(app)
+    response = client.post(
+        "/embeddings/trigger",
+        json={
+            "document_id": 420,
+            "model": "client-model-ignored",
+            "provider": "client-provider-ignored",
+            "chunks": [{"chunk_index": 0, "text": "soil", "content_hash": "h0"}],
+        },
+    )
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["model"] == "env-embedding-model"
+    assert payload["provider"] == "env-provider"
+
+
 def test_embedding_trigger_route_provider_failure(monkeypatch: pytest.MonkeyPatch) -> None:
     reset_idempotency_store()
     from farmer_helper.api.routes import embeddings as embeddings_route

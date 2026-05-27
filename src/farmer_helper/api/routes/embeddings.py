@@ -109,6 +109,9 @@ async def trigger_embeddings(
         HTTPException: 409 when an idempotency key is reused with a different request.
     """
     started_at = time.perf_counter()
+    settings = get_settings()
+    configured_provider = settings.embedding_provider
+    configured_model = settings.embedding_model
 
     def _log_route_completed(response: EmbeddingOrchestrationResult) -> None:
         """Record completion telemetry for a synchronous embedding request.
@@ -163,7 +166,7 @@ async def trigger_embeddings(
 
     service = build_orchestration_service(
         db=db,
-        provider_name=request.provider,
+        provider_name=configured_provider,
         version=request.version,
         batch_size=request.batch_size,
         dimensions=request.dimensions,
@@ -172,7 +175,7 @@ async def trigger_embeddings(
     try:
         response = await service.embed_and_persist(
             document_id=request.document_id,
-            model=request.model,
+            model=configured_model,
             chunks=request.chunks,
         )
     except EmbeddingProviderError as exc:
@@ -187,8 +190,8 @@ async def trigger_embeddings(
         )
         response = EmbeddingOrchestrationResult(
             document_id=request.document_id,
-            model=request.model,
-            provider=request.provider,
+            model=configured_model,
+            provider=configured_provider,
             version=request.version,
             dimensions=request.dimensions,
             persisted_count=0,
@@ -226,11 +229,12 @@ async def _run_async_embedding_job(
     """
     store = get_embedding_async_job_store()
     work_queue = get_embedding_work_queue()
+    configured_model = get_settings().embedding_model
     store.mark_running(job_id)
     try:
         result = await service.embed_and_persist(
             document_id=request.document_id,
-            model=request.model,
+            model=configured_model,
             chunks=request.chunks,
         )
     except Exception as exc:  # pragma: no cover - exercised in tests with status assertions
@@ -261,6 +265,7 @@ async def trigger_embeddings_async(
         HTTPException: 503 when the embedding work queue is at capacity.
     """
     settings = get_settings()
+    configured_provider = settings.embedding_provider
     work_queue = get_embedding_work_queue()
     try:
         work_queue.reserve(settings.embedding_job_queue_max_size)
@@ -276,7 +281,7 @@ async def trigger_embeddings_async(
 
     service = build_orchestration_service(
         db=db,
-        provider_name=request.provider,
+        provider_name=configured_provider,
         version=request.version,
         batch_size=request.batch_size,
         dimensions=request.dimensions,

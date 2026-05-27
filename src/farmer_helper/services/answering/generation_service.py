@@ -80,12 +80,13 @@ class AnswerGenerationService:
                 max_chunks=request.max_chunks,
             )
         )
+        selected_model = self._model_router.route(question=request.question)
 
         if prompt_result.decision == "refuse":
             total_ms = (time.perf_counter() - start) * 1000
             self._diagnostics_logger.generation_completed(
                 decision="refuse",
-                model=request.model,
+                model=selected_model,
                 citations_count=0,
                 input_tokens=0,
                 output_tokens=0,
@@ -103,7 +104,7 @@ class AnswerGenerationService:
             total_ms = (time.perf_counter() - start) * 1000
             self._diagnostics_logger.generation_completed(
                 decision="clarify",
-                model=request.model,
+                model=selected_model,
                 citations_count=0,
                 input_tokens=0,
                 output_tokens=0,
@@ -119,10 +120,7 @@ class AnswerGenerationService:
 
         llm_response = self._provider.generate(
             LLMGenerateRequest(
-                model=self._model_router.route(
-                    request_model=request.model,
-                    question=request.question,
-                ),
+                model=selected_model,
                 messages=[
                     LLMMessage(role="system", content=prompt_result.system_prompt),
                     LLMMessage(role="user", content=prompt_result.user_prompt),
