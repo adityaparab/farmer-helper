@@ -25,7 +25,7 @@ Phase 15 production readiness review is complete with validated quality gates, s
 4. `docs/deployment/STAGING_DRY_RUN_REPORT.md`
 
 ## Residual risk notes
-1. Coverage run surfaced ResourceWarning entries for unclosed SQLite connections in test teardown paths. This does not block release but should be cleaned in a follow-up maintenance issue.
+1. Prior SQLite `ResourceWarning` entries from coverage runs were resolved in a post-sign-off cleanup pass by centralizing SQLAlchemy teardown in `tests/conftest.py`.
 
 ## Final decision
 Approved for production readiness sign-off.

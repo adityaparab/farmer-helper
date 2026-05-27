@@ -44,5 +44,6 @@ Observed result:
 3. Structured error contract validation includes health/readiness and async queue limits.
 4. Concurrency coexistence validated for embedding and retrieval traffic.
 
-## Notes
-1. Resource warnings for unclosed SQLite connections were observed during the coverage run; tests still passed. This is tracked as a residual test-hygiene risk for future cleanup.
+## Cleanup follow-up
+1. A post-sign-off cleanup pass added centralized SQLAlchemy session/engine teardown in `tests/conftest.py`.
+2. Coverage and test runs now complete without the prior SQLite `ResourceWarning` output.
