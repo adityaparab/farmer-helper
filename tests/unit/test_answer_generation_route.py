@@ -48,7 +48,7 @@ def test_answer_generation_route_success(monkeypatch) -> None:
     monkeypatch.setattr(
         answers_route,
         "build_answer_generation_service",
-        lambda: FakeSuccessService(),
+        lambda _db: FakeSuccessService(),
     )
 
     client = TestClient(app)
@@ -82,7 +82,7 @@ def test_answer_generation_route_provider_failure(monkeypatch) -> None:
     monkeypatch.setattr(
         answers_route,
         "build_answer_generation_service",
-        lambda: FakeFailService(),
+        lambda _db: FakeFailService(),
     )
 
     client = TestClient(app)
@@ -116,7 +116,7 @@ def test_answer_generation_route_clarification_payload(monkeypatch) -> None:
     monkeypatch.setattr(
         answers_route,
         "build_answer_generation_service",
-        lambda: FakeClarifyService(),
+        lambda _db: FakeClarifyService(),
     )
 
     client = TestClient(app)

@@ -5,6 +5,7 @@ from farmer_helper.schemas.answering import (
     LLMGenerateResponse,
     RetrievedChunk,
 )
+from farmer_helper.schemas.session import FollowUpContextMessage, FollowUpContextResponse
 from farmer_helper.services.answering.generation_service import AnswerGenerationService
 from farmer_helper.services.answering.prompt_builder import PromptBuilder
 from farmer_helper.services.answering.provider import LLMProvider
@@ -33,6 +34,39 @@ class CountingProvider(LLMProvider):
             finish_reason="stop",
             input_tokens=5,
             output_tokens=1,
+        )
+
+
+class CapturingProvider(LLMProvider):
+    def __init__(self) -> None:
+        self.last_user_message: str | None = None
+
+    def generate(self, request: LLMGenerateRequest) -> LLMGenerateResponse:
+        self.last_user_message = next(
+            (message.content for message in request.messages if message.role == "user"),
+            None,
+        )
+        return LLMGenerateResponse(
+            model=request.model,
+            text="Generated with context",
+            finish_reason="stop",
+            input_tokens=8,
+            output_tokens=4,
+        )
+
+
+class FakeContextResolver:
+    def resolve(self, request):  # type: ignore[no-untyped-def]
+        return FollowUpContextResponse(
+            session_key=request.session_key,
+            messages=[
+                FollowUpContextMessage(
+                    turn_index=4,
+                    role="assistant",
+                    content="Prior recommendation: monitor soil moisture daily.",
+                )
+            ],
+            context_text="[4] assistant: Prior recommendation: monitor soil moisture daily.",
         )
 
 
@@ -128,3 +162,25 @@ def test_answer_generation_service_skips_provider_when_refused() -> None:
     assert response.decision == "refuse"
     assert response.refusal_code == "REFUSAL_UNSAFE_REQUEST"
     assert provider.calls == 0
+
+
+def test_answer_generation_service_injects_follow_up_context_when_session_key_present() -> None:
+    provider = CapturingProvider()
+    service = AnswerGenerationService(
+        prompt_builder=PromptBuilder(),
+        provider=provider,
+        context_resolver=FakeContextResolver(),
+    )
+
+    response = service.generate(
+        AnswerGenerationRequest(
+            session_key="session-ctx-1",
+            question="What should I do next?",
+            retrieved_chunks=[_chunk(1, 0, "Use mulch.", 0.9)],
+        )
+    )
+
+    assert response.decision == "answer"
+    assert provider.last_user_message is not None
+    assert "Follow-up context" in provider.last_user_message
+    assert "Current question" in provider.last_user_message

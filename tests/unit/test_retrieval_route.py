@@ -103,3 +103,23 @@ def test_retrieval_query_route_requires_query_vector() -> None:
     )
 
     assert response.status_code == 422
+
+
+def test_retrieval_query_route_rejects_missing_session_context() -> None:
+    client = TestClient(app)
+    response = client.post(
+        "/retrieval/query",
+        json={
+            "query_text": "soil moisture",
+            "query_vector": [0.1, 0.2, 0.3],
+            "session_key": "missing-session",
+            "top_k": 3,
+            "provider": "mock-provider",
+            "model": "mock-embedding-v1",
+            "version": "v1",
+            "reranker": "none",
+        },
+    )
+
+    assert response.status_code == 400
+    assert "Session not found" in response.json()["detail"]

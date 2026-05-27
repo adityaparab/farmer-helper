@@ -63,6 +63,9 @@ class RerankResponse(BaseModel):
 class RetrievalRequest(BaseModel):
     query_text: str = Field(min_length=1)
     query_vector: list[float] = Field(min_length=1)
+    session_key: str | None = Field(default=None, min_length=1, max_length=64)
+    context_max_messages: int = Field(ge=1, le=50, default=8)
+    context_max_turns: int = Field(ge=1, le=50, default=8)
     top_k: int = Field(ge=1, le=100, default=5)
     provider: str = Field(min_length=1)
     model: str = Field(min_length=1)

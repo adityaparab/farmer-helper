@@ -7,10 +7,12 @@ from farmer_helper.schemas.answering import (
     LLMMessage,
     PromptBuildRequest,
 )
+from farmer_helper.schemas.session import FollowUpContextRequest
 from farmer_helper.services.answering.citation_mapper import CitationMapper
 from farmer_helper.services.answering.diagnostics_logger import AnswerDiagnosticsLogger
 from farmer_helper.services.answering.prompt_builder import PromptBuilder
 from farmer_helper.services.answering.provider import LLMProvider
+from farmer_helper.services.session.context_resolver import FollowUpContextResolver
 
 
 class AnswerGenerationService:
@@ -20,17 +22,37 @@ class AnswerGenerationService:
         provider: LLMProvider,
         citation_mapper: CitationMapper | None = None,
         diagnostics_logger: AnswerDiagnosticsLogger | None = None,
+        context_resolver: FollowUpContextResolver | None = None,
     ) -> None:
         self._prompt_builder = prompt_builder
         self._provider = provider
         self._citation_mapper = citation_mapper or CitationMapper()
         self._diagnostics_logger = diagnostics_logger or AnswerDiagnosticsLogger()
+        self._context_resolver = context_resolver
 
     def generate(self, request: AnswerGenerationRequest) -> AnswerGenerationResponse:
         start = time.perf_counter()
+        effective_question = request.question
+        if request.session_key and self._context_resolver is not None:
+            context = self._context_resolver.resolve(
+                FollowUpContextRequest(
+                    session_key=request.session_key,
+                    question=request.question,
+                    max_messages=request.context_max_messages,
+                    max_turns=request.context_max_turns,
+                )
+            )
+            if context.context_text:
+                effective_question = (
+                    "Follow-up context:\n"
+                    f"{context.context_text}\n\n"
+                    "Current question:\n"
+                    f"{request.question}"
+                )
+
         prompt_result = self._prompt_builder.build(
             PromptBuildRequest(
-                question=request.question,
+                question=effective_question,
                 retrieved_chunks=request.retrieved_chunks,
                 max_chunks=request.max_chunks,
             )

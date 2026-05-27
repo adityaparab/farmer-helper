@@ -5,14 +5,15 @@
 Thread bounded follow-up context into retrieval and answering requests so multi-turn behavior remains grounded and explainable.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Define bounded-context transport schema between session and answering layers.
-2. Integrate context resolver output into answer-generation request flow.
-3. Add tests ensuring deterministic bounded-context propagation.
+## What was done
+1. Added optional session-context transport fields in `src/farmer_helper/schemas/retrieval.py` and `src/farmer_helper/schemas/answering.py`.
+2. Integrated context resolver output into retrieval query flow in `src/farmer_helper/api/routes/retrieval.py`.
+3. Integrated context resolver output into answer-generation flow in `src/farmer_helper/services/answering/generation_service.py` and `src/farmer_helper/api/routes/answers.py`.
+4. Added propagation and failure-path tests in `tests/unit/test_answer_generation_service.py`, `tests/unit/test_answer_generation_route.py`, and `tests/unit/test_retrieval_route.py`.
 
 ## Decisions made
 - Context propagation should be explicit and bounded by configured limits.

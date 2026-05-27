@@ -22,6 +22,7 @@
 11. Session-memory foundation with chat session/message schemas and repository persistence.
 12. Follow-up context resolution with bounded deterministic message-window selection.
 13. Optional long-session summarization with threshold-based activation.
+14. Bounded session-context propagation into retrieval and answer-generation request flows.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`
