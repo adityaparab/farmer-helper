@@ -50,6 +50,9 @@
 39. Async embedding trigger/job-status flow for heavy work off the synchronous request path.
 40. Admin API surface for ingestion/reindex workflow control and status transitions.
 41. Persistent version tracking, gold-answer workflow records, QA review queue, and access audit logs.
+42. Configurable SQLAlchemy connection pooling for concurrent runtime usage.
+43. Async embedding worker queue capacity guard with persistent job status/result records.
+44. Concurrent mixed embedding/retrieval integration coverage for coexistence validation.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`
@@ -63,6 +66,7 @@
 9. Security runbook: `docs/development/SECURITY_RUNBOOK.md`
 10. Performance and cost runbook: `docs/development/PERFORMANCE_COST_RUNBOOK.md`
 11. Admin operations runbook: `docs/development/ADMIN_OPERATIONS_RUNBOOK.md`
+12. Scalability and concurrency runbook: `docs/development/SCALABILITY_RUNBOOK.md`
 
 ## Next phases
 1. Hybrid retrieval and reranking pipeline.

@@ -35,11 +35,23 @@ def run_migrations_offline() -> None:
 
 
 def run_migrations_online() -> None:
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
+    section = config.get_section(config.config_ini_section, {})
+    engine_kwargs: dict[str, object] = {
+        "prefix": "sqlalchemy.",
+    }
+
+    if settings.database_url.startswith("sqlite"):
+        engine_kwargs["poolclass"] = pool.NullPool
+    else:
+        engine_kwargs["poolclass"] = pool.QueuePool
+        engine_kwargs["pool_size"] = settings.database_pool_min
+        engine_kwargs["max_overflow"] = max(
+            0, settings.database_pool_max - settings.database_pool_min
+        )
+        engine_kwargs["pool_timeout"] = settings.database_pool_timeout_seconds
+        engine_kwargs["pool_pre_ping"] = True
+
+    connectable = engine_from_config(section, **engine_kwargs)
 
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)

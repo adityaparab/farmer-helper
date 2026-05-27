@@ -13,7 +13,11 @@ from farmer_helper.schemas.embedding import (
     EmbeddingOrchestrationResult,
     EmbeddingTriggerRequest,
 )
-from farmer_helper.services.embedding.async_jobs import get_embedding_async_job_store
+from farmer_helper.services.embedding.async_jobs import (
+    QueueCapacityError,
+    get_embedding_async_job_store,
+    get_embedding_work_queue,
+)
 from farmer_helper.services.embedding.batch_service import EmbeddingBatchService
 from farmer_helper.services.embedding.circuit_breaker_provider import (
     CircuitBreakerEmbeddingProvider,
@@ -184,6 +188,7 @@ async def _run_async_embedding_job(
     request: EmbeddingTriggerRequest,
 ) -> None:
     store = get_embedding_async_job_store()
+    work_queue = get_embedding_work_queue()
     store.mark_running(job_id)
     try:
         result = await service.embed_and_persist(
@@ -193,9 +198,11 @@ async def _run_async_embedding_job(
         )
     except Exception as exc:  # pragma: no cover - exercised in tests with status assertions
         store.mark_failed(job_id, str(exc))
+        work_queue.release()
         return
 
     store.mark_completed(job_id, result)
+    work_queue.release()
 
 
 @router.post("/trigger-async", response_model=EmbeddingAsyncTriggerResponse, status_code=202)
@@ -204,6 +211,13 @@ async def trigger_embeddings_async(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db_session),
 ) -> EmbeddingAsyncTriggerResponse:  # noqa: B008
+    settings = get_settings()
+    work_queue = get_embedding_work_queue()
+    try:
+        work_queue.reserve(settings.embedding_job_queue_max_size)
+    except QueueCapacityError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
+
     service = build_orchestration_service(
         db=db,
         provider_name=request.provider,
@@ -212,7 +226,7 @@ async def trigger_embeddings_async(
         dimensions=request.dimensions,
     )
     store = get_embedding_async_job_store()
-    job = store.create()
+    job = store.create(request_payload=request.model_dump(mode="json"))
     background_tasks.add_task(
         _run_async_embedding_job,
         job_id=job.job_id,

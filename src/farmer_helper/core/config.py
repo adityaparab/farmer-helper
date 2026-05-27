@@ -15,6 +15,9 @@ class Settings(BaseSettings):
     api_port: int = Field(default=8000, alias="API_PORT")
 
     database_url: str = Field(default="sqlite:///./farmer_helper.db", alias="DATABASE_URL")
+    database_pool_min: int = Field(default=2, alias="DATABASE_POOL_MIN")
+    database_pool_max: int = Field(default=10, alias="DATABASE_POOL_MAX")
+    database_pool_timeout_seconds: int = Field(default=30, alias="DATABASE_POOL_TIMEOUT_SECONDS")
 
     external_call_timeout_seconds: float = Field(
         default=2.0,
@@ -66,6 +69,8 @@ class Settings(BaseSettings):
         default=300,
         alias="SESSION_CONTEXT_MAX_CHARS_PER_MESSAGE",
     )
+    embedding_worker_count: int = Field(default=2, alias="EMBEDDING_WORKER_COUNT")
+    embedding_job_queue_max_size: int = Field(default=100, alias="EMBEDDING_JOB_QUEUE_MAX_SIZE")
 
 
 @lru_cache(maxsize=1)

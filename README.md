@@ -75,6 +75,10 @@ Active implementation tracking for Phase 12 lives in:
 - `docs/plan/phase-12/EPIC.md`
 - `docs/plan/phase-12/tasks/`
 
+Active implementation tracking for Phase 13 lives in:
+- `docs/plan/phase-13/EPIC.md`
+- `docs/plan/phase-13/tasks/`
+
 GitHub issue status comment standard:
 - `docs/plan/ISSUE_COMMENT_TEMPLATE.md`
 - `scripts/post-issue-status-comment.ps1`
@@ -363,3 +367,19 @@ Admin and maintainability implementation:
 
 Admin operations documentation:
 - `docs/development/ADMIN_OPERATIONS_RUNBOOK.md`
+
+## Phase 13 scalability and concurrency progress
+Scalability hardening implementation:
+- `src/farmer_helper/db/base.py`
+- `src/farmer_helper/services/embedding/async_jobs.py`
+- `src/farmer_helper/repositories/embedding_async_job_repository.py`
+- `src/farmer_helper/api/routes/embeddings.py`
+- `src/farmer_helper/db/models/foundation.py`
+- `alembic/versions/20260527_0006_embedding_async_jobs.py`
+
+Concurrency validation:
+- `tests/unit/test_db_pool_configuration.py`
+- `tests/integration/test_concurrency_load.py`
+
+Scalability documentation:
+- `docs/development/SCALABILITY_RUNBOOK.md`

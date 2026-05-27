@@ -391,3 +391,34 @@ def test_embedding_trigger_async_route_queues_job(monkeypatch: pytest.MonkeyPatc
     assert status.status_code == 200
     status_payload = status.json()
     assert status_payload["status"] in {"queued", "running", "completed"}
+
+
+def test_embedding_trigger_async_route_rejects_when_queue_is_full(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    from farmer_helper.api.routes import embeddings as embeddings_route
+
+    class FakeQueue:
+        def reserve(self, limit: int) -> None:
+            del limit
+            raise embeddings_route.QueueCapacityError("Embedding worker queue is at capacity")
+
+    monkeypatch.setattr(
+        embeddings_route,
+        "build_orchestration_service",
+        _build_fake_success_service,
+    )
+    monkeypatch.setattr(embeddings_route, "get_embedding_work_queue", lambda: FakeQueue())
+
+    client = TestClient(app)
+    response = client.post(
+        "/embeddings/trigger-async",
+        json={
+            "document_id": 78,
+            "model": "test-model",
+            "chunks": [{"chunk_index": 0, "text": "soil", "content_hash": "h0"}],
+        },
+    )
+
+    assert response.status_code == 503
+    assert "at capacity" in response.json()["detail"]
