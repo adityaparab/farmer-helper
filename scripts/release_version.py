@@ -45,7 +45,8 @@ def _parse_semver(value: str) -> tuple[int, int, int]:
     match = SEMVER_PATTERN.fullmatch(value)
     if match is None:
         raise ValueError(f"Invalid semantic version: {value}")
-    return tuple(int(group) for group in match.groups())
+    major_text, minor_text, patch_text = match.groups()
+    return int(major_text), int(minor_text), int(patch_text)
 
 
 def _read_about_version() -> str:
