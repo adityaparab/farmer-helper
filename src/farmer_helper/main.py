@@ -2,10 +2,10 @@ import logging
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 from fastapi.routing import APIRoute
 from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
 
 from farmer_helper.api.middleware.request_id import request_id_middleware
 from farmer_helper.api.routes.admin import router as admin_router
