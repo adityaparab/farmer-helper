@@ -20,6 +20,7 @@ Capture a comprehensive, phase-driven execution plan for the web interface + RBA
 - Status: Completed
 - Started: 2026-05-27
 - Completed: 2026-05-27
+- Remote issue: https://github.com/adityaparab/farmer-helper/issues/170
 
 ## What was done
 1. Created phase tracking scaffold under docs/plan/phase-16/.
@@ -45,6 +46,7 @@ Capture a comprehensive, phase-driven execution plan for the web interface + RBA
 ## Evidence
 - docs/plan/phase-16/EPIC.md
 - docs/plan/phase-16/tasks/P16-T01-plan-and-tracking-bootstrap.md
+- https://github.com/adityaparab/farmer-helper/issues/170
 
 ## Risks and follow-ups
 - Fixed default admin credentials create a security risk and require immediate rotation guidance in runbooks.

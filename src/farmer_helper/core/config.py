@@ -73,6 +73,12 @@ class Settings(BaseSettings):
     embedding_job_queue_max_size: int = Field(default=100, alias="EMBEDDING_JOB_QUEUE_MAX_SIZE")
     frontend_dist_dir: str = Field(default="frontend/dist", alias="FRONTEND_DIST_DIR")
     frontend_serve_enabled: bool = Field(default=True, alias="FRONTEND_SERVE_ENABLED")
+    auth_jwt_secret: str = Field(
+        default="development-only-change-me",
+        alias="AUTH_JWT_SECRET",
+    )
+    auth_access_token_ttl_minutes: int = Field(default=30, alias="AUTH_ACCESS_TOKEN_TTL_MINUTES")
+    auth_refresh_token_ttl_days: int = Field(default=14, alias="AUTH_REFRESH_TOKEN_TTL_DAYS")
 
 
 @lru_cache(maxsize=1)

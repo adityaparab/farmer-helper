@@ -9,6 +9,7 @@ from fastapi.staticfiles import StaticFiles
 from farmer_helper.api.middleware.request_id import request_id_middleware
 from farmer_helper.api.routes.admin import router as admin_router
 from farmer_helper.api.routes.answers import router as answers_router
+from farmer_helper.api.routes.auth import router as auth_router
 from farmer_helper.api.routes.embeddings import router as embeddings_router
 from farmer_helper.api.routes.health import router as health_router
 from farmer_helper.api.routes.retrieval import router as retrieval_router
@@ -31,6 +32,10 @@ OPENAPI_TAGS = [
     {
         "name": "health",
         "description": "Liveness and readiness probes for runtime and database health checks.",
+    },
+    {
+        "name": "auth",
+        "description": "User registration, login, JWT session, and current-user endpoints.",
     },
     {
         "name": "admin",
@@ -134,6 +139,7 @@ def create_app() -> FastAPI:
     )
     app.middleware("http")(request_id_middleware)
     app.include_router(health_router)
+    app.include_router(auth_router)
     app.include_router(admin_router)
     app.include_router(embeddings_router)
     app.include_router(retrieval_router)

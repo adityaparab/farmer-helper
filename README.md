@@ -90,6 +90,14 @@ Active implementation tracking for Phase 15 lives in:
 - `docs/plan/phase-15/EPIC.md`
 - `docs/plan/phase-15/tasks/`
 
+Active implementation tracking for Phase 16 lives in:
+- `docs/plan/phase-16/EPIC.md`
+- `docs/plan/phase-16/tasks/`
+
+Active implementation tracking for Phase 17 lives in:
+- `docs/plan/phase-17/EPIC.md`
+- `docs/plan/phase-17/tasks/`
+
 GitHub issue status comment standard:
 - `docs/plan/ISSUE_COMMENT_TEMPLATE.md`
 - `scripts/post-issue-status-comment.ps1`

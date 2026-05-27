@@ -25,6 +25,7 @@ Establish the frontend codebase foundation for landing, admin, and user role exp
 - Status: Completed
 - Started: 2026-05-27
 - Completed: 2026-05-27
+- Remote issue: https://github.com/adityaparab/farmer-helper/issues/171
 
 ## What was done
 1. Created frontend project scaffold under frontend/.
@@ -54,6 +55,7 @@ Establish the frontend codebase foundation for landing, admin, and user role exp
 - frontend/src/types.ts
 - frontend/src/test/setup.ts
 - frontend/src/index.css
+- https://github.com/adityaparab/farmer-helper/issues/171
 
 ## Risks and follow-ups
 - User chat currently uses placeholder answer generation and needs backend API binding.

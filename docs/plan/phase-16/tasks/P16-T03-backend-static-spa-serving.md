@@ -16,8 +16,10 @@ Enable the backend to serve the frontend build output, including SPA fallback, w
 - Health and core API routes remain accessible.
 
 ## Implementation status
-- Status: In Progress
+- Status: Completed
 - Started: 2026-05-27
+- Completed: 2026-05-27
+- Remote issue: https://github.com/adityaparab/farmer-helper/issues/172
 
 ## What was done
 1. Added frontend static serving settings in backend config.
@@ -30,6 +32,7 @@ Enable the backend to serve the frontend build output, including SPA fallback, w
 - src/farmer_helper/main.py
 - src/farmer_helper/services/security/guard.py
 - tests/smoke/test_frontend_static_serving.py
+- https://github.com/adityaparab/farmer-helper/issues/172
 
 ## Risks and follow-ups
 - Build/deploy pipeline still needs frontend artifact production and copy strategy.

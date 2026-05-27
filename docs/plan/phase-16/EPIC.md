@@ -9,18 +9,20 @@ This Epic extends the roadmap after Phase 15 and establishes the execution basel
 ## Epic status
 - Status: In Progress
 - Started on: 2026-05-27
+- Remote GitHub Epic: https://github.com/adityaparab/farmer-helper/issues/168
+- Local/remote sync: Synced on 2026-05-27
 
 ## Sub-issues
-| ID | Title | Status | Last updated | Notes |
-|---|---|---|---|---|
-| P16-T01 | Save implementation plan and bootstrap tracking | Completed | 2026-05-27 | Program plan documented and phase structure created |
-| P16-T02 | Scaffold modular frontend with React TS Vite Tailwind TanStack and Vitest | Completed | 2026-05-27 | Responsive, professional, componentized frontend foundation with Vitest coverage delivered |
-| P16-T03 | Serve SPA index and assets from backend startup path | In Progress | 2026-05-27 | Backend entrypoint integration in progress |
-| P16-T04 | Define auth and RBAC schema changes and migration plan | Not Started | 2026-05-27 | Pending migration authoring |
-| P16-T05 | Define admin dashboard metrics contracts | Not Started | 2026-05-27 | Based on existing DB entities |
-| P16-T06 | Define admin PDF upload architecture and controls | Not Started | 2026-05-27 | Validation, audit, ingestion integration |
-| P16-T07 | Define UX information architecture for landing/admin/user views | Not Started | 2026-05-27 | Professional UI quality criteria |
-| P16-T08 | Define local and remote Epic/issue synchronization workflow | Not Started | 2026-05-27 | gh CLI + status comment template |
+| ID | Title | Status | Remote issue | Last updated | Notes |
+|---|---|---|---|---|---|
+| P16-T01 | Save implementation plan and bootstrap tracking | Completed | https://github.com/adityaparab/farmer-helper/issues/170 | 2026-05-27 | Program plan documented and phase structure created |
+| P16-T02 | Scaffold modular frontend with React TS Vite Tailwind TanStack and Vitest | Completed | https://github.com/adityaparab/farmer-helper/issues/171 | 2026-05-27 | Responsive, professional, componentized frontend foundation with Vitest coverage delivered |
+| P16-T03 | Serve SPA index and assets from backend startup path | Completed | https://github.com/adityaparab/farmer-helper/issues/172 | 2026-05-27 | Backend static index/assets/fallback serving delivered with smoke coverage |
+| P16-T04 | Define auth and RBAC schema changes and migration plan | Not Started | https://github.com/adityaparab/farmer-helper/issues/173 | 2026-05-27 | Pending migration authoring |
+| P16-T05 | Define admin dashboard metrics contracts | Not Started | https://github.com/adityaparab/farmer-helper/issues/174 | 2026-05-27 | Based on existing DB entities |
+| P16-T06 | Define admin PDF upload architecture and controls | Not Started | https://github.com/adityaparab/farmer-helper/issues/175 | 2026-05-27 | Validation, audit, ingestion integration |
+| P16-T07 | Define UX information architecture for landing/admin/user views | Not Started | https://github.com/adityaparab/farmer-helper/issues/176 | 2026-05-27 | Professional UI quality criteria |
+| P16-T08 | Define local and remote Epic/issue synchronization workflow | Completed | https://github.com/adityaparab/farmer-helper/issues/177 | 2026-05-27 | Canonical GitHub Epics/tasks created and local docs linked |
 
 ## Frontend implementation standards
 - The web application must be fully responsive across mobile, tablet, and desktop viewports.

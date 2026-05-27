@@ -11,13 +11,21 @@ def _reset_db() -> None:
     Base.metadata.create_all(bind=engine)
 
 
+def _admin_headers(client: TestClient, actor_id: str) -> dict[str, str]:
+    login = client.post("/auth/login", json={"username": "admin", "password": "P@ssw0rd"})
+    assert login.status_code == 200
+    token = login.json()["access_token"]
+    return {"Authorization": f"Bearer {token}", "x-actor-id": actor_id}
+
+
 def test_admin_ingestion_reindex_and_status_workflow() -> None:
     _reset_db()
     client = TestClient(app)
+    headers = _admin_headers(client, "admin-user")
 
     create = client.post(
         "/admin/ingestion/jobs",
-        headers={"x-actor-id": "admin-user"},
+        headers=headers,
         json={
             "source_path": "docs/source/a.pdf",
             "content_hash": "hash-a",
@@ -30,7 +38,7 @@ def test_admin_ingestion_reindex_and_status_workflow() -> None:
 
     update = client.post(
         f"/admin/jobs/{created['job_id']}/status",
-        headers={"x-actor-id": "admin-user"},
+        headers=headers,
         json={"status": "processing"},
     )
     assert update.status_code == 200
@@ -38,7 +46,7 @@ def test_admin_ingestion_reindex_and_status_workflow() -> None:
 
     reindex = client.post(
         "/admin/reindex/jobs",
-        headers={"x-actor-id": "admin-user"},
+        headers=headers,
         json={
             "document_id": created["document_id"],
             "pipeline_version": "v2",
@@ -52,10 +60,14 @@ def test_admin_ingestion_reindex_and_status_workflow() -> None:
 def test_admin_version_gold_answer_review_queue_and_audit() -> None:
     _reset_db()
     client = TestClient(app)
+    editor_headers = _admin_headers(client, "editor-1")
+    editor_2_headers = {**editor_headers, "x-actor-id": "editor-2"}
+    reviewer_headers = {**editor_headers, "x-actor-id": "reviewer-1"}
+    reviewer_2_headers = {**editor_headers, "x-actor-id": "reviewer-2"}
 
     version = client.post(
         "/admin/versions",
-        headers={"x-actor-id": "editor-1"},
+        headers=editor_headers,
         json={
             "content_version": "content-v3",
             "model_version": "model-v2",
@@ -68,7 +80,7 @@ def test_admin_version_gold_answer_review_queue_and_audit() -> None:
 
     gold = client.post(
         "/admin/gold-answers",
-        headers={"x-actor-id": "editor-1"},
+        headers=editor_headers,
         json={"question": "How to mulch?", "answer": "Use organic mulch."},
     )
     assert gold.status_code == 201
@@ -76,7 +88,7 @@ def test_admin_version_gold_answer_review_queue_and_audit() -> None:
 
     gold_update = client.post(
         f"/admin/gold-answers/{gold_id}",
-        headers={"x-actor-id": "editor-2"},
+        headers=editor_2_headers,
         json={"status": "approved"},
     )
     assert gold_update.status_code == 200
@@ -85,7 +97,7 @@ def test_admin_version_gold_answer_review_queue_and_audit() -> None:
 
     review = client.post(
         "/admin/review-queue",
-        headers={"x-actor-id": "reviewer-1"},
+        headers=reviewer_headers,
         json={"issue_type": "citation_mismatch", "details": "Check source mapping"},
     )
     assert review.status_code == 201
@@ -93,13 +105,13 @@ def test_admin_version_gold_answer_review_queue_and_audit() -> None:
 
     review_update = client.post(
         f"/admin/review-queue/{review_id}",
-        headers={"x-actor-id": "reviewer-2"},
+        headers=reviewer_2_headers,
         json={"status": "in_review", "assigned_to": "reviewer-2"},
     )
     assert review_update.status_code == 200
     assert review_update.json()["status"] == "in_review"
 
-    logs = client.get("/admin/access-audit")
+    logs = client.get("/admin/access-audit", headers=editor_headers)
     assert logs.status_code == 200
     assert len(logs.json()) >= 4
     assert any(item["action"] == "admin.version.create" for item in logs.json())
