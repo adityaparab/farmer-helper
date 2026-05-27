@@ -7,8 +7,9 @@ Connect the React/Vite frontend to FastAPI auth, admin, upload, answer, and sess
 This phase turns the Phase 16 frontend scaffold into an authenticated application shell that talks to the backend contracts delivered across Phases 5, 6, 16, and 17.
 
 ## Epic status
-- Status: In Progress
+- Status: Completed
 - Started on: 2026-05-27
+- Completed on: 2026-05-27
 - Remote GitHub Epic: https://github.com/adityaparab/farmer-helper/issues/184
 - Local/remote sync: Synced on 2026-05-27
 
@@ -19,7 +20,7 @@ This phase turns the Phase 16 frontend scaffold into an authenticated applicatio
 | P18-T02 | Connect auth session and role routing | Completed | https://github.com/adityaparab/farmer-helper/issues/186 | 2026-05-27 | Backend login/me/logout now drives frontend role state |
 | P18-T03 | Connect admin metrics and PDF upload UI | Completed | https://github.com/adityaparab/farmer-helper/issues/187 | 2026-05-27 | Admin metrics and multipart PDF upload now use backend APIs |
 | P18-T04 | Connect user chat and history UI | Completed | https://github.com/adityaparab/farmer-helper/issues/188 | 2026-05-27 | User chat now calls backend answer API and updates history |
-| P18-T05 | Validate frontend integration workflows | Not Started | https://github.com/adityaparab/farmer-helper/issues/192 | 2026-05-27 | Vitest/build and backend compatibility validation |
+| P18-T05 | Validate frontend integration workflows | Completed | https://github.com/adityaparab/farmer-helper/issues/192 | 2026-05-27 | Frontend and backend validation gates passed |
 
 ## Exit criteria
 - Frontend role state comes from backend auth, not mock username branching.
