@@ -214,7 +214,9 @@ Answer-generation documentation:
 Session and message foundations:
 - `src/farmer_helper/schemas/session.py`
 - `src/farmer_helper/repositories/chat_session_repository.py`
+- `src/farmer_helper/services/session/context_resolver.py`
 - `src/farmer_helper/db/models/foundation.py`
 - `alembic/versions/20260527_0004_session_memory_schema.py`
 - `tests/unit/test_session_schemas.py`
 - `tests/unit/test_chat_session_repository.py`
+- `tests/unit/test_follow_up_context_resolver.py`

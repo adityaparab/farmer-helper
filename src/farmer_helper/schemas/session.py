@@ -53,3 +53,22 @@ class ChatMessageResponse(BaseModel):
     content: str = Field(min_length=1)
     metadata: dict[str, str] | None = None
     created_at: datetime
+
+
+class FollowUpContextRequest(BaseModel):
+    session_key: str = Field(min_length=1, max_length=64)
+    question: str = Field(min_length=1)
+    max_messages: int = Field(ge=1, le=50, default=8)
+    max_turns: int = Field(ge=1, le=50, default=8)
+
+
+class FollowUpContextMessage(BaseModel):
+    turn_index: int = Field(ge=0)
+    role: MessageRole
+    content: str = Field(min_length=1)
+
+
+class FollowUpContextResponse(BaseModel):
+    session_key: str = Field(min_length=1)
+    messages: list[FollowUpContextMessage]
+    context_text: str

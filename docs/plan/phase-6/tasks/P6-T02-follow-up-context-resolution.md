@@ -5,14 +5,15 @@
 Resolve follow-up questions by retrieving bounded recent session context and normalizing it for retrieval and answering layers.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add service for bounded recent-message context resolution.
-2. Define deterministic ordering and turn-window behavior.
-3. Add unit tests for context-window and edge-case handling.
+## What was done
+1. Added `FollowUpContextRequest`/`FollowUpContextResponse` contracts in `src/farmer_helper/schemas/session.py`.
+2. Added `FollowUpContextResolver` in `src/farmer_helper/services/session/context_resolver.py`.
+3. Implemented bounded context selection by turn window and message limit.
+4. Added deterministic unit tests in `tests/unit/test_follow_up_context_resolver.py`.
 
 ## Decisions made
 - Follow-up context should be bounded by configurable turn/message limits.

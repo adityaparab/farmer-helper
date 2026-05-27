@@ -20,6 +20,7 @@
 9. Answer-generation API foundation with provider abstraction and deterministic mock provider.
 10. Answer-generation diagnostics logging for latency, token usage, decision path, and confidence fields.
 11. Session-memory foundation with chat session/message schemas and repository persistence.
+12. Follow-up context resolution with bounded deterministic message-window selection.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`
