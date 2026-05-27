@@ -5,15 +5,15 @@
 Grow the evaluation dataset coverage safely over time to improve regression sensitivity while preserving determinism.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add new dataset entries for underrepresented failure/refusal and ambiguity scenarios.
-2. Keep IDs stable and enforce deterministic ordering.
-3. Add tests validating expanded dataset integrity and unique IDs.
-4. Update eval maintenance docs with expansion rules.
+## What was done
+1. Expanded `docs/evaluation/EVAL_DATASET_SEED.jsonl` from 10 to 15 deterministic scenarios.
+2. Added additional ambiguity/refusal and operational agronomy cases for broader eval coverage.
+3. Preserved stable, lexicographically sorted IDs (`Q001`..`Q015`).
+4. Added dataset integrity test coverage in `tests/unit/test_eval_seed_dataset.py`.
 
 ## Decisions made
 - Expansion should be incremental with reviewable diffs.
