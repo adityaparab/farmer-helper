@@ -244,11 +244,15 @@ Timeout and retry policy foundations:
 - `src/farmer_helper/core/config.py`
 - `src/farmer_helper/services/embedding/retrying_provider.py`
 - `src/farmer_helper/services/embedding/timeout_provider.py`
+- `src/farmer_helper/services/embedding/circuit_breaker_provider.py`
 - `src/farmer_helper/services/answering/retrying_provider.py`
 - `src/farmer_helper/services/answering/timeout_provider.py`
+- `src/farmer_helper/services/answering/circuit_breaker_provider.py`
 - `src/farmer_helper/api/routes/embeddings.py`
 - `src/farmer_helper/api/routes/answers.py`
 - `tests/unit/test_retrying_embedding_provider.py`
 - `tests/unit/test_timeout_embedding_provider.py`
+- `tests/unit/test_circuit_breaker_embedding_provider.py`
 - `tests/unit/test_retrying_llm_provider.py`
 - `tests/unit/test_timeout_llm_provider.py`
+- `tests/unit/test_circuit_breaker_llm_provider.py`

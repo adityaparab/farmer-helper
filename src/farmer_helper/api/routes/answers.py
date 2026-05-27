@@ -5,6 +5,10 @@ from farmer_helper.core.config import get_settings
 from farmer_helper.db.base import get_db_session
 from farmer_helper.repositories.chat_session_repository import ChatSessionRepository
 from farmer_helper.schemas.answering import AnswerGenerationRequest, AnswerGenerationResponse
+from farmer_helper.services.answering.circuit_breaker_provider import (
+    CircuitBreakerLLMProvider,
+    LLMCircuitBreakerPolicy,
+)
 from farmer_helper.services.answering.generation_service import AnswerGenerationService
 from farmer_helper.services.answering.mock_provider import MockLLMProvider
 from farmer_helper.services.answering.prompt_builder import PromptBuilder
@@ -18,12 +22,20 @@ router = APIRouter(prefix="/answers", tags=["answers"])
 
 def build_answer_generation_service(db: Session) -> AnswerGenerationService:
     settings = get_settings()
-    provider = RetryingLLMProvider(
+    primary_provider = RetryingLLMProvider(
         provider=TimeoutLLMProvider(
             provider=MockLLMProvider(),
             policy=LLMTimeoutPolicy(timeout_seconds=settings.external_call_timeout_seconds),
         ),
         policy=LLMRetryPolicy(max_attempts=settings.llm_retry_max_attempts),
+    )
+    provider = CircuitBreakerLLMProvider(
+        provider=primary_provider,
+        policy=LLMCircuitBreakerPolicy(
+            failure_threshold=settings.llm_circuit_breaker_failure_threshold,
+            recovery_timeout_seconds=settings.llm_circuit_breaker_recovery_timeout_seconds,
+        ),
+        fallback_provider=MockLLMProvider(),
     )
 
     return AnswerGenerationService(

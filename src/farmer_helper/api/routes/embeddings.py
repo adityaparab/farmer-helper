@@ -6,6 +6,10 @@ from farmer_helper.db.base import get_db_session
 from farmer_helper.repositories.chunk_embedding_repository import ChunkEmbeddingRepository
 from farmer_helper.schemas.embedding import EmbeddingOrchestrationResult, EmbeddingTriggerRequest
 from farmer_helper.services.embedding.batch_service import EmbeddingBatchService
+from farmer_helper.services.embedding.circuit_breaker_provider import (
+    CircuitBreakerEmbeddingProvider,
+    EmbeddingCircuitBreakerPolicy,
+)
 from farmer_helper.services.embedding.mock_provider import MockEmbeddingProvider
 from farmer_helper.services.embedding.orchestration_service import EmbeddingOrchestrationService
 from farmer_helper.services.embedding.provider import EmbeddingProviderError
@@ -29,7 +33,7 @@ def build_orchestration_service(
     dimensions: int,
 ) -> EmbeddingOrchestrationService:
     settings = get_settings()
-    provider = RetryingEmbeddingProvider(
+    primary_provider = RetryingEmbeddingProvider(
         provider=TimeoutEmbeddingProvider(
             provider=MockEmbeddingProvider(dimensions=dimensions),
             policy=EmbeddingTimeoutPolicy(
@@ -37,6 +41,14 @@ def build_orchestration_service(
             ),
         ),
         policy=EmbeddingRetryPolicy(max_attempts=settings.embedding_retry_max_attempts),
+    )
+    provider = CircuitBreakerEmbeddingProvider(
+        provider=primary_provider,
+        policy=EmbeddingCircuitBreakerPolicy(
+            failure_threshold=settings.embedding_circuit_breaker_failure_threshold,
+            recovery_timeout_seconds=settings.embedding_circuit_breaker_recovery_timeout_seconds,
+        ),
+        fallback_provider=MockEmbeddingProvider(dimensions=dimensions),
     )
     batch_service = EmbeddingBatchService(provider=provider, batch_size=batch_size)
     return EmbeddingOrchestrationService(

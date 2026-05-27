@@ -28,6 +28,22 @@ class Settings(BaseSettings):
         default=3,
         alias="LLM_RETRY_MAX_ATTEMPTS",
     )
+    embedding_circuit_breaker_failure_threshold: int = Field(
+        default=3,
+        alias="EMBEDDING_CIRCUIT_BREAKER_FAILURE_THRESHOLD",
+    )
+    embedding_circuit_breaker_recovery_timeout_seconds: float = Field(
+        default=30.0,
+        alias="EMBEDDING_CIRCUIT_BREAKER_RECOVERY_TIMEOUT_SECONDS",
+    )
+    llm_circuit_breaker_failure_threshold: int = Field(
+        default=3,
+        alias="LLM_CIRCUIT_BREAKER_FAILURE_THRESHOLD",
+    )
+    llm_circuit_breaker_recovery_timeout_seconds: float = Field(
+        default=30.0,
+        alias="LLM_CIRCUIT_BREAKER_RECOVERY_TIMEOUT_SECONDS",
+    )
 
 
 @lru_cache(maxsize=1)

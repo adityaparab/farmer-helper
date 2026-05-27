@@ -5,15 +5,16 @@
 Add deterministic circuit-breaker controls and fallback strategy around external provider usage to prevent cascading failure under repeated provider outages.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add circuit-breaker state model with deterministic transitions.
-2. Integrate breaker checks into provider wrappers and route-level builders.
-3. Implement bounded fallback behavior when breaker is open.
-4. Add unit tests for closed/open/half-open transitions.
+## What was done
+1. Added circuit-breaker wrappers for embedding and LLM provider boundaries.
+2. Added deterministic state transitions (closed/open/half-open) with configurable thresholds and recovery windows.
+3. Added optional fallback-provider strategy for open-circuit behavior.
+4. Wired circuit-breaker wrappers into embeddings and answers route-level provider construction.
+5. Added deterministic unit tests for opening behavior, half-open recovery, and no-fallback open-circuit errors.
 
 ## Decisions made
 - Circuit-breaker behavior should compose with existing timeout and retry wrappers.

@@ -26,6 +26,7 @@
 15. Session lifecycle management with deterministic archival and expiry transitions.
 16. Session transcript export/import with deterministic round-trip behavior.
 17. External call resilience baseline with timeout policies and deterministic retries for embedding and LLM providers.
+18. Circuit-breaker and fallback-provider strategy for external embedding and LLM call boundaries.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`
