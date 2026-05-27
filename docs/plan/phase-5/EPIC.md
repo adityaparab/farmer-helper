@@ -19,5 +19,5 @@ This Epic maps to Phase 5 in `docs/plan/PHASES.md` and tracks local sub-issue st
 | P5-T04 | Add deterministic citation mapping | Completed | 2026-05-27 | Added deterministic citation mapper with deduplication and ordering tests |
 | P5-T05 | Add refusal and ambiguity handling | Completed | 2026-05-27 | Added policy codes and regression tests for refusal/clarification outcomes |
 | P5-T06 | Add grounded-response regression tests | Completed | 2026-05-27 | Added table-driven integration regression scenarios for answer/clarify/refuse paths |
-| P5-T07 | Add usage, latency, and confidence logging | In progress | 2026-05-27 | Next active task |
-| P5-T08 | Document prompting and provider switching | Not started | - | Pending |
+| P5-T07 | Add usage, latency, and confidence logging | Completed | 2026-05-27 | Added structured answer diagnostics with latency, usage, and confidence fields |
+| P5-T08 | Document prompting and provider switching | In progress | 2026-05-27 | Next active task |

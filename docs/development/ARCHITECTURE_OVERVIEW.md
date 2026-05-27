@@ -18,6 +18,7 @@
 7. Hybrid retrieval foundation with vector retrieval, keyword retrieval, fusion, optional reranking, retrieval API, and diagnostics logging.
 8. Answer-generation prompt builder foundation with deterministic refusal and clarification policy.
 9. Answer-generation API foundation with provider abstraction and deterministic mock provider.
+10. Answer-generation diagnostics logging for latency, token usage, decision path, and confidence fields.
 
 ## Operational references
 1. Ingestion flow guide: `docs/development/INGESTION_PIPELINE.md`

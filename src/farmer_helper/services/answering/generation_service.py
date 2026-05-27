@@ -1,3 +1,5 @@
+import time
+
 from farmer_helper.schemas.answering import (
     AnswerGenerationRequest,
     AnswerGenerationResponse,
@@ -6,6 +8,7 @@ from farmer_helper.schemas.answering import (
     PromptBuildRequest,
 )
 from farmer_helper.services.answering.citation_mapper import CitationMapper
+from farmer_helper.services.answering.diagnostics_logger import AnswerDiagnosticsLogger
 from farmer_helper.services.answering.prompt_builder import PromptBuilder
 from farmer_helper.services.answering.provider import LLMProvider
 
@@ -16,12 +19,15 @@ class AnswerGenerationService:
         prompt_builder: PromptBuilder,
         provider: LLMProvider,
         citation_mapper: CitationMapper | None = None,
+        diagnostics_logger: AnswerDiagnosticsLogger | None = None,
     ) -> None:
         self._prompt_builder = prompt_builder
         self._provider = provider
         self._citation_mapper = citation_mapper or CitationMapper()
+        self._diagnostics_logger = diagnostics_logger or AnswerDiagnosticsLogger()
 
     def generate(self, request: AnswerGenerationRequest) -> AnswerGenerationResponse:
+        start = time.perf_counter()
         prompt_result = self._prompt_builder.build(
             PromptBuildRequest(
                 question=request.question,
@@ -31,6 +37,16 @@ class AnswerGenerationService:
         )
 
         if prompt_result.decision == "refuse":
+            total_ms = (time.perf_counter() - start) * 1000
+            self._diagnostics_logger.generation_completed(
+                decision="refuse",
+                model=request.model,
+                citations_count=0,
+                input_tokens=0,
+                output_tokens=0,
+                confidence=0.0,
+                total_ms=total_ms,
+            )
             return AnswerGenerationResponse(
                 decision="refuse",
                 refusal_reason=prompt_result.refusal_reason,
@@ -39,6 +55,16 @@ class AnswerGenerationService:
             )
 
         if prompt_result.decision == "clarify":
+            total_ms = (time.perf_counter() - start) * 1000
+            self._diagnostics_logger.generation_completed(
+                decision="clarify",
+                model=request.model,
+                citations_count=0,
+                input_tokens=0,
+                output_tokens=0,
+                confidence=0.0,
+                total_ms=total_ms,
+            )
             return AnswerGenerationResponse(
                 decision="clarify",
                 clarification_message=prompt_result.clarification_message,
@@ -63,6 +89,21 @@ class AnswerGenerationService:
             max_citations=request.max_chunks,
         )
 
+        total_ms = (time.perf_counter() - start) * 1000
+        confidence = self._estimate_confidence(
+            citations_count=len(citations),
+            finish_reason=llm_response.finish_reason,
+        )
+        self._diagnostics_logger.generation_completed(
+            decision="answer",
+            model=llm_response.model,
+            citations_count=len(citations),
+            input_tokens=llm_response.input_tokens,
+            output_tokens=llm_response.output_tokens,
+            confidence=confidence,
+            total_ms=total_ms,
+        )
+
         return AnswerGenerationResponse(
             decision="answer",
             answer=llm_response.text,
@@ -72,3 +113,10 @@ class AnswerGenerationService:
             input_tokens=llm_response.input_tokens,
             output_tokens=llm_response.output_tokens,
         )
+
+    @staticmethod
+    def _estimate_confidence(citations_count: int, finish_reason: str) -> float:
+        confidence = min(1.0, 0.4 + (0.1 * citations_count))
+        if finish_reason == "length":
+            confidence = max(0.0, confidence - 0.1)
+        return confidence

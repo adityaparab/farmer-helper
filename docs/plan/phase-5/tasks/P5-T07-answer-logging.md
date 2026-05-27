@@ -5,14 +5,14 @@
 Add structured answer-generation diagnostics that capture latency, token usage, decision paths, and confidence metadata.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add structured diagnostics logger for answer-generation outcomes.
-2. Capture generation latency and token usage metadata in service flow.
-3. Add tests for deterministic diagnostics payload fields.
+## What was done
+1. Added structured diagnostics logger in `src/farmer_helper/services/answering/diagnostics_logger.py`.
+2. Added latency, usage, and confidence logging in `src/farmer_helper/services/answering/generation_service.py`.
+3. Added deterministic diagnostics tests in `tests/unit/test_answer_diagnostics_logging.py`.
 
 ## Decisions made
 - Diagnostics fields should be stable and low-cardinality.
