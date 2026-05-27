@@ -13,3 +13,4 @@ alembic/versions/__pycache__/
 farmer_helper.db
 artifacts/
 .env
+data/
