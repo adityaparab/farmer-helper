@@ -7,8 +7,9 @@ Support bounded, traceable conversation memory and follow-up questions.
 This Epic maps to Phase 6 in `docs/plan/PHASES.md` and tracks local sub-issue status.
 
 ## Epic status
-- Status: In progress
+- Status: Completed
 - Started on: 2026-05-27
+- Completed on: 2026-05-27
 
 ## Sub-issues
 | ID | Title | Status | Last updated | Notes |
@@ -20,4 +21,4 @@ This Epic maps to Phase 6 in `docs/plan/PHASES.md` and tracks local sub-issue st
 | P6-T05 | Add expiry or archival rules | Completed | 2026-05-27 | Added deterministic archive/expiry lifecycle transitions and tests |
 | P6-T06 | Add multi-turn integration tests | Completed | 2026-05-27 | Added deterministic multi-turn integration coverage across answer/retrieval/session services |
 | P6-T07 | Add transcript export/import | Completed | 2026-05-27 | Added deterministic transcript export/import service and round-trip tests |
-| P6-T08 | Document session behavior and extension points | In progress | 2026-05-27 | Next active task |
+| P6-T08 | Document session behavior and extension points | Completed | 2026-05-27 | Added session behavior guide and documented extension points |

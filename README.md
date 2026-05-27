@@ -231,3 +231,6 @@ Session and message foundations:
 - `tests/unit/test_session_transcript_service.py`
 - `tests/unit/test_retrieval_route.py`
 - `tests/unit/test_answer_generation_service.py`
+
+Session behavior documentation:
+- `docs/development/SESSION_BEHAVIOR.md`

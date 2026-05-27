@@ -5,14 +5,14 @@
 Document session lifecycle behavior, context resolution, summarization, transcript operations, and extension points for future memory strategies.
 
 ## Implementation status
-- Status: In progress
+- Status: Completed
 - Started: 2026-05-27
-- Completed: -
+- Completed: 2026-05-27
 
-## Next work
-1. Add developer docs for session schemas and lifecycle transitions.
-2. Document bounded context, summarization, and transcript workflows.
-3. Document extension points for pluggable memory policies.
+## What was done
+1. Added `docs/development/SESSION_BEHAVIOR.md` with lifecycle, context, summarization, transcript, and extension-point documentation.
+2. Linked the session behavior guide from `docs/development/ARCHITECTURE_OVERVIEW.md` operational references.
+3. Added Phase 6 README reference to the new session behavior documentation.
 
 ## Decisions made
 - Documentation should align with current service contracts and tests.
