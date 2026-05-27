@@ -22,6 +22,42 @@ repos:
         additional_dependencies:
           - ruff==0.15.0
         types_or: [python, pyi]
+      - id: backend-unit-tests
+        name: backend-unit-tests
+        entry: python scripts/run_pytest.py unit
+        language: python
+        additional_dependencies:
+          - pytest>=8.4.1,<9.0.0
+          - fastapi>=0.116.0,<1.0.0
+          - httpx>=0.28.1,<1.0.0
+          - sqlalchemy>=2.0.41,<3.0.0
+          - pydantic-settings>=2.10.0,<3.0.0
+          - alembic>=1.16.2,<2.0.0
+          - python-json-logger>=3.3.0,<4.0.0
+          - sentry-sdk>=2.26.0,<3.0.0
+          - pypdf>=6.0.0,<7.0.0
+          - python-multipart>=0.0.20,<1.0.0
+          - psycopg[binary]>=3.2.9,<4.0.0
+        always_run: true
+        pass_filenames: false
+      - id: backend-integration-tests
+        name: backend-integration-tests
+        entry: python scripts/run_pytest.py integration
+        language: python
+        additional_dependencies:
+          - pytest>=8.4.1,<9.0.0
+          - fastapi>=0.116.0,<1.0.0
+          - httpx>=0.28.1,<1.0.0
+          - sqlalchemy>=2.0.41,<3.0.0
+          - pydantic-settings>=2.10.0,<3.0.0
+          - alembic>=1.16.2,<2.0.0
+          - python-json-logger>=3.3.0,<4.0.0
+          - sentry-sdk>=2.26.0,<3.0.0
+          - pypdf>=6.0.0,<7.0.0
+          - python-multipart>=0.0.20,<1.0.0
+          - psycopg[binary]>=3.2.9,<4.0.0
+        always_run: true
+        pass_filenames: false
       - id: commit-msg-standard
         name: commit-msg-standard
         entry: python scripts/validate_commit_message.py
