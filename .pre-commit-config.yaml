@@ -1,4 +1,5 @@
 default_stages: [pre-commit]
+fail_fast: true
 
 repos:
   - repo: local
@@ -44,18 +45,14 @@ repos:
         pass_filenames: false
       - id: frontend-lint-fix
         name: frontend-lint-fix
-        entry: npm --prefix frontend run lint -- --fix
+        entry: python scripts/run_frontend_eslint.py --fix
         language: system
-        always_run: true
-        pass_filenames: false
-        files: ^frontend/
+        files: ^frontend/.*\.(ts|tsx|js|jsx)$
       - id: frontend-lint
         name: frontend-lint
-        entry: npm --prefix frontend run lint
+        entry: python scripts/run_frontend_eslint.py
         language: system
-        always_run: true
-        pass_filenames: false
-        files: ^frontend/
+        files: ^frontend/.*\.(ts|tsx|js|jsx)$
       - id: frontend-test
         name: frontend-test
         entry: npm --prefix frontend test
