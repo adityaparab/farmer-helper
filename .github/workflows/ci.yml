@@ -11,10 +11,10 @@ jobs:
       SECURITY_API_KEY: ""
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
 
@@ -30,7 +30,7 @@ jobs:
         run: pytest -q --cov=src/farmer_helper --cov-report=term-missing --cov-report=xml:artifacts/coverage.xml
 
       - name: Upload coverage artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-report
           path: artifacts/coverage.xml
@@ -42,7 +42,7 @@ jobs:
         run: python scripts/run-evals.py --min-average-score 6.0 --report-out artifacts/eval-report.json
 
       - name: Upload eval report artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: eval-report
           path: artifacts/eval-report.json
@@ -54,10 +54,10 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: "22"
           cache: npm
@@ -80,7 +80,7 @@ jobs:
         working-directory: frontend
 
       - name: Upload frontend coverage artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: frontend-coverage-report
           path: frontend/coverage/cobertura-coverage.xml
@@ -93,7 +93,7 @@ jobs:
         working-directory: frontend
 
       - name: Upload frontend dist artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: frontend-dist
           path: frontend/dist
