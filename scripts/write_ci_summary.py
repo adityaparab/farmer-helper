@@ -20,22 +20,9 @@ def _append_coverage_summary(report_path: Path, summary_path: Path, title: str) 
     lines_covered = int(root.attrib.get("lines-covered", "0"))
     line_rate = float(root.attrib.get("line-rate", "0")) * 100
 
-    classes: list[tuple[float, str]] = []
-    for package in root.findall("./packages/package"):
-        for class_node in package.findall("./classes/class"):
-            filename = class_node.attrib.get("filename", "unknown")
-            class_rate = float(class_node.attrib.get("line-rate", "0")) * 100
-            classes.append((class_rate, filename))
-
-    lowest_covered = sorted(classes, key=lambda item: item[0])[:5]
-
     with summary_path.open("a", encoding="utf-8") as handle:
         handle.write(f"## {title}\n\n")
         handle.write(f"- Lines covered: {lines_covered}/{lines_valid} ({line_rate:.2f}%)\n")
-        if lowest_covered:
-            handle.write("- Lowest covered files:\n")
-            for class_rate, filename in lowest_covered:
-                handle.write(f"  - {filename}: {class_rate:.2f}%\n")
         handle.write("\n")
 
 
