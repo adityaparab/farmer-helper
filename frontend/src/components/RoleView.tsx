@@ -61,6 +61,7 @@ export function RoleView({
 
   return (
     <UserWorkspace
+      key={sessionKey ?? 'guest'}
       answerBaseUrl={answerBaseUrl}
       accessToken={accessToken}
       sessionKey={sessionKey}

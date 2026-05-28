@@ -280,7 +280,16 @@ describe('App', () => {
   })
 
   it('restores login session from local storage after refresh', async () => {
-    const fetchSpy = mockAuthSuccess('user')
+    window.localStorage.setItem(
+      'farmer-helper.auth-session',
+      JSON.stringify({
+        accessToken: 'stored-access-token',
+        refreshToken: 'stored-refresh-token',
+        user: { id: 2, username: 'user', role: 'user' },
+      }),
+    )
+    const fetchSpy = vi
+      .spyOn(globalThis, 'fetch')
       .mockResolvedValueOnce(
         jsonResponse({
           access_token: 'restored-access-token',
@@ -291,13 +300,6 @@ describe('App', () => {
         }),
       )
       .mockResolvedValueOnce(jsonResponse({ id: 2, username: 'user', role: 'user' }))
-    const user = userEvent.setup()
-    const initialRender = render(<App />)
-
-    await user.type(screen.getByLabelText('Username'), 'field-user')
-    await user.click(screen.getByRole('button', { name: 'Continue' }))
-    await screen.findByRole('region', { name: 'User workspace' })
-    initialRender.unmount()
 
     render(<App />)
 

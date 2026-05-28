@@ -43,16 +43,17 @@ export function UserWorkspace({
   accessToken,
   sessionKey,
 }: UserWorkspaceProps) {
+  const workspaceKey = sessionKey ?? 'guest'
   const [question, setQuestion] = useState('')
-  const [storedQuestions, setStoredQuestions] = useState<string[]>(() => loadStoredQuestions(sessionKey))
+  const [storedQuestions, setStoredQuestions] = useState<string[]>(() => loadStoredQuestions(workspaceKey))
   const transport = useMemo(
     () =>
       createAnswerChatTransport({
         baseUrl: answerBaseUrl,
         getAccessToken: () => accessToken,
-        sessionKey,
+        sessionKey: workspaceKey,
       }),
-    [accessToken, answerBaseUrl, sessionKey],
+    [accessToken, answerBaseUrl, workspaceKey],
   )
   const { messages, sendMessage, status, error, clearError } = useChat({
     messages: [],
@@ -60,16 +61,12 @@ export function UserWorkspace({
   })
 
   useEffect(() => {
-    setStoredQuestions(loadStoredQuestions(sessionKey))
-  }, [sessionKey])
-
-  useEffect(() => {
     if (typeof window === 'undefined') {
       return
     }
 
-    window.localStorage.setItem(queryHistoryStorageKey(sessionKey), JSON.stringify(storedQuestions))
-  }, [sessionKey, storedQuestions])
+    window.localStorage.setItem(queryHistoryStorageKey(workspaceKey), JSON.stringify(storedQuestions))
+  }, [storedQuestions, workspaceKey])
   const isSubmitting = status === 'submitted' || status === 'streaming'
   const canSubmit = question.trim().length > 0 && !isSubmitting
 

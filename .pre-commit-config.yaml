@@ -40,6 +40,34 @@ repos:
           - psycopg[binary]>=3.2.9,<4.0.0
         always_run: true
         pass_filenames: false
+      - id: frontend-lint-fix
+        name: frontend-lint-fix
+        entry: npm --prefix frontend run lint -- --fix
+        language: system
+        always_run: true
+        pass_filenames: false
+        files: ^frontend/
+      - id: frontend-lint
+        name: frontend-lint
+        entry: npm --prefix frontend run lint
+        language: system
+        always_run: true
+        pass_filenames: false
+        files: ^frontend/
+      - id: frontend-test
+        name: frontend-test
+        entry: npm --prefix frontend test
+        language: system
+        always_run: true
+        pass_filenames: false
+        files: ^frontend/
+      - id: frontend-build
+        name: frontend-build
+        entry: npm --prefix frontend run build
+        language: system
+        always_run: true
+        pass_filenames: false
+        files: ^frontend/
       - id: commit-msg-standard
         name: commit-msg-standard
         entry: python scripts/validate_commit_message.py

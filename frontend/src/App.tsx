@@ -89,9 +89,10 @@ function authErrorMessage(error: unknown): string {
 }
 
 function App({ apiClient: injectedApiClient }: AppProps) {
-  const [session, setSession] = useState<AuthSession | null>(() => readStoredSession())
+  const [initialStoredSession] = useState<AuthSession | null>(() => readStoredSession())
+  const [session, setSession] = useState<AuthSession | null>(initialStoredSession)
   const [themeMode, setThemeMode] = useState<ThemeMode>(() => readStoredThemeMode())
-  const [isRestoringSession, setIsRestoringSession] = useState(() => readStoredSession() !== null)
+  const [isRestoringSession, setIsRestoringSession] = useState(initialStoredSession !== null)
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [authIsSubmitting, setAuthIsSubmitting] = useState(false)
@@ -122,9 +123,7 @@ function App({ apiClient: injectedApiClient }: AppProps) {
   }, [session])
 
   useEffect(() => {
-    const storedSession = readStoredSession()
-    if (!storedSession) {
-      setIsRestoringSession(false)
+    if (!initialStoredSession) {
       return
     }
 
@@ -136,7 +135,7 @@ function App({ apiClient: injectedApiClient }: AppProps) {
           createApiClient({
             baseUrl: import.meta.env.VITE_API_BASE_URL,
           })
-        const refreshed = await unauthenticatedClient.auth.refresh(storedSession.refreshToken)
+        const refreshed = await unauthenticatedClient.auth.refresh(initialStoredSession.refreshToken)
         const authenticatedClient =
           injectedApiClient ??
           createApiClient({
@@ -167,7 +166,7 @@ function App({ apiClient: injectedApiClient }: AppProps) {
     return () => {
       isCurrent = false
     }
-  }, [injectedApiClient])
+  }, [initialStoredSession, injectedApiClient])
 
   const toggleTheme = () => {
     setThemeMode((current) => (current === 'light' ? 'dark' : 'light'))
