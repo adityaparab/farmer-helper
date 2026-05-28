@@ -35,6 +35,9 @@ jobs:
           name: coverage-report
           path: artifacts/coverage.xml
 
+      - name: Publish coverage summary
+        run: python scripts/write_ci_summary.py coverage artifacts/coverage.xml "Backend Coverage Report"
+
       - name: Eval regression gate
         run: python scripts/run-evals.py --min-average-score 6.0 --report-out artifacts/eval-report.json
 
@@ -43,6 +46,9 @@ jobs:
         with:
           name: eval-report
           path: artifacts/eval-report.json
+
+      - name: Publish eval summary
+        run: python scripts/write_ci_summary.py eval artifacts/eval-report.json
 
   frontend-quality:
     runs-on: ubuntu-latest
@@ -68,6 +74,19 @@ jobs:
       - name: Frontend tests
         run: npm run test
         working-directory: frontend
+
+      - name: Frontend coverage
+        run: npm run test:coverage
+        working-directory: frontend
+
+      - name: Upload frontend coverage artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage-report
+          path: frontend/coverage/cobertura-coverage.xml
+
+      - name: Publish frontend coverage summary
+        run: python scripts/write_ci_summary.py coverage frontend/coverage/cobertura-coverage.xml "Frontend Coverage Report"
 
       - name: Frontend build
         run: npm run build
